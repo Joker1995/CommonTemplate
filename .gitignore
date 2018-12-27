@@ -1,6 +1,7 @@
 /CommonTemplateBackEnd/target/
 /CommonTemplateBackEnd/!.mvn/wrapper/maven-wrapper.jar
-
+/CommonTemplateBackEnd/log/
+/CommonTemplateBackEnd/src/test/
 ### STS ###
 .apt_generated
 .classpath
