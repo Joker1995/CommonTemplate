@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tisson.demo.dao.sys.SysPagesMapper">
+  <resultMap id="BaseResultMap" type="com.tisson.demo.entity.sys.SysPages">
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="parent_id" jdbcType="VARCHAR" property="parentId" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
+    <result column="create_time" jdbcType="DATE" property="createTime" />
+    <result column="update_time" jdbcType="DATE" property="updateTime" />
+  </resultMap>
+  
+  <select id="queryAccessPagesChildList" parameterType="java.lang.String" resultMap="BaseResultMap">
+  	select * from sys_pages where parent_id=#{id,jdbcType=CHAR}
+  </select>
+  
+  <delete id="deleteAccessPages">
+  	<if test="query!=null">
+        <if test="query.id!=null">
+  			delete from sys_role_pages where page_id=#{query.id,jdbcType=CHAR};
+  			delete from sys_user_pages where page_id=#{query.id,jdbcType=CHAR};
+  		</if>
+  		<if test="query.id!=null">
+  			delete from sys_pages where id=#{query.id,jdbcType=CHAR};
+  		</if>
+  	</if>
+  	<if test="subListIds!=null and subListIds.size()>0 ">
+		delete from sys_role_pages where page_id in
+		<foreach item="item" index="index" collection="subListIds" 
+	                     open="(" separator="," close=")">
+	        	#{item}
+	    </foreach>;
+	     delete from sys_user_pages where page_id in
+		<foreach item="item" index="index" collection="subListIds" 
+	                     open="(" separator="," close=")">
+	        	#{item}
+	    </foreach>;
+	    delete from sys_pages where id in
+		<foreach item="item" index="index" collection="subListIds" 
+	                     open="(" separator="," close=")">
+	        	#{item}
+	    </foreach>;
+    </if>
+  </delete>
+</mapper>

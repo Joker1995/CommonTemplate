@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tisson.demo.dao.sys.SysRolesMapper">
+  <resultMap id="BaseResultMap" type="com.tisson.demo.entity.sys.SysRoles">
+    <id column="id" jdbcType="CHAR" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="label" jdbcType="VARCHAR" property="label" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="update_user" jdbcType="VARCHAR" property="updateUser" />
+    <result column="create_time" jdbcType="DATE" property="createTime" />
+    <result column="update_time" jdbcType="DATE" property="updateTime" />
+  </resultMap>
+  
+  <select id="queryAccessPageList" resultType="com.tisson.demo.entity.sys.SysPages">
+  	select * from sys_pages where id in (select page_id from sys_role_pages where role_id=#{query.id,jdbcType=CHAR} )
+  </select>
+  
+  <select id="queryResourceList" resultType="com.tisson.demo.entity.sys.SysResources">
+  	select * from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{query.id,jdbcType=CHAR} )
+  </select>
+  
+  <select id="queryResourcesByRoleId" resultType="com.tisson.demo.entity.sys.SysResources">
+  	select * from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{id,jdbcType=CHAR} )
+  </select>
+  
+  <select id="queryAccessPageByRoleId" resultType="com.tisson.demo.entity.sys.SysPages">
+  	select * from sys_pages where id in (select page_id from sys_role_pages where role_id=#{id,jdbcType=CHAR} )
+  </select>
+  
+  <select id="queryAccessPageIdsList" resultType="java.lang.String">
+  	select id from sys_pages where id in (select page_id from sys_role_pages where role_id=#{query.id,jdbcType=CHAR} )
+  </select>
+  
+  <select id="queryResourceIdsList" resultType="java.lang.String">
+  	select id from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{query.id,jdbcType=CHAR} )
+  </select>
+  
+  <delete id="deleteRole">
+  	<if test="query!=null and query.id!=null">
+       delete from sys_role_pages where role_id=#{query.id,jdbcType=CHAR};
+       delete from sys_role_resources where role_id=#{query.id,jdbcType=CHAR};
+       delete from sys_roles where id=#{query.id,jdbcType=CHAR};
+  	</if>
+  </delete>
+  
+  <delete id="deleteRoleAccessPages">
+  	<if test="query!=null and query.id!=null">
+       delete from sys_role_pages where role_id=#{query.id,jdbcType=CHAR};
+  	</if>
+  </delete>
+  
+  <insert id="addRoleAccessPages">
+  	<if test="query!=null and query.accessPageIds!=null">
+       <foreach collection ="query.accessPageIds" item="item" index= "index" separator =";">
+       	insert into sys_role_pages(id,role_id,page_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+       </foreach >
+  	</if>
+  </insert>
+  
+  <delete id="deleteRoleResources">
+  	<if test="query!=null and query.id!=null">
+       delete from sys_role_resources where role_id=#{query.id,jdbcType=CHAR};
+  	</if>
+  </delete>
+  
+  <insert id="addRoleResources">
+  	<if test="query!=null and query.resourceIds!=null">
+       <foreach collection ="query.resourceIds" item="item" index= "index" separator =";">
+       	insert into sys_role_resources(id,role_id,resource_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+       </foreach >
+  	</if>
+  </insert>
+</mapper>

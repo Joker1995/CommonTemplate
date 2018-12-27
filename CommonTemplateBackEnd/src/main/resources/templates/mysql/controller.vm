@@ -1,0 +1,81 @@
+package [(${unit.packageName})].controller;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
+import [(${unit.projectPackageName})].common.base.ListQuery;
+import [(${unit.projectPackageName})].common.base.ResponseBean;
+import [(${unit.packageName})].entity.[(${table.javaName})];
+import [(${unit.packageName})].service.[(${table.javaName})]Service;
+/**  
+* @Title: [(${table.javaName})]Controller.java  
+* @Package [(${unit.packageName})].controller  
+* @Description: [(${table.javaName})]的controller,注解RequiresPermissions的内容需要配置给数据库用于授权访问
+* @author System-Auto-Generate
+* @date [(${generateDate})]
+* @version V1.0  
+*/
+@RestController
+@RequestMapping("/[(${table.javaName})]")
+@RequiresPermissions("[(${table.javaName})]")
+public class  [(${table.javaName})]Controller{
+    @Autowired
+    private [(${table.javaName})]Service coreService;
+    
+    /**
+     * @param query 分页查询参数,取全部时page和page设置为null或者-1即可
+     * @return 分页查询结果
+     */
+    @PostMapping(value = "/[(${table.javaName})]List")
+    public ResponseBean<PageInfo<[(${table.javaName})]>> query[(${table.javaName})]List(@RequestBody ListQuery<[(${table.javaName})]> query){
+        return new ResponseBean<PageInfo<[(${table.javaName})]>>("query[(${table.javaName})]List success",coreService.queryPage(query));
+    }
+	
+    /**
+     * @param query 查询实体详情
+     * @return 实体详情结果
+     */
+    @GetMapping("/{id}")
+    public ResponseBean<[(${table.javaName})]> query[(${table.javaName})]Detail(@PathVariable("id") String id){
+        return new ResponseBean<[(${table.javaName})]>("query[(${table.javaName})]Detail success",coreService.loadById(id));
+    }
+	
+    /**
+     * @param query 更新实体详情
+     * @return 更新结果
+     */
+    @PutMapping
+    public ResponseBean<String> update[(${table.javaName})](@RequestBody [(${table.javaName})] query){
+        coreService.update(query);
+        return new ResponseBean<String>("update[(${table.javaName})] success","update[(${table.javaName})] success");
+    }
+	
+    /**
+     * @param query 新增实体
+     * @return 新增结果
+     */
+    @PostMapping
+    public ResponseBean<String> add[(${table.javaName})](@RequestBody [(${table.javaName})] query){
+        coreService.save(query);
+        return new ResponseBean<String>("add[(${table.javaName})] success","add[(${table.javaName})] success");
+    }
+	
+    /**
+     * @param query 删除实体
+     * @return  删除结果
+     */
+    @DeleteMapping
+    public ResponseBean<String> delete[(${table.javaName})](@RequestBody [(${table.javaName})] query){
+        coreService.deleteById(query.getId());
+        return new ResponseBean<String>("delete[(${table.javaName})] success","delete[(${table.javaName})] success");
+    }
+}

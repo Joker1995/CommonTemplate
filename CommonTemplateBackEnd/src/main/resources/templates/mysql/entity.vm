@@ -1,0 +1,36 @@
+package [(${unit.packageName})].entity;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+/**  
+* @Title: [(${table.javaName})].java  
+* @Package [(${unit.packageName})].entity  
+* @Description: TODO(????????????)
+* @author System-Auto-Generate
+* @date [(${generateDate})]
+* @version V1.0  
+*/
+@Table(name = "[(${table.jdbcName})]")
+public class  [(${table.javaName})]{[# th:each="column : ${table.columns}"]
+    [# th:if="${column.primaryKey}"]// [( ${column.comment} )] 
+    @Id
+    @GeneratedValue(generator="UUID")
+    private [(${column.javaType})] [(${column.javaName})];[/][# th:if="!${column.primaryKey}"]
+    // [( ${column.comment} )] 
+    @Column(name="[(${column.jdbcName})]")
+    private [(${column.javaType})] [(${column.javaName})];
+    [/]
+    [/]
+    [# th:each="column : ${table.columns}"]public [(${column.javaType})] [(${column.getterName})](){
+        return [(${column.javaName})];
+    };
+    	
+    public void [(${column.setterName})] ( [(${column.javaType})] [(${column.javaName})] ){
+        this.[(${column.javaName})]=[(${column.javaName})];
+    }
+    	
+    [/]
+}

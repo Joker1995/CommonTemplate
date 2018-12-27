@@ -1,0 +1,16 @@
+package [(${unit.packageName})].mapper;
+
+import [(${unit.projectPackageName})].common.base.Mapper;
+import [(${unit.packageName})].entity.[(${table.javaName})];
+
+/**  
+* @Title: [(${table.javaName})]Mapper.java  
+* @Package [(${unit.packageName})].mapper  
+* @Description: TODO([(${table.javaName})]的mapper)
+* @author System-Auto-Generate
+* @date [(${generateDate})]
+* @version V1.0  
+*/
+@Table(name = "[(${table.jdbcName})]")
+public interface  [(${table.javaName})]Mapper extends Mapper<[(${table.javaName})]>{
+}

@@ -1,0 +1,48 @@
+mapper:
+  mappers: com.tisson.demo.common.base.Mapper
+  notEmpty: true
+mybatis:
+    mapper-locations: classpath:mapper/master/*.xml
+    type-aliases-package: com.tisson.demo.entity
+    configuration:
+      map-underscore-to-camel-case: true
+server:
+    port: 8088
+    servlet:
+      context-path: /template
+spring:
+    aop:
+      proxy-target-class: true
+    datasource:
+        name: masterDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/ssm_shiro?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+        username: root
+        password: 123
+        # 配置获取连接等待超时的时间
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        hikari:
+         maximum-pool-size: 100
+         minimum-idle: 10
+         register-mbeans: false
+         connection-test-query: select 1
+         connection-timeout: 1000
+         validation-timeout: 6000
+#    devtools:
+#        remote:
+#            restart:
+#                enabled: true
+#        restart:
+#            additional-paths: src/main/java
+    redis:
+       host: 127.0.0.1
+       lettuce:
+           pool:
+               max-active: 5
+               max-idle: 1
+               max-wait: 5000
+               min-idle: 1
+       port: 6379
+       timeout: 30000
