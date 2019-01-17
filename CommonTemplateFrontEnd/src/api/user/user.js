@@ -144,3 +144,7 @@ export function doUpdateUserAccessPageList(userId, accessPageIdList) {
     data: requestParam
   })
 }
+
+export function doDownloadUserList(data, fileName) {
+  return request.download('/user/downloadUserList', data, fileName)
+}

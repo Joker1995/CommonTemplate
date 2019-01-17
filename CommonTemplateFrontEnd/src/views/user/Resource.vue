@@ -6,10 +6,11 @@
           :data="resourceOptions"
           :expand-on-click-node="false"
           :render-content="renderContent"
-          :default-checked-keys="[1]"
+          :current-node-key="currentNodeKey"
           :highlight-current="true"
           node-key="id"
-          default-expand-all/>
+          default-expand-all
+          @node-click="queryChildList"/>
       </el-aside>
       <el-main>
         <el-table
@@ -71,11 +72,13 @@ import { Container, Tree } from 'element-ui'
 import Pagination from '@/components/Pagination'
 import { doGetResourceChildNodes, doGetResourceList, doCreateResource, doUpdateResource,
   doDeleteResource } from '@/api/user/resource'
+import { generateTreeData } from '@/utils'
 
 export default {
   components: { Pagination, Tree, Container },
   data() {
     return {
+      currentNodeKey: '',
       resourceOptions: [],
       tableKey: 0,
       list: null,
@@ -120,18 +123,25 @@ export default {
   },
   methods: {
     getList() {
-      doGetResourceList().then(response => {
-        this.resourceOptions = response.data
+      doGetResourceList(this.listQuery).then(response => {
+        const data = response.data.list
+        this.resourceOptions = generateTreeData(null, data)
         const firstNodeId = this.resourceOptions.length > 0 ? this.resourceOptions[0].id : null
-        this.currentNodeKey = firstNodeId
-        if (firstNodeId != null) {
-          this.initNodeChildList(1)
+        if (this.currentNodeKey === '') {
+          this.currentNodeKey = firstNodeId
+          this.initNodeChildList(firstNodeId)
+        } else {
+          this.initNodeChildList(this.currentNodeKey)
         }
       })
     },
+    queryChildList(data, node, component) {
+      this.currentNodeKey = data.id
+      this.initNodeChildList(data.id)
+    },
     initNodeChildList(id) {
-      doGetResourceChildNodes(id).then(response => {
-        this.list = response.data.items
+      doGetResourceChildNodes(id, this.listQuery).then(response => {
+        this.list = response.data.list
         this.total = response.data.total
         let i = 0
         for (const item of this.list) {
@@ -195,7 +205,6 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          /* 新增权限操作 TODO */
           doCreateResource(this.temp).then(response => {
             this.$notify({
               title: '成功',
@@ -203,6 +212,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
             this.dialogFormVisible = false
             this.initNodeChildList(this.temp.id)
           })
@@ -228,6 +238,7 @@ export default {
               type: 'success',
               duration: 2000
             })
+            this.getList()
             this.dialogFormVisible = false
             this.initNodeChildList(this.temp.id)
           })
@@ -244,6 +255,7 @@ export default {
           type: 'success',
           duration: 2000
         })
+        this.getList()
         this.initNodeChildList(data.id)
       })
     }

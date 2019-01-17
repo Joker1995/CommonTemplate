@@ -1,20 +1,19 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input :placeholder="table.name" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-input :placeholder="table.label" v-model="listQuery.label" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-input :placeholder="table.mobilePhone" v-model="listQuery.mobilePhone" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
-      <el-select v-model="listQuery.organization" :placeholder="table.organization" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in organizationOptions" :key="item.value" :label="item.label" :value="item.value"/>
+      <el-input :placeholder="table.name" v-model="listQuery.data.name" style="width: 140px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="table.label" v-model="listQuery.data.label" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="table.mobilePhone" v-model="listQuery.data.mobilePhone" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-select v-model="listQuery.data.organization" :placeholder="table.organization" clearable style="width: 200px" class="filter-item">
+        <el-option v-for="item in organizationOptions" :key="item.id" :label="item.name" :value="item.id"/>
       </el-select>
-      <el-select v-model="listQuery.status" :placeholder="table.status" clearable style="width: 90px" class="filter-item">
+      <el-select v-model="listQuery.data.status" :placeholder="table.status" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value"/>
       </el-select>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ table.search }}</el-button>
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ table.add }}</el-button>
       <el-button :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">{{ table.export }}</el-button>
     </div>
-
     <el-table
       v-loading="listLoading"
       :key="tableKey"
@@ -71,8 +70,8 @@
           <el-input v-model="temp.label"/>
         </el-form-item>
         <el-form-item :label="table.organization" prop="organization">
-          <el-select v-model="temp.organization" class="filter-item" placeholder="请选择">
-            <el-option v-for="item in organizationOptions" :key="item.value" :label="item.label" :value="item.value"/>
+          <el-select v-model="temp.organizationId" class="filter-item" placeholder="请选择">
+            <el-option v-for="item in organizationOptions" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="table.status">
@@ -119,12 +118,13 @@
 </template>
 
 <script>
-import { doGetUserList, doGetUserResourcesList, doGetAccessPage,
-  doGetUserRolesList, doGetUserAccessPagesList, doUpdateUserRoleList, doCreateUser, doUpdateUserResourceList,
+import { doGetUserList, doGetUserResourcesList, doGetUserRolesList, doGetUserAccessPagesList,
+  doUpdateUserRoleList, doCreateUser, doUpdateUserResourceList, doDownloadUserList,
   doUpdateUserAccessPageList, doUpdateUser } from '@/api/user/user'
 import { doGetOrganizationList } from '@/api/user/organization'
 import { doGetRoleList } from '@/api/user/role'
 import { doGetResourceList } from '@/api/user/resource'
+import { doGetAccessPageList } from '@/api/user/accessPage'
 import { Tree } from 'element-ui'
 import Pagination from '@/components/Pagination'
 import { generateTreeData, filterSelectNode } from '@/utils'
@@ -141,11 +141,13 @@ export default {
       listQuery: {
         page: 1,
         limit: 20,
-        name: undefined,
-        label: undefined,
-        mobilePhone: undefined,
-        organization: undefined,
-        status: undefined,
+        data: {
+          name: undefined,
+          label: undefined,
+          mobilePhone: undefined,
+          organization: undefined,
+          status: undefined
+        },
         sort: '+id'
       },
       organizationOptions: [],
@@ -171,7 +173,7 @@ export default {
       rules: {
         name: [{ required: true, message: 'name is required', trigger: 'blur' }],
         label: [{ required: true, message: 'nickName is required', trigger: 'blur' }],
-        /* organization: [{ required: true, message: 'organization is required', trigger: 'change' }], */
+        organization: [{ required: true, message: 'organization is required', trigger: 'change' }],
         status: [{ required: true, message: 'status is required', trigger: 'change' }]
       },
       downloadLoading: false,
@@ -213,16 +215,29 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      request.all([doGetOrganizationList(), doGetRoleList({ page: -1, limit: -1 }), doGetResourceList({ page: -1, limit: -1 }), doGetAccessPage(), doGetUserList(this.listQuery)]).then(response => {
-        this.organizationOptions = response[0].data
+      request.all([doGetOrganizationList({ page: -1, limit: -1 }), doGetRoleList({ page: -1, limit: -1 }), doGetResourceList({ page: -1, limit: -1 }),
+        doGetAccessPageList({ page: -1, limit: -1 }), doGetUserList(this.listQuery)]).then(response => {
+        this.organizationOptions = response[0].data.list
         this.roleOptions = response[1].data.list
-        this.resourceOptions = generateTreeData(null, response[2].data)
-        this.accessPageOptions = generateTreeData(null, response[3].data)
+        this.resourceOptions = generateTreeData(null, response[2].data.list)
+        this.accessPageOptions = generateTreeData(null, response[3].data.list)
         this.list = response[4].data.list
         this.total = response[4].data.total
         let i = 0
         for (const item of this.list) {
           item.number = Number(++i)
+          for (const organization of this.organizationOptions) {
+            if (organization.id === item.organizationId) {
+              item.organization = organization.name
+            }
+          }
+          let roleStr = ''
+          for (const role of this.roleOptions) {
+            if (item.roleIds.includes(role.id)) {
+              roleStr += role.label + ','
+            }
+          }
+          item.role = roleStr.substring(0, roleStr.length - 1)
         }
         setTimeout(() => {
           this.listLoading = false
@@ -231,7 +246,7 @@ export default {
     },
     handleFilter() {
       this.listQuery.page = 1
-      this.getList()
+      this.refreshUserList()
     },
     sortChange(data) {
       console.log(data)
@@ -245,6 +260,31 @@ export default {
         organization: undefined,
         status: undefined
       }
+    },
+    refreshUserList() {
+      doGetUserList(this.listQuery).then(response => {
+        this.list = response.data.list
+        this.total = response.data.total
+        let i = 0
+        for (const item of this.list) {
+          item.number = Number(++i)
+          for (const organization of this.organizationOptions) {
+            if (organization.id === item.organizationId) {
+              item.organization = organization.name
+            }
+          }
+          let roleStr = ''
+          for (const role of this.roleOptions) {
+            if (item.roleIds.includes(role.id)) {
+              roleStr += role.label + ','
+            }
+          }
+          item.role = roleStr.substring(0, roleStr.length - 1)
+        }
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
+      })
     },
     handleCreate() {
       this.resetTemp()
@@ -269,7 +309,7 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.temp = Object.assign({}, row) // copy 简单Object
       this.dialogStatus = '修改'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -280,19 +320,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          console.log(tempData)
           doUpdateUser(tempData).then(() => {
-            doGetUserList(this.listQuery).then(response => {
-              this.list = response.data.list
-              this.total = response.data.total
-              let i = 0
-              for (const item of this.list) {
-                item.number = Number(++i)
-              }
-              setTimeout(() => {
-                this.listLoading = false
-              }, 1.5 * 1000)
-            })
+            this.refreshUserList()
             this.dialogFormVisible = false
             this.$notify({
               title: '成功',
@@ -314,6 +343,7 @@ export default {
     },
     handleDownload() {
       this.downloadLoading = true
+      doDownloadUserList(this.listQuery, '用户列表.xls')
       setTimeout(() => {
         this.downloadLoading = false
       }, 2000)
@@ -321,6 +351,7 @@ export default {
     handleResourceUpdate(row) {
       this.resourceFormVisible = true
       const userId = row.id
+      this.temp = Object.assign({}, row) // copy obj
       doGetUserResourcesList(userId).then(response => {
         const data = response.data
         const userResourceIds = []
@@ -334,7 +365,8 @@ export default {
     handleRoleUpdate(row) {
       this.roleFormVisible = true
       this.roleLabelList = []
-      const userId = row.id
+      this.temp = Object.assign({}, row)
+      const userId = this.temp.id
       doGetUserRolesList(userId).then(response => {
         const data = response.data
         for (const item of data) {
@@ -375,6 +407,7 @@ export default {
     updateRole() {
       const userId = this.temp.id
       doUpdateUserRoleList(userId, this.roleIdList).then(response => {
+        this.refreshUserList()
         this.$notify({
           title: '成功',
           message: '角色修改成功',
@@ -406,7 +439,7 @@ export default {
       for (const roleOption of this.roleOptions) {
         for (const selectRole of selectedRoleLabels) {
           if (roleOption.label === selectRole) {
-            this.roleIdList.push(roleOption.value)
+            this.roleIdList.push(roleOption.id)
           }
         }
       }

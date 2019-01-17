@@ -88,6 +88,8 @@ export default {
           this.$store.dispatch('Login', this.temp).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
+          }, () => {
+            this.loading = false
           })
         }
       })

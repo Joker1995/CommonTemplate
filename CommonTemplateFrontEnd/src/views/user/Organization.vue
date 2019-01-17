@@ -52,7 +52,7 @@
   </div>
 </template>
 <script>
-import { doGetOrganizationList } from '@/api/user/organization'
+import { doGetOrganizationList, doCreateOrganization, doUpdateOrganization, doDeleteOrganization } from '@/api/user/organization'
 import Pagination from '@/components/Pagination'
 
 export default {
@@ -89,8 +89,7 @@ export default {
         confirm: '确认',
         actions: '操作',
         edit: '修改',
-        delete: '删除',
-        permission: '权限'
+        delete: '删除'
       }
     }
   },
@@ -100,7 +99,6 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-
       doGetOrganizationList(this.listQuery).then(response => {
         this.list = response.data.list
         this.total = response.data.total
@@ -120,11 +118,7 @@ export default {
     resetTemp() {
       this.temp = {
         id: undefined,
-        name: undefined,
-        nickName: undefined,
-        mobilePhone: undefined,
-        organization: undefined,
-        status: undefined
+        name: undefined
       }
     },
     handleCreate() {
@@ -136,14 +130,16 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          /* 新增角色操作 TODO */
-          this.$notify({
-            title: '成功',
-            message: '创建成功',
-            type: 'success',
-            duration: 2000
+          doCreateOrganization(this.temp).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '创建成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+            this.dialogFormVisible = false
           })
-          this.dialogFormVisible = false
         }
       })
     },
@@ -158,24 +154,28 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          /* 修改角色操作 TODO */
-
-          this.$notify({
-            title: '成功',
-            message: '更新成功',
-            type: 'success',
-            duration: 2000
+          doUpdateOrganization(this.temp).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.getList()
+            this.dialogFormVisible = false
           })
-          this.dialogFormVisible = false
         }
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+      doDeleteOrganization(row).then(response => {
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
+        this.getList()
       })
     }
   }

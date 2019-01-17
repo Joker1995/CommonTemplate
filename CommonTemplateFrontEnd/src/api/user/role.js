@@ -8,25 +8,19 @@ export function doCreateRole(role) {
   })
 }
 
+export function doUpdateRole(role) {
+  return request({
+    url: '/role/',
+    method: 'put',
+    data: role
+  })
+}
+
 export function doGetRoleList(query) {
   return request({
     url: '/role/roleList',
     method: 'post',
     data: query
-  })
-}
-
-export function doGetResourceList() {
-  return request({
-    url: '/role/resourceList',
-    method: 'get'
-  })
-}
-
-export function doGetAccessPageList() {
-  return request({
-    url: '/role/accessPageList',
-    method: 'get'
   })
 }
 

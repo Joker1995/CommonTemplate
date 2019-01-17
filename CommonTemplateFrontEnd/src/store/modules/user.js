@@ -37,8 +37,10 @@ const user = {
           commit('SET_NAME', username)
           commit('SET_PASSWORD', userInfo.password)
           resolve()
-        }).catch(err => {
-          reject(err)
+        }, error => {
+          reject(error)
+        }).catch(error => {
+          reject(error)
         })
       })
     },

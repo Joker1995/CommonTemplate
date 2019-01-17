@@ -1,9 +1,10 @@
 import request from '@/utils/request'
 
-export function doGetResourceChildNodes(id) {
+export function doGetResourceChildNodes(id, query) {
   return request({
     url: '/resource/' + id + '/childList',
-    method: 'get'
+    method: 'post',
+    data: query
   })
 }
 
@@ -15,26 +16,26 @@ export function doGetResourceList(query) {
   })
 }
 
-export function doCreateResource(resource) {
+export function doCreateResource(data) {
   return request({
     url: '/resource',
     method: 'post',
-    data: resource
+    data: data
   })
 }
 
-export function doUpdateResource(resource) {
+export function doUpdateResource(data) {
   return request({
     url: '/resource',
     method: 'put',
-    data: resource
+    data: data
   })
 }
 
-export function doDeleteResource(resource) {
+export function doDeleteResource(data) {
   return request({
     url: '/resource',
     method: 'delete',
-    data: resource
+    data: data
   })
 }

@@ -26,9 +26,9 @@
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.nickName" prop="nickName" sortable="custom" min-width="150px">
+      <el-table-column :label="table.label" prop="label" sortable="custom" min-width="150px">
         <template slot-scope="scope">
-          <span>{{ scope.row.nickName }}</span>
+          <span>{{ scope.row.label }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="table.actions" align="center" width="350" class-name="small-padding fixed-width">
@@ -48,8 +48,8 @@
         <el-form-item :label="table.name" prop="name">
           <el-input v-model="temp.name"/>
         </el-form-item>
-        <el-form-item :label="table.nickName" prop="nickName">
-          <el-input v-model="temp.nickName"/>
+        <el-form-item :label="table.label" prop="label">
+          <el-input v-model="temp.label"/>
         </el-form-item>
         <el-form-item :label="table.remark">
           <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.memo" type="textarea" placeholder="请输入"/>
@@ -79,11 +79,13 @@
   </div>
 </template>
 <script>
-import { doGetRoleList, doGetAccessPageList, doGetResourceList, doDeleteRole,
-  doUpdateAccessPageList, doUpdateResourceList } from '@/api/user/role'
+import { doGetRoleList, doDeleteRole, doCreateRole, doUpdateRole, doUpdateAccessPageList, doUpdateResourceList } from '@/api/user/role'
+import { doGetAccessPageList } from '@/api/user/accessPage'
+import { doGetResourceList } from '@/api/user/resource'
 import { Tree } from 'element-ui'
 import Pagination from '@/components/Pagination'
 import { generateTreeData, filterSelectNodeId } from '@/utils'
+import request from '@/utils/request'
 
 export default {
   components: { Pagination, Tree },
@@ -97,7 +99,7 @@ export default {
         page: 1,
         limit: 20,
         name: undefined,
-        nickName: undefined,
+        label: undefined,
         sort: '+id'
       },
       resourceOptions: [],
@@ -105,7 +107,7 @@ export default {
       temp: {
         id: undefined,
         name: undefined,
-        nickName: undefined,
+        label: undefined,
         accessPageIds: [],
         resourceIds: []
       },
@@ -113,7 +115,7 @@ export default {
       dialogStatus: '',
       rules: {
         name: [{ required: true, message: 'name is required', trigger: 'blur' }],
-        nickName: [{ required: true, message: 'nickName is required', trigger: 'blur' }]
+        label: [{ required: true, message: 'nickName is required', trigger: 'blur' }]
       },
       downloadLoading: false,
       resourceDialogTitle: '权限修改',
@@ -126,7 +128,7 @@ export default {
       },
       table: {
         name: '名称',
-        nickName: '昵称',
+        label: '昵称',
         status: '状态',
         search: '搜索',
         add: '添加',
@@ -149,27 +151,35 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      doGetAccessPageList().then(response => {
-        const data = generateTreeData(null, response.data)
-        this.accessPageOptions = data
-
-        doGetResourceList().then(response => {
-          const data = generateTreeData(null, response.data)
-          this.resourceOptions = data
-
-          doGetRoleList(this.listQuery).then(response => {
-            this.list = response.data.list
-            this.total = response.data.total
-            let i = 0
-            for (const item of this.list) {
-              item.number = Number(++i)
-              item.nickName = item.label
-            }
-            setTimeout(() => {
-              this.listLoading = false
-            }, 1.5 * 1000)
-          })
+      request.all([doGetAccessPageList({ page: -1, limit: -1 }), doGetResourceList({ page: -1, limit: -1 }), doGetRoleList(this.listQuery)])
+        .then(response => {
+          const accessPageData = generateTreeData(null, response[0].data.list)
+          this.accessPageOptions = accessPageData
+          const resourceData = generateTreeData(null, response[1].data.list)
+          this.resourceOptions = resourceData
+          this.list = response[2].data.list
+          this.total = response[2].data.total
+          let i = 0
+          for (const item of this.list) {
+            item.number = Number(++i)
+          }
+          setTimeout(() => {
+            this.listLoading = false
+          }, 1.5 * 1000)
         })
+    },
+    refreshRoleList() {
+      this.listLoading = true
+      doGetRoleList(this.listQuery).then(response => {
+        this.list = response.data.list
+        this.total = response.data.total
+        let i = 0
+        for (const item of this.list) {
+          item.number = Number(++i)
+        }
+        setTimeout(() => {
+          this.listLoading = false
+        }, 1.5 * 1000)
       })
     },
     handleFilter() {
@@ -183,7 +193,7 @@ export default {
       this.temp = {
         id: undefined,
         name: undefined,
-        nickName: undefined,
+        label: undefined,
         mobilePhone: undefined,
         organization: undefined,
         status: undefined,
@@ -200,15 +210,16 @@ export default {
     createData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          /* 新增角色操作 TODO */
-
-          this.$notify({
-            title: '成功',
-            message: '创建成功',
-            type: 'success',
-            duration: 2000
+          doCreateRole(this.temp).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '创建成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.refreshRoleList()
+            this.dialogFormVisible = false
           })
-          this.dialogFormVisible = false
         }
       })
     },
@@ -223,15 +234,16 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          /* 修改角色操作 TODO */
-
-          this.$notify({
-            title: '成功',
-            message: '更新成功',
-            type: 'success',
-            duration: 2000
+          doUpdateRole(this.temp).then(response => {
+            this.$notify({
+              title: '成功',
+              message: '更新成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.refreshRoleList()
+            this.dialogFormVisible = false
           })
-          this.dialogFormVisible = false
         }
       })
     },
@@ -269,7 +281,6 @@ export default {
     },
     updateAccessPage() {
       this.temp.accessPageIds = this.$refs['accessPageTree'].getCheckedKeys()
-      console.log(this.temp.accessPageIds)
       doUpdateAccessPageList(this.temp).then(response => {
         this.$notify({
           title: '成功',
@@ -277,7 +288,7 @@ export default {
           type: 'success',
           duration: 2000
         })
-        this.resourceFormVisible = false
+        this.accessPageFormVisible = false
       })
     },
     updateResource() {

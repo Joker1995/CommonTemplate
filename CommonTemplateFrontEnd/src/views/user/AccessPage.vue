@@ -124,18 +124,21 @@ export default {
   },
   methods: {
     getList() {
-      doGetAccessPageList().then(response => {
-        const data = response.data
+      doGetAccessPageList(this.listQuery).then(response => {
+        const data = response.data.list
         this.permissionOptions = generateTreeData(null, data)
         const firstNodeId = this.permissionOptions.length > 0 ? this.permissionOptions[0].id : null
-        this.currentNodeKey = firstNodeId
-        if (firstNodeId != null) {
-          this.initNodeChildList(1)
+        if (this.currentNodeKey === '') {
+          this.currentNodeKey = firstNodeId
+          this.initNodeChildList(firstNodeId)
+        } else {
+          this.initNodeChildList(this.currentNodeKey)
         }
       })
     },
     initNodeChildList(parentId) {
-      doGetAccessPageChildNodes(parentId).then(response => {
+      doGetAccessPageChildNodes(parentId, this.listQuery).then(response => {
+        this.list = []
         const dataList = response.data.list
         this.total = response.data.total
         let i = 0
@@ -198,6 +201,7 @@ export default {
       }
     },
     queryChildList(data, node, component) {
+      this.currentNodeKey = data.id
       this.initNodeChildList(data.id)
     },
     createData() {
@@ -212,6 +216,7 @@ export default {
               duration: 2000
             })
             this.dialogFormVisible = false
+            this.getList()
             this.initNodeChildList(this.temp.id)
           })
         }
@@ -237,6 +242,7 @@ export default {
               duration: 2000
             })
             this.dialogFormVisible = false
+            this.getList()
             this.initNodeChildList(this.temp.id)
           })
         }
@@ -252,6 +258,7 @@ export default {
           type: 'success',
           duration: 2000
         })
+        this.getList()
         this.initNodeChildList(data.id)
       })
     }

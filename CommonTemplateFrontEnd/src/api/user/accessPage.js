@@ -1,16 +1,18 @@
 import request from '@/utils/request'
 
-export function doGetAccessPageChildNodes(parentId) {
+export function doGetAccessPageChildNodes(parentId, query) {
   return request({
     url: '/accessPage/' + parentId + '/childList',
-    method: 'get'
+    method: 'post',
+    data: query
   })
 }
 
-export function doGetAccessPageList() {
+export function doGetAccessPageList(query) {
   return request({
     url: '/accessPage/accessPages',
-    method: 'get'
+    method: 'post',
+    data: query
   })
 }
 
