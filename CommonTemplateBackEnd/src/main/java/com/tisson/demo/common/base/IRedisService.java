@@ -94,7 +94,7 @@ public class IRedisService<T> {
      * @param key 传入key的名称
      * @return
      */
-    public boolean isKeyExists(String key,String hashKey) {
+    public Boolean isKeyExists(String key,String hashKey) {
         return hashOperations.hasKey(key, hashKey);
     }
 
@@ -103,7 +103,7 @@ public class IRedisService<T> {
      *
      * @return
      */
-    public long count(String key) {
+    public Long count(String key) {
         return hashOperations.size(key);
     }
 

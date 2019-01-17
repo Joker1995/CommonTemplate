@@ -55,4 +55,17 @@ public class GlobalProperties {
 	public String getCodeTemplateDirPath() {
 		return codeTemplateDirPath;
 	}
+	@Value("${excel.generateDirPath}")
+	private String excelGenerateDirPath;
+
+	public String getExcelGenerateDirPath() {
+		return excelGenerateDirPath;
+	}
+	@Value("${excel.templateDirPath}")
+	private String excelTemplateDirPath;
+
+	public String getExcelTemplateDirPath() {
+		return excelTemplateDirPath;
+	}
+	
 }

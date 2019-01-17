@@ -31,12 +31,12 @@ import com.tisson.demo.service.sys.SysRolesService;
 */
 @RestController
 @RequestMapping("/role")
-@RequiresPermissions("role")
+@RequiresPermissions("/role")
 public class SysRolesController {
 	@Autowired
 	private SysRolesService sysRolesService;
 	
-	@GetMapping("/roleList")
+	@PostMapping("/roleList")
 	public ResponseBean<PageInfo<SysRoles>> roleList(@RequestBody ListQuery<SysRoles> query){
 		return new ResponseBean<PageInfo<SysRoles>>("queryRoleList",sysRolesService.queryRoleList(query));
 	}

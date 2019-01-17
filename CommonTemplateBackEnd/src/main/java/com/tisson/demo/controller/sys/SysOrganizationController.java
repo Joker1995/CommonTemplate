@@ -27,7 +27,7 @@ import com.tisson.demo.service.sys.SysOrganizationService;
 */
 @RestController
 @RequestMapping("/organization")
-@RequiresPermissions("organization")
+@RequiresPermissions("/organization")
 public class SysOrganizationController {
 	@Autowired
 	private SysOrganizationService sysOrganizationService;

@@ -14,7 +14,11 @@ import javax.persistence.Table;
 * @version V1.0  
 */
 @Table(name = "[(${table.jdbcName})]")
-public class  [(${table.javaName})]{[# th:each="column : ${table.columns}"]
+public class  [(${table.javaName})] implements Serializable{/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+[# th:each="column : ${table.columns}"]
     [# th:if="${column.primaryKey}"]// [( ${column.comment} )] 
     @Id
     @GeneratedValue(generator="UUID")

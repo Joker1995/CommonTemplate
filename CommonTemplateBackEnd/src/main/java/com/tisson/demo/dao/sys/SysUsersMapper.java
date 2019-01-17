@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 
 import com.tisson.demo.common.base.Mapper;
+import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
@@ -77,4 +78,10 @@ public interface SysUsersMapper extends Mapper<SysUsers>{
 	void deleteUserRoles(@Param("query")SysUsers query);
 
 	void addUserRoles(@Param("query")SysUsers query);
+
+	List<SysOrganizations> queryOrganizationByUserId(String id);
+
+	void insertUserOrganizationRelation(@Param("query")SysUsers sysUsers);
+
+	void deleteUserOrganizationRelation(@Param("query")SysUsers sysUsers);
 }

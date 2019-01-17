@@ -2,7 +2,9 @@ package com.tisson.demo.entity.sys;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
@@ -11,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.tisson.demo.common.base.BaseEntity;
+
+import cn.hutool.core.date.DateUtil;
 
 /**  
 * @Title: SysUsers.java  
@@ -57,13 +61,18 @@ public class SysUsers extends BaseEntity implements Serializable{
     
     @Column(name = "exp_date")
     private Date expDate;
+
+    @Column(name = "max_online_count")
+    private Integer maxOnlineCount;
     
     @Transient 
-    private List<SysRoles> roles;
+    private List<SysRoles> roleList;
     @Transient 
     private List<SysResources> resourceList;
     @Transient
     private List<SysPages> accessPageList;
+    @Transient
+    private List<SysOrganizations> organizationList;
     @Transient
     private List<String> roleIds;
     @Transient
@@ -71,7 +80,7 @@ public class SysUsers extends BaseEntity implements Serializable{
     @Transient
     private List<String> accessPageIds;
     @Transient
-    private String currentToken;
+    private String organizationId;
     
 	public String getId() {
 		return id;
@@ -161,12 +170,12 @@ public class SysUsers extends BaseEntity implements Serializable{
 		this.expDate = expDate;
 	}
 
-	public List<SysRoles> getRoles() {
-		return roles;
+	public List<SysRoles> getRoleList() {
+		return roleList;
 	}
 
-	public void setRoles(List<SysRoles> roles) {
-		this.roles = roles;
+	public void setRoleList(List<SysRoles> roleList) {
+		this.roleList = roleList;
 	}
 
 	public List<SysResources> getResourceList() {
@@ -209,18 +218,55 @@ public class SysUsers extends BaseEntity implements Serializable{
 		this.accessPageIds = accessPageIds;
 	}
 
-	public String getCurrentToken() {
-		return currentToken;
+	public Integer getMaxOnlineCount() {
+		return maxOnlineCount;
 	}
 
-	public void setCurrentToken(String currentToken) {
-		this.currentToken = currentToken;
+	public void setMaxOnlineCount(Integer maxOnlineCount) {
+		this.maxOnlineCount = maxOnlineCount;
+	}
+
+	public List<SysOrganizations> getOrganizationList() {
+		return organizationList;
+	}
+
+	public void setOrganizationList(List<SysOrganizations> organizationList) {
+		this.organizationList = organizationList;
+	}
+	
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
+	}
+	
+	/**
+	 * 对象的成员变量和值以k-v输出
+	 * @return
+	 */
+	public Map<String,String> propStrMap(){
+		Map<String,String> map = new HashMap<String,String>();
+		map.put("id", this.id);
+		map.put("name", this.name);
+		map.put("password", this.password);
+		map.put("label", this.label);
+		map.put("status", this.status);
+		map.put("mobilePhone", this.mobilePhone);
+		map.put("sex", String.valueOf(this.sex));
+		map.put("photo", this.photo);
+		map.put("memo", this.memo);
+		map.put("effDate", DateUtil.format(this.effDate, "yyyy-MM-dd HH:mm:ss"));
+		map.put("expDate", DateUtil.format(this.expDate, "yyyy-MM-dd HH:mm:ss"));
+		map.put("maxOnlineCount", String.valueOf(maxOnlineCount));
+		return map;
 	}
 
 	@Override
 	public String toString() {
 		return "{id:" + id + ", name:" + name + ", password:" + password + ", label:" + label + ", status:"
 				+ status + ", mobilePhone:" + mobilePhone + ", sex:" + sex + ", photo:" + photo + ", memo:" + memo
-				+ ", effDate:" + effDate + ", expDate:" + expDate + ",currentToken:"+currentToken+"}";
+				+ ", effDate:" + effDate + ", expDate:" + expDate + ",maxOnlineCount:"+maxOnlineCount+"}";
 	}
 }

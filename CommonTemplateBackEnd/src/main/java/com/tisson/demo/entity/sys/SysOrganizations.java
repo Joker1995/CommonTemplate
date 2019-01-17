@@ -1,5 +1,7 @@
 package com.tisson.demo.entity.sys;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,7 +18,12 @@ import com.tisson.demo.common.base.BaseEntity;
 * @version V1.0  
 */
 @Table(name = "sys_organizations")
-public class SysOrganizations extends BaseEntity {
+public class SysOrganizations extends BaseEntity implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6245325037617283652L;
+
 	@Id
 	@GeneratedValue(generator = "UUID")
 	private String id;

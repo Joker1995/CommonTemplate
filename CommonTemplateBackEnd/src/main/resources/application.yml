@@ -17,8 +17,14 @@ spring:
         name: masterDataSource
         driver-class-name: com.mysql.jdbc.Driver
         jdbc-url: jdbc:mysql://localhost:3306/ssm_shiro?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+#        jdbc-url: jdbc:mysql://132.126.23.85:3307/crawler?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+#        jdbc-url: jdbc:mysql://172.16.28.152:3306/crawler?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true
+##        username: root
+#        username: scms
         username: root
         password: 123
+#        password: P@ssw0rd
+#        password: Root^1+1=3
         # 配置获取连接等待超时的时间
         maxWait: 60000
         # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒

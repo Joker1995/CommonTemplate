@@ -84,13 +84,13 @@ public class SysCodeController {
 		return new ResponseBean<List<Map<String, Object>>>("query ApplicationContext dataSourceList success", result);
 	}
 
-	@GetMapping(value = "/dataSource/test")
+	@PostMapping(value = "/dataSource/test")
 	@RequiresPermissions("/code/dataSource/test")
 	public ResponseBean<Boolean> testDataSourceConnection(@RequestBody DataSourceConfig config) {
 		return new ResponseBean<Boolean>("testDataSourceConnection success", testConnection(config));
 	}
 
-	@GetMapping(value = "/dataSource/tables")
+	@PostMapping(value = "/dataSource/tables")
 	@RequiresPermissions("/code/dataSource/tables")
 	public ResponseBean<List<Table>> queryDataBaseTables(@RequestBody DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
@@ -210,7 +210,7 @@ public class SysCodeController {
 		} 
 	}
 	
-	@GetMapping("/project/generate")
+	@PostMapping("/project/generate")
 	@RequiresPermissions("/code/generateProject")
 	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) {
 		// TODO

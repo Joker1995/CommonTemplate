@@ -1,18 +1,12 @@
 package com.tisson.demo.service.sys;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import javax.annotation.Resource;
-
-import org.apache.shiro.session.Session;
-import org.apache.shiro.session.mgt.eis.EnterpriseCacheSessionDAO;
-import org.apache.shiro.subject.SimplePrincipalCollection;
-import org.apache.shiro.subject.support.DefaultSubjectContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +16,7 @@ import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.dao.sys.SysUsersMapper;
+import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
@@ -36,9 +31,9 @@ import com.tisson.demo.entity.sys.SysUsers;
  * @version V1.0
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional(rollbackFor=Exception.class)
 public class SysUsersService extends BaseService<SysUsers> {
-	@Resource
+	@Autowired
     private SysUsersMapper sysUsersMapper;
 	
 	public SysUsers loadByName(String name) {
@@ -81,6 +76,7 @@ public class SysUsersService extends BaseService<SysUsers> {
 		params.put("query", query.data);
 		params.put("specialUserName", null);
 		List<SysUsers> result=sysUsersMapper.queryList(params);
+		initUserRelations(result);
 		return new PageInfo<SysUsers>(result);
 	}
 	
@@ -92,6 +88,7 @@ public class SysUsersService extends BaseService<SysUsers> {
 		params.put("query", query.data);
 		params.put("specialUserName", specialUserName);
 		List<SysUsers> result=sysUsersMapper.queryList(params);
+		initUserRelations(result);
 		return new PageInfo<SysUsers>(result);
 	}
 	
@@ -100,6 +97,7 @@ public class SysUsersService extends BaseService<SysUsers> {
 		params.put("query", query.data);
 		params.put("specialUserName", null);
 		List<SysUsers> result=sysUsersMapper.queryList(params);
+		initUserRelations(result);
 		return new PageInfo<SysUsers>(result);
 	}
 	public PageInfo<SysUsers> queryAll(ListQuery<SysUsers> query,List<String> specialUserName) {
@@ -107,6 +105,7 @@ public class SysUsersService extends BaseService<SysUsers> {
 		params.put("query", query.data);
 		params.put("specialUserName", specialUserName);
 		List<SysUsers> result=sysUsersMapper.queryList(params);
+		initUserRelations(result);
 		return new PageInfo<SysUsers>(result);
 	}
 
@@ -120,7 +119,7 @@ public class SysUsersService extends BaseService<SysUsers> {
 		sysUsersMapper.deleteSysUsers(sysUsers);
 	}
 	
-	public void updateUserRoles(SysUsers sysUsers) {
+	public void updateUserRoles(SysUsers sysUsers) throws Exception{
 		sysUsersMapper.deleteUserRoles(sysUsers);
 		sysUsersMapper.addUserRoles(sysUsers);
 	}
@@ -135,6 +134,11 @@ public class SysUsersService extends BaseService<SysUsers> {
 		sysUsersMapper.addUserAccessPages(sysUsers);
 	}
 
+	public List<SysOrganizations> queryOrganizationByUserId(String id) {
+		return sysUsersMapper.queryOrganizationByUserId(id);
+	}
+
+
 	public void loginTokenList(ListQuery<SysUsers> query) {
 		
 	}
@@ -146,24 +150,61 @@ public class SysUsersService extends BaseService<SysUsers> {
 		* @throws  
 		*/
 	}
-
-	private Map<String,String> getSessionUserInfo(Session session) {
-		/**  
-		* @Title: getSessionUser  
-		* @Description: TODO(这里用一句话描述这个方法的作用)  
-		* @return    返回类型  
-		* @throws  
-		*/  
-		//获取session登录信息。
-		Object obj = session.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
-		if(null == obj){
-			return null;
-		}//确保是 SimplePrincipalCollection对象。
-		if(obj instanceof SimplePrincipalCollection){
-			SimplePrincipalCollection spc = (SimplePrincipalCollection)obj;
-			spc.getPrimaryPrincipal();
+	
+	private void initUserRelations(List<SysUsers> userList) {
+		for(SysUsers user : userList) {
+			List<SysRoles> roleList = sysUsersMapper.queryRoles(user.getId());
+			List<String> roleIds=new ArrayList<String>();
+			for(SysRoles role : roleList) {
+				roleIds.add(role.getId());
+			}
+			user.setRoleIds(roleIds);
+			
+			List<SysOrganizations> organizationList = queryOrganizationByUserId(user.getId());
+			String organizationId=null;
+			if(organizationList.size()>0) {
+				organizationId=organizationList.get(0).getId();
+			}
+			user.setOrganizationId(organizationId);
+			
+			Set<SysPages> pageSet=new HashSet<SysPages>();
+			List<String> pageIds=new ArrayList<String>();
+			List<SysPages> userAccessPageList = queryPagesByUserId(user.getId());
+			List<SysPages> roleAccessPageList = queryPagesByRoleId(roleIds);
+			pageSet.addAll(roleAccessPageList);
+			pageSet.addAll(userAccessPageList);
+			for(SysPages page : new ArrayList<SysPages>(pageSet)) {
+				pageIds.add(page.getId());
+			}
+			user.setAccessPageIds(pageIds);
+			
+			Set<SysResources> resourceSet=new HashSet<SysResources>();
+			List<String> resourceIds=new ArrayList<String>();
+			List<SysResources> userResourceList = queryResourcesByUserId(user.getId());
+			List<SysResources> roleResourceList = queryResourcesByRoleId(roleIds);
+			resourceSet.addAll(roleResourceList);
+			resourceSet.addAll(userResourceList);
+			for(SysResources resource : new ArrayList<SysResources>(resourceSet)) {
+				resourceIds.add(resource.getId());
+			}
+			user.setResourceIds(resourceIds);
 		}
-		return null;
 	}
 
+	public void saveUserOrganizationRelation(SysUsers sysUsers) {
+		sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
+		sysUsersMapper.insertUserOrganizationRelation(sysUsers);
+	}
+	
+	public void test() {
+		SysUsers sysUsers=new SysUsers();
+		sysUsers.setName("test123");
+		sysUsers.setStatus("S0A");
+		sysUsersMapper.insert(sysUsers);
+		int i=1/0;
+		SysUsers sysUsers1=new SysUsers();
+		sysUsers1.setName("test321");
+		sysUsers1.setStatus("S0A");
+		sysUsersMapper.insert(sysUsers1);
+	}
 }

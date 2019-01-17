@@ -3,6 +3,7 @@ package com.tisson.demo.common.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.ShiroException;
+import org.apache.shiro.authc.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,17 +27,6 @@ import cn.hutool.json.JSONUtil;
 @RestControllerAdvice
 public class ExceptionControllerHandler {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ExceptionControllerHandler.class);
-	/**
-	 * 捕捉shiro异常
-	 * 
-	 * @param e
-	 * @return
-	 */
-	@ResponseStatus(HttpStatus.UNAUTHORIZED)
-	@ExceptionHandler(ShiroException.class)
-	public ResponseBean<String> handle401(ShiroException e) {
-		return new ResponseBean<String>(401, e.getMessage(), null);
-	}
 
 	/**
 	 * 捕捉UnauthorizedException
@@ -45,10 +35,16 @@ public class ExceptionControllerHandler {
 	 */
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	@ExceptionHandler(UnauthorizedException.class)
-	public ResponseBean<String> handle401() {
-		return new ResponseBean<String>(401, "Unauthorized", null);
+	public ResponseBean<String> handleUnauthorizedException() {
+		return new ResponseBean<String>(10002, "userName or passsword error or token expired", null);
 	}
-
+	
+	// 捕捉shiro的异常
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ShiroException.class)
+    public ResponseBean<String> handle401(ShiroException e) {
+        return new ResponseBean<String>(401, e.getMessage(), null);
+    }
 	/**
 	 * 捕捉所有其他异常
 	 * 
@@ -62,7 +58,6 @@ public class ExceptionControllerHandler {
 		LOGGER.error("URL:{}########PARAMS:{}",
 				request.getRequestURI(),JSONUtil.toJsonStr(request.getParameterMap()));
 		LOGGER.error("ERROR MEG:{}",ex.getMessage());
-		ex.printStackTrace();
 		return new ResponseBean<String>(500,"INTERNAL_SERVER_ERROR",null);
 	}
 

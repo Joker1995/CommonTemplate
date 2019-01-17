@@ -38,29 +38,14 @@ import com.tisson.demo.service.sys.SysUsersService;
 */
 @RestController
 @RequestMapping("/resource")
-@RequiresPermissions("resource")
+@RequiresPermissions("/resource")
 public class SysResoucesController {
 	@Autowired
 	private SysResourcesService sysResourcesService;
-	@Autowired
-	private SysUsersService sysUsersService;
 	
-	@GetMapping(value = "/accessPages")
-	public ResponseBean<List<Object>> queryResourcesList(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token){
-		String userName = JWTUtil.getUserName(token);
-		SysUsers sysUsers = sysUsersService.loadByName(userName);
-		// 根据user的id查询出所有可访问接口
-        List<SysResources> userResourcesList = sysUsersService.queryResourcesByUserId(sysUsers.getId());
-        // 根据user的id查询出所有角色
-        List<SysRoles> sysRolesList = sysUsersService.queryRoles(sysUsers.getId());
-        Set<String> roleIdSet = new HashSet<String>();
-        for(SysRoles item : sysRolesList) {
-        	roleIdSet.add(item.getId());
-        }
-        List<SysResources> roleResourcesList = sysUsersService.queryResourcesByRoleId(new ArrayList<String>(roleIdSet));
-        Set<SysResources> resourcesSet = filterResourcesList(userResourcesList);
-        resourcesSet.addAll( filterResourcesList(roleResourcesList));
-		return new ResponseBean<List<Object>>("queryResourceList success",new ArrayList<Object>(resourcesSet));
+	@PostMapping(value = "/resources")
+	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody ListQuery<SysResources> query){
+		return new ResponseBean<PageInfo<SysResources>>("queryResourceList success",sysResourcesService.queryPage(query));
 	}
 	
 	@PostMapping(value = "/{id}/childList")
