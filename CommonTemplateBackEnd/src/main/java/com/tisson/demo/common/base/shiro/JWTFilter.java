@@ -85,11 +85,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			String key = "ssoToken:" + userName;
 			Integer maxOnlineCount = loginUser.getMaxOnlineCount();
 			Integer cacheMaxCount = userName2TokenService.count(key).intValue();
-			if (maxOnlineCount > 1 && cacheMaxCount < maxOnlineCount) {
-				if (!userName2TokenService.isKeyExists("ssoToken:" + JWTUtil.getUserName(authorization), authorization)) {
-					userName2TokenService.put("ssoToken:" + JWTUtil.getUserName(authorization), authorization, false,
-							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
-				}
+	        if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
+	        		&& !userName2TokenService.isKeyExists(key, authorization)) {
+				throw new AuthenticationException(userName + " has too many token online");
 			}
 			boolean shouldRefresh = shouldTokenRefresh(JWTUtil.getIssuedAt(authorization));
 			if (shouldRefresh) {

@@ -100,8 +100,15 @@ public class AuthRealm extends AuthorizingRealm{
         String key = "ssoToken:" + userName;
         Integer maxOnlineCount = sysUsers.getMaxOnlineCount();
         Integer cacheMaxCount = userName2TokenService.count(key).intValue();
-        if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount) {
+        if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
+        		&& !userName2TokenService.isKeyExists(key, token)) {
 			throw new AuthenticationException(userName + " has too many token online");
+		}
+        if (maxOnlineCount > 1 && cacheMaxCount <= maxOnlineCount) {
+			if (!userName2TokenService.isKeyExists("ssoToken:" + userName, token)) {
+				userName2TokenService.put("ssoToken:" + userName, token, false,
+						Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
+			}
 		}
         // 根据user的id查询出所有角色
         List<SysRoles> sysRolesList = sysUsersMapper.queryRoles(sysUsers.getId());
