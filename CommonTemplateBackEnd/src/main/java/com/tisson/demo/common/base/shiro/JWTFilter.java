@@ -82,9 +82,14 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			if (!JWTUtil.verify(authorization, userName, loginUser.getPassword())) {
 				throw new AuthenticationException("token expired");
 			}
-			if (!userName2TokenService.isKeyExists("ssoToken:" + JWTUtil.getUserName(authorization), authorization)) {
-				userName2TokenService.put("ssoToken:" + JWTUtil.getUserName(authorization), authorization, false,
-						Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
+			String key = "ssoToken:" + userName;
+			Integer maxOnlineCount = loginUser.getMaxOnlineCount();
+			Integer cacheMaxCount = userName2TokenService.count(key).intValue();
+			if (maxOnlineCount > 1 && cacheMaxCount < maxOnlineCount) {
+				if (!userName2TokenService.isKeyExists("ssoToken:" + JWTUtil.getUserName(authorization), authorization)) {
+					userName2TokenService.put("ssoToken:" + JWTUtil.getUserName(authorization), authorization, false,
+							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
+				}
 			}
 			boolean shouldRefresh = shouldTokenRefresh(JWTUtil.getIssuedAt(authorization));
 			if (shouldRefresh) {
@@ -94,6 +99,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 					userName2TokenService.put("ssoToken:" + JWTUtil.getUserName(newToken), newToken, false,
 							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
 				}
+				userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(newToken),authorization);
 			}
 		}
 		if (!StringUtils.isEmpty(newToken)) {
