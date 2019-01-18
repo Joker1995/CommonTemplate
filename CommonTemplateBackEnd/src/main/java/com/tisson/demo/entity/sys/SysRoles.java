@@ -21,7 +21,7 @@ import com.tisson.demo.common.base.BaseEntity;
  */
 @Table(name = "sys_roles")
 public class SysRoles extends BaseEntity implements Serializable{
-	private static final long serialVersionUID = 7366508599665153662L;
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(generator="UUID")

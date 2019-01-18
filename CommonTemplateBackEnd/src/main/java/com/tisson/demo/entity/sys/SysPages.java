@@ -24,7 +24,7 @@ public class SysPages extends BaseEntity implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 2416221881127474315L;
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(generator = "UUID")

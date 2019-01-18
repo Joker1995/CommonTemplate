@@ -22,7 +22,7 @@ public class SysOrganizations extends BaseEntity implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6245325037617283652L;
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(generator = "UUID")

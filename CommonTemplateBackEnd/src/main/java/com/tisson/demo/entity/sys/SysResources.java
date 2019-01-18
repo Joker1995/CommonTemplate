@@ -19,10 +19,11 @@ import com.tisson.demo.common.base.BaseEntity;
 */
 @Table(name = "sys_resources")
 public class SysResources extends BaseEntity implements Serializable{
+
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 5915428947823523626L;
+	private static final long serialVersionUID = 1L;
 
 	@Id
 	@GeneratedValue(generator="UUID")

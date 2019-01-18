@@ -8,7 +8,7 @@ package com.tisson.demo.common.base.expt;
 * @version V1.0  
 */
 public class UnauthorizedException extends RuntimeException {
-	private static final long serialVersionUID = 4986254581324696215L;
+	private static final long serialVersionUID = 1L;
 
 	public UnauthorizedException(String msg) {
         super(msg);

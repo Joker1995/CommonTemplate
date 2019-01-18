@@ -26,7 +26,11 @@ import cn.hutool.core.date.DateUtil;
 */
 @Table(name = "sys_users")
 public class SysUsers extends BaseEntity implements Serializable{
-	private static final long serialVersionUID = -7410269724497727954L;
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Id
     @GeneratedValue(generator="UUID")

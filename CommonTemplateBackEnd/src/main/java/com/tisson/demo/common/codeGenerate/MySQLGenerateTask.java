@@ -81,7 +81,9 @@ public class MySQLGenerateTask extends GenerateTask {
 		generateService(this.unit);
 		generateController(this.unit);
 		FileUtil.touch(this.getGenerateDirPath()+".zip");
-		return ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
+		File codeZip=ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
+		FileUtil.del(this.getGenerateDirPath());
+		return codeZip;
 	}
 
 	private void generateEntity(TaskUnit unit) throws Exception {
@@ -91,10 +93,11 @@ public class MySQLGenerateTask extends GenerateTask {
 		Engine engine = new ThymeleafEngine(initTemplateEngine());
 		FileUtil.touch(generateEntityFilePath);
 		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"entity.vm");
-		BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", true);
-		template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
-				new DateTime().toString("yyyy/MM/dd")), writer);
-		writer.flush();
+		try(BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
 	}
 
 	private void generateMapper(TaskUnit unit) throws Exception {
@@ -104,10 +107,11 @@ public class MySQLGenerateTask extends GenerateTask {
 		Engine engine = new ThymeleafEngine(initTemplateEngine());
 		FileUtil.touch(generateEntityFilePath);
 		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"mapper.vm");
-		BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", true);
-		template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
-				new DateTime().toString("yyyy/MM/dd")), writer);
-		writer.flush();
+		try(BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
 	}
 
 	private void generateService(TaskUnit unit) throws Exception {
@@ -117,10 +121,11 @@ public class MySQLGenerateTask extends GenerateTask {
 		Engine engine = new ThymeleafEngine(initTemplateEngine());
 		FileUtil.touch(generateEntityFilePath);
 		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"service.vm");
-		BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", true);
-		template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
-				new DateTime().toString("yyyy/MM/dd")), writer);
-		writer.flush();
+		try(BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
 	}
 
 	private void generateController(TaskUnit unit) throws Exception {
@@ -130,10 +135,11 @@ public class MySQLGenerateTask extends GenerateTask {
 		Engine engine = new ThymeleafEngine(initTemplateEngine());
 		FileUtil.touch(generateEntityFilePath);
 		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"controller.vm");
-		BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", true);
-		template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
-				new DateTime().toString("yyyy/MM/dd")), writer);
-		writer.flush();
+		try(BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
 	}
 	
 	private TemplateEngine initTemplateEngine() {

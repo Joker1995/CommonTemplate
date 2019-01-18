@@ -31,7 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tisson.demo.common.base.ResponseBean;
-import com.tisson.demo.common.base.code.DataSourceConfig;
+import com.tisson.demo.common.codeGenerate.DataSourceConfig;
+import com.tisson.demo.common.codeGenerate.ProjectTask;
 import com.tisson.demo.common.codeGenerate.GenerateTask;
 import com.tisson.demo.common.codeGenerate.MySQLGenerateTask;
 import com.tisson.demo.common.codeGenerate.MySQLMetaData;
@@ -174,9 +175,9 @@ public class SysCodeController {
 		}
 	}
 
-	@GetMapping("/code/generate")
+	@PostMapping("/generateCode")
 	@RequiresPermissions("/code/generateSimpleCode")
-	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) {
+	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		// TODO
 		GenerateTask task = new MySQLGenerateTask(unit);
 		unit.setTable(unit.getTable().setJavaName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), false)));
@@ -194,26 +195,48 @@ public class SysCodeController {
 			File codeFile = task.generate();
 			String downLoadFileName = unit.getTable().getJdbcName() + ".zip";
 			resp.setHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(downLoadFileName, "utf-8"));
-			ServletOutputStream out = resp.getOutputStream();
-			FileInputStream inputStream = new FileInputStream(codeFile);
-			int bitVal = 0;
-			byte[] buffer = new byte[1024];
-			while (bitVal != -1) {
-				bitVal = inputStream.read(buffer);
-				out.write(buffer, 0, bitVal);
+			try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
+				int bitVal = 0;
+				byte[] buffer = new byte[1024];
+				while (bitVal != -1) {
+					bitVal = inputStream.read(buffer);
+					out.write(buffer, 0, bitVal);
+				}
+				out.flush();
 			}
-			inputStream.close();
-			out.flush();
-			out.close();
+			FileUtil.del(codeFile);
 		} catch (Exception e) {
 			log.error("generateSimpleCode Exception:{}", e);
+			throw new Exception("generateSimpleCode error");
 		} 
 	}
 	
-	@PostMapping("/project/generate")
+	@PostMapping("/generateProject")
 	@RequiresPermissions("/code/generateProject")
 	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) {
 		// TODO
+		ProjectTask task=new ProjectTask(unit);
+		try {
+			String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
+					+ UUID.randomUUID().toString().replace("-", "");
+			FileUtil.mkdir(generatePath);
+			String codeTemplateDirPath=globalProperties.getCodeTemplateDirPath();
+			task.setGenerateDirPath(generatePath);
+			task.setTemplateDirPath(codeTemplateDirPath);
+			File codeFile = task.generate();
+			try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
+				int bitVal = 0;
+				byte[] buffer = new byte[1024];
+				while (bitVal != -1) {
+					bitVal = inputStream.read(buffer);
+					out.write(buffer, 0, bitVal);
+				}
+				out.flush();
+			}
+			FileUtil.del(codeFile);
+		}catch (Exception e) {
+			log.error("generateProject error:",e);
+		}
 	}
 
 	private boolean testConnection(DataSourceConfig config) {

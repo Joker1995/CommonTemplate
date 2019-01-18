@@ -1,7 +1,5 @@
 package com.tisson.demo.common.codeGenerate;
 
-import com.tisson.demo.common.base.code.DataSourceConfig;
-
 /**  
 * @Title: CodeProperties.java  
 * @Package com.tisson.demo.common.codeGenerate  
