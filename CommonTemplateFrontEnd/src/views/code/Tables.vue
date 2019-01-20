@@ -88,8 +88,9 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-
-      doGetDataSourceTableList().then(response => {
+      const data = {}
+      data.name = this.$route.query.dataSource
+      doGetDataSourceTableList(data).then(response => {
         this.list = response.data
         let i = 0
         for (const item of this.list) {
@@ -118,7 +119,8 @@ export default {
     generateCode() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          doGetGenerateCode(this.temp).then(() => {
+          const fileName = '生成代码.zip'
+          doGetGenerateCode(this.temp, fileName).then(() => {
             this.dialogFormVisible = false
           })
         }

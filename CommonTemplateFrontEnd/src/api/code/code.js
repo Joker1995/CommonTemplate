@@ -7,25 +7,18 @@ export function doGetDataSourceList() {
   })
 }
 
-export function doGetDataSourceTableList() {
+export function doGetDataSourceTableList(data) {
   return request({
     url: '/code/dataSource/tables',
-    method: 'get'
+    method: 'post',
+    data: data
   })
 }
 
-export function doGetGenerateCode(params) {
-  return request({
-    url: '/code/generate',
-    method: 'get',
-    data: params
-  })
+export function doGetGenerateCode(data, fileName) {
+  return request.download('/code/generateCode', data, fileName)
 }
 
-export function doGetGenerateProject(params) {
-  return request({
-    url: '/code/generateProject',
-    method: 'get',
-    data: params
-  })
+export function doGetGenerateProject(data, fileName) {
+  return request.download('/code/generateProject', data, fileName)
 }

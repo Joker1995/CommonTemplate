@@ -38,8 +38,10 @@ export default {
     generateProject() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          doGetGenerateProject(this.temp).then(() => {
+          doGetGenerateProject(this.temp, '项目代码.zip').then(() => {
             this.resetTemp()
+          }, (error) => {
+            console.log(error)
           })
         }
       })

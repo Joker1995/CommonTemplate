@@ -63,7 +63,7 @@ const user = {
         doGetUserInfo(state.token).then(response => {
           const data = response.data
           commit('SET_NAME', data.name)
-          commit('SET_AVATAR', data.avatar)
+          commit('SET_AVATAR', 'http://tx.haiqq.com/uploads/allimg/170507/104F41W9-1.jpg')
           resolve(response)
         }).catch(error => {
           reject(error)

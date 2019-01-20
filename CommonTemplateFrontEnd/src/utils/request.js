@@ -48,6 +48,7 @@ service.download = (url, data, fileName) => {
   }, error => {
     // 下载错误时候处理
     console.log('error:' + error)
+    Promise.reject(error)
   }).catch((error) => {
     console.log('error:' + error)
   })
@@ -108,9 +109,8 @@ service.interceptors.response.use(
   }, error => {
     console.log('err:' + error) // for debug
     console.log(error.response)
-    const response = error.response
     Message({
-      message: response.data.msg,
+      message: '请求错误',
       type: 'error',
       duration: 5 * 1000
     })
