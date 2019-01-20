@@ -1,7 +1,13 @@
 # CommonTemplate
 
 该项目是一个简单的通用平台代码,提供简单的登录、注册、用户管理、权限管理以及前端访问等.
+![首页](https://upload-images.jianshu.io/upload_images/2792101-708c7bd4730a28b5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
+![代码生成](https://upload-images.jianshu.io/upload_images/2792101-34c8f708df1ceea9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+![用户列表](https://upload-images.jianshu.io/upload_images/2792101-aa068c4e6fdfe2ec.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+![页面权限](https://upload-images.jianshu.io/upload_images/2792101-fb4b009a342e166a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 该项目基于 Java8 开发, 缓存采用使用 redis 作为缓存,权限检验采用 jwt + shiro 实现, hikari 作为数据库连接池, logback 作为日志系统, 如若需要使用其他组件, 请自行定义 exclusion.
 
 此处是简单的项目介绍.
