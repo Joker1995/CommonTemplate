@@ -213,30 +213,25 @@ public class SysCodeController {
 	
 	@PostMapping("/generateProject")
 	@RequiresPermissions("/code/generateProject")
-	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) {
-		// TODO
+	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		ProjectTask task=new ProjectTask(unit);
-		try {
-			String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
-					+ UUID.randomUUID().toString().replace("-", "");
-			FileUtil.mkdir(generatePath);
-			String codeTemplateDirPath=globalProperties.getCodeTemplateDirPath();
-			task.setGenerateDirPath(generatePath);
-			task.setTemplateDirPath(codeTemplateDirPath);
-			File codeFile = task.generate();
-			try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
-				int bitVal = 0;
-				byte[] buffer = new byte[1024];
-				while (bitVal != -1) {
-					bitVal = inputStream.read(buffer);
-					out.write(buffer, 0, bitVal);
-				}
-				out.flush();
+		String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
+				+ UUID.randomUUID().toString().replace("-", "");
+		FileUtil.mkdir(generatePath);
+		String codeTemplateDirPath=globalProperties.getCodeTemplateDirPath();
+		task.setGenerateDirPath(generatePath);
+		task.setTemplateDirPath(codeTemplateDirPath);
+		File codeFile = task.generate();
+		try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
+			int bitVal = 0;
+			byte[] buffer = new byte[1024];
+			while (bitVal != -1) {
+				bitVal = inputStream.read(buffer);
+				out.write(buffer, 0, bitVal);
 			}
-			FileUtil.del(codeFile);
-		}catch (Exception e) {
-			log.error("generateProject error:",e);
+			out.flush();
 		}
+		FileUtil.del(codeFile);
 	}
 
 	private boolean testConnection(DataSourceConfig config) {

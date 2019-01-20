@@ -44,10 +44,11 @@ public class ProjectTask extends GenerateTask{
 	}
 
 	private void generateApplication(String srcCodeDir) throws Exception {
-		String packageName=this.unit.getPackageName();
+		String packageName=this.unit.getProjectPackageName();
 		Integer index=packageName.lastIndexOf(".")+1;
 		String appName=NameConverter.convertNormal2CamelCaseName(packageName.substring(index), false);
-		String applicationFilePath = srcCodeDir + File.separator+packageName.replace(".", File.separator)+ appName+"Application.java";
+		String applicationFilePath = srcCodeDir + File.separator+packageName.replace(".", File.separator)
+		+File.separator+ appName+"Application.java";
 		String applicationTemplateFilePath=this.getTemplateDirPath()+File.separator
 				+"codeFile"+File.separator+"Application.vm";
 		Engine engine = new ThymeleafEngine(initTemplateEngine());
@@ -59,7 +60,7 @@ public class ProjectTask extends GenerateTask{
 	}
 	
 	private void generateProjectOthFile(String resourceDirPath) throws Exception {
-		String packageName=this.unit.getPackageName();
+		String packageName=this.unit.getProjectPackageName();
 		Integer index=packageName.lastIndexOf(".")+1;
 		String appName=NameConverter.convertNormal2CamelCaseName(packageName.substring(index), false);
 		String pomTemplateFilePath=this.getTemplateDirPath()+File.separator+"resourceFile"+File.separator+"pom.vm";
@@ -112,7 +113,7 @@ public class ProjectTask extends GenerateTask{
 	}
 	
 	private void generateResource(String resourceDirPath) throws Exception {
-		String packageName=this.unit.getPackageName();
+		String packageName=this.unit.getProjectPackageName();
 		Integer index=packageName.lastIndexOf(".")+1;
 		String appName=NameConverter.convertNormal2CamelCaseName(packageName.substring(index), true);
 		// 生成application.yml文件
@@ -187,10 +188,10 @@ public class ProjectTask extends GenerateTask{
 		generateResource(srcResourceDir);
 		generateProjectCode(srcCodeDir);
 		generateProjectOthFile(srcResourceDir);
-//		FileUtil.touch(this.getGenerateDirPath()+".zip");
-//		File codeZip=ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
-//		FileUtil.del(this.getGenerateDirPath());
-		return null;
+		FileUtil.touch(this.getGenerateDirPath()+".zip");
+		File codeZip=ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
+		FileUtil.del(this.getGenerateDirPath());
+		return codeZip;
 	}
 	
 	private TemplateEngine initTemplateEngine() {
