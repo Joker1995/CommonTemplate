@@ -1,5 +1,6 @@
 package com.tisson.demo.service.sys;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,14 +14,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.BaseService;
+import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.base.ListQuery;
+import com.tisson.demo.common.base.cahce.RedisCache;
+import com.tisson.demo.common.base.cahce.RedisCallBack;
+import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
+
+import cn.hutool.core.date.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Title: SysUsersService.java
@@ -32,9 +42,12 @@ import com.tisson.demo.entity.sys.SysUsers;
  */
 @Service
 @Transactional(rollbackFor=Exception.class)
+@Slf4j
 public class SysUsersService extends BaseService<SysUsers> {
 	@Autowired
     private SysUsersMapper sysUsersMapper;
+	@Autowired
+	private RedisCache cache;
 	
 	public SysUsers loadByName(String name) {
 		return sysUsersMapper.loadByName(name);
@@ -139,16 +152,54 @@ public class SysUsersService extends BaseService<SysUsers> {
 	}
 
 
-	public void loginTokenList(ListQuery<SysUsers> query) {
-		
+	public List<Map<String,String>> loadTokenList(SysUsers user) {
+		List<Map<String,String>> result=new ArrayList<Map<String,String>>();
+		List<String> tokenList=cache.getAllHashKey("ssoToken:"+user.getName());
+		for(String token:tokenList) {
+			Map<String,String> item=new HashMap<String,String>();
+			item.put("expireTime", DateUtil.format(JWTUtil.getExpiresAt(token), "yyyy-MM-dd HH:mm:ss"));
+			item.put("authCode", token);
+			result.add(item);
+		}
+		return result;
 	}
 	public void kickOut(List<String> ssoTokens) {
-		/**  
-		* @Title: kickOut  
-		* @Description: TODO(这里用一句话描述这个方法的作用)  
-		* @return    返回类型  
-		* @throws  
-		*/
+		Type type=new TypeToken<Map<String,String>>(){}.getType();
+		for(String token : ssoTokens) {
+			String userName=JWTUtil.getUserName(token);
+			Map<String,String> resultMap = cache.getHash("ssoToken:"+userName, token, type, new RedisCallBack<Map<String,String>>() {
+				@Override
+				public <T> T callbackForSingleObject(byte[] data, Type type) {
+					return JsonSerializer.deserialize(data, type);
+				}
+				@Override
+				public <T> List<T> callbackForList(byte[] data, Type type) {
+					return null;
+				}
+			});
+			resultMap.put("kickOut", "true");
+			cache.setHash("ssoToken:"+userName, token, resultMap);
+		}
+	}
+
+
+	public void rollBack(List<String> ssoTokens) {
+		Type type=new TypeToken<Map<String,String>>(){}.getType();
+		for(String token : ssoTokens) {
+			String userName=JWTUtil.getUserName(token);
+			Map<String,String> resultMap = cache.getHash("ssoToken:"+userName, token, type, new RedisCallBack<Map<String,String>>() {
+				@Override
+				public <T> T callbackForSingleObject(byte[] data, Type type) {
+					return JsonSerializer.deserialize(data, type);
+				}
+				@Override
+				public <T> List<T> callbackForList(byte[] data, Type type) {
+					return null;
+				}
+			});
+			resultMap.put("kickOut", "false");
+			cache.setHash("ssoToken:"+userName, token, resultMap);
+		}
 	}
 	
 	private void initUserRelations(List<SysUsers> userList) {
@@ -194,17 +245,5 @@ public class SysUsersService extends BaseService<SysUsers> {
 	public void saveUserOrganizationRelation(SysUsers sysUsers) {
 		sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
 		sysUsersMapper.insertUserOrganizationRelation(sysUsers);
-	}
-	
-	public void test() {
-		SysUsers sysUsers=new SysUsers();
-		sysUsers.setName("test123");
-		sysUsers.setStatus("S0A");
-		sysUsersMapper.insert(sysUsers);
-		int i=1/0;
-		SysUsers sysUsers1=new SysUsers();
-		sysUsers1.setName("test321");
-		sysUsers1.setStatus("S0A");
-		sysUsersMapper.insert(sysUsers1);
 	}
 }

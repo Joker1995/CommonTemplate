@@ -2,9 +2,14 @@ package com.tisson.demo.common.base.shiro;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -24,8 +29,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.IRedisService;
+import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.base.ResponseBean;
+import com.tisson.demo.common.base.cahce.RedisCache;
+import com.tisson.demo.common.base.cahce.RedisCallBack;
 import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysUsers;
@@ -48,8 +57,10 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 	private final static Logger LOGGER = LoggerFactory.getLogger(JWTFilter.class);
 	@Autowired
 	private SysUsersMapper sysUsersMapper;
+//	@Autowired
+//	private IRedisService<Boolean> userName2TokenService;
 	@Autowired
-	private IRedisService<Boolean> userName2TokenService;
+	private RedisCache cache;
 
 	/**
 	 * 判断用户是否想要登入。 检测header里面是否包含Authorization字段即可
@@ -83,21 +94,53 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 				throw new AuthenticationException("token expired");
 			}
 			String key = "ssoToken:" + userName;
+			// 判断是否踢出
+			Type type=new TypeToken<Map<String,String>>(){}.getType();
+			Map<String,String> resultMap = cache.getHash("ssoToken:"+userName, authorization, type, new RedisCallBack<Map<String,String>>() {
+				@Override
+				public <T> T callbackForSingleObject(byte[] data, Type type) {
+					return JsonSerializer.deserialize(data, type);
+				}
+				@Override
+				public <T> List<T> callbackForList(byte[] data, Type type) {
+					return null;
+				}
+			});
+			if(resultMap!=null) {
+	        	String kickOutResult=resultMap.get("kickOut");
+	    	    if(kickOutResult!=null && kickOutResult.toLowerCase().equals("true")) {
+	    	    	throw new AuthenticationException("token was kicked out");
+	    	    }
+	        }
+			
 			Integer maxOnlineCount = loginUser.getMaxOnlineCount();
-			Integer cacheMaxCount = userName2TokenService.count(key).intValue();
+			// hash结构expire会使全部hashkey都执行
+			List<String> hashKeyList=new ArrayList<String>(cache.getAllHashKey(key));
+	        Integer cacheMaxCount=hashKeyList.size();
+	        Date now = new Date();
+	        for(String hashKey:hashKeyList) {
+	        	Date expireTime = JWTUtil.getExpiresAt(hashKey);
+	        	if(expireTime.getTime()<=now.getTime()) {
+	        		cache.delHash(key, hashKey);
+	        		cacheMaxCount--;
+	        	}
+	        }
 	        if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
-	        		&& !userName2TokenService.isKeyExists(key, authorization)) {
+	        		&& !cache.hashKeyExists(key, authorization)) {
 				throw new AuthenticationException(userName + " has too many token online");
 			}
 			boolean shouldRefresh = shouldTokenRefresh(JWTUtil.getIssuedAt(authorization));
 			if (shouldRefresh) {
 				SysUsers sysUsers = sysUsersMapper.loadByName(userName);
 				newToken = JWTUtil.sign(userName, sysUsers.getPassword());
-				if (!userName2TokenService.isKeyExists("ssoToken:" + JWTUtil.getUserName(newToken), newToken)) {
-					userName2TokenService.put("ssoToken:" + JWTUtil.getUserName(newToken), newToken, false,
-							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
+				if (!cache.hashKeyExists("ssoToken:" + userName, newToken)) {
+					Map<String,String> dataMap=new HashMap<String,String>();
+					dataMap.put("kickOut", "false");
+					cache.setHash("ssoToken:" + userName, newToken,dataMap);
+					cache.expire("ssoToken:" + userName, 
+							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).intValue());
 				}
-				userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(newToken),authorization);
+				cache.delHash("ssoToken:" + userName,authorization);
 			}
 		}
 		if (!StringUtils.isEmpty(newToken)) {

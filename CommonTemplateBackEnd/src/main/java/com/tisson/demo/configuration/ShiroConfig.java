@@ -17,6 +17,7 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.tisson.demo.common.base.cahce.RedisCache;
 import com.tisson.demo.common.base.shiro.AuthRealm;
 import com.tisson.demo.common.base.shiro.JWTFilter;
 
@@ -79,9 +80,9 @@ public class ShiroConfig {
      * @return
      */
     @Bean
-	public RedisCacheManager redisCacheManager() {
+	public RedisCacheManager redisCacheManager(RedisCache cache) {
 		RedisCacheManager redisCacheManager = new RedisCacheManager();
-        redisCacheManager.setRedisManager(redisManager());
+        redisCacheManager.setRedisManager(cache);
         return redisCacheManager;
 	}
 	
@@ -91,14 +92,14 @@ public class ShiroConfig {
      *
      * @return
      */
-	private RedisManager redisManager() {
-		RedisManager redisManager = new RedisManager();
-        redisManager.setHost("127.0.0.1");
-        redisManager.setPort(6379);
-        redisManager.setExpire(1800);// 配置缓存过期时间
-        redisManager.setTimeout(0);
-        return redisManager;
-	}
+//	private RedisManager redisManager() {
+//		RedisManager redisManager = new RedisManager();
+//        redisManager.setHost("127.0.0.1");
+//        redisManager.setPort(6379);
+//        redisManager.setExpire(1800);// 配置缓存过期时间
+//        redisManager.setTimeout(0);
+//        return redisManager;
+//	}
     /***
      * 授权所用配置
      *

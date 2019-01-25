@@ -48,12 +48,13 @@
           <span>{{ scope.row.role }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.actions" align="center" width="420" class-name="small-padding fixed-width">
+      <el-table-column :label="table.actions" align="center" width="520" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ table.edit }}</el-button>
           <el-button type="primary" size="mini" @click="handleRoleUpdate(scope.row)">{{ table.role }}</el-button>
           <el-button type="primary" size="mini" @click="handleResourceUpdate(scope.row)">{{ table.resource }}</el-button>
           <el-button type="primary" size="mini" @click="handleAccessPageUpdate(scope.row)">{{ table.accessPage }}</el-button>
+          <el-button type="primary" size="mini" @click="handleToken(scope.row)">{{ table.token }}</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ table.delete }}</el-button>
         </template>
       </el-table-column>
@@ -114,13 +115,37 @@
         <el-button type="primary" @click="updateAccessPage()">{{ table.confirm }}</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :title="tokenDialogTitle" :visible.sync="tokenFormVisible">
+      <el-table :data="tokenDataList" border fit highlight-current-row style="width: 100%;">
+        <el-table-column :label="table.authCode" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.token }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="table.expireTime" align="center">
+          <template slot-scope="scope">
+            <span>{{ scope.row.expireTime }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column :label="table.actions" align="center" width="280" class-name="small-padding fixed-width">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" @click="handleKickOut(scope.row)">{{ table.kickOut }}</el-button>
+            <el-button type="primary" size="mini" @click="handleRollback(scope.row)">{{ table.rollBack }}</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="tokenFormVisible = false">{{ table.cancel }}</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { doGetUserList, doGetUserResourcesList, doGetUserRolesList, doGetUserAccessPagesList,
   doUpdateUserRoleList, doCreateUser, doUpdateUserResourceList, doDownloadUserList,
-  doUpdateUserAccessPageList, doUpdateUser } from '@/api/user/user'
+  doUpdateUserAccessPageList, doUpdateUser, doGetUserTokenList, doKickOutUserToken, doRollBackUserToken } from '@/api/user/user'
 import { doGetOrganizationList } from '@/api/user/organization'
 import { doGetRoleList } from '@/api/user/role'
 import { doGetResourceList } from '@/api/user/resource'
@@ -156,6 +181,7 @@ export default {
       roleOptions: [],
       roleLabelList: [],
       roleIdList: [],
+      tokenDataList: [],
       statusOptions: [{ value: 'S0A', label: '正常' }, { value: 'SXA', label: '禁用' }],
       temp: {
         id: undefined,
@@ -180,9 +206,11 @@ export default {
       resourceDialogTitle: '接口权限修改',
       accessPageDialogTitle: '前端界面权限修改',
       roleDialogTitle: '角色修改',
+      tokenDialogTitle: 'Token会话列表',
       resourceFormVisible: false,
       accessPageFormVisible: false,
       roleFormVisible: false,
+      tokenFormVisible: false,
       defaultProps: {
         children: 'children',
         label: 'label'
@@ -205,7 +233,12 @@ export default {
         delete: '删除',
         role: '角色',
         resource: '接口权限',
-        accessPage: '界面权限'
+        accessPage: '界面权限',
+        token: 'token列表',
+        kickOut: '踢出会话',
+        rollBack: '恢复会话',
+        authCode: '授权码',
+        expireTime: '过期时间'
       }
     }
   },
@@ -443,6 +476,72 @@ export default {
           }
         }
       }
+    },
+    handleToken(row) {
+      this.tokenDataList = []
+      doGetUserTokenList(row).then(response => {
+        const data = response.data
+        if (data.length > 0) {
+          for (const token of data) {
+            const jwtToken = {}
+            jwtToken.token = token.authCode
+            jwtToken.expireTime = token.expireTime
+            this.tokenDataList.push(jwtToken)
+            this.tokenFormVisible = true
+          }
+        } else {
+          this.$notify({
+            title: '成功',
+            message: '暂无数据',
+            type: 'success',
+            duration: 2000
+          })
+        }
+      })
+    },
+    handleKickOut(row) {
+      const data = []
+      data.push(row.token)
+      doKickOutUserToken(data).then(response => {
+        const code = response.code
+        if (code === 200) {
+          this.$notify({
+            title: '成功',
+            message: '踢出会话成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '踢出会话失败',
+            type: 'error',
+            duration: 2000
+          })
+        }
+      })
+    },
+    handleRollback(row) {
+      const data = []
+      data.push(row.token)
+      doRollBackUserToken(data).then(response => {
+        const code = response.code
+        if (code === 200) {
+          this.$notify({
+            title: '成功',
+            message: '恢复会话成功',
+            type: 'success',
+            duration: 2000
+          })
+        } else {
+          this.$notify({
+            title: '失败',
+            message: '恢复会话失败',
+            type: 'error',
+            duration: 2000
+          })
+        }
+      })
     }
   }
 }

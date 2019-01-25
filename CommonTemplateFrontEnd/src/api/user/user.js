@@ -145,6 +145,30 @@ export function doUpdateUserAccessPageList(userId, accessPageIdList) {
   })
 }
 
+export function doGetUserTokenList(query) {
+  return request({
+    url: '/user/ssoToken',
+    method: 'post',
+    data: query
+  })
+}
+
+export function doKickOutUserToken(query) {
+  return request({
+    url: '/user/ssoToken/kickOut',
+    method: 'post',
+    data: query
+  })
+}
+
+export function doRollBackUserToken(query) {
+  return request({
+    url: '/user/ssoToken/rollBack',
+    method: 'post',
+    data: query
+  })
+}
+
 export function doDownloadUserList(data, fileName) {
   return request.download('/user/downloadUserList', data, fileName)
 }

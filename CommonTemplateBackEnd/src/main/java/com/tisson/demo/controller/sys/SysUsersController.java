@@ -37,6 +37,7 @@ import com.tisson.demo.common.base.GlobalConstant;
 import com.tisson.demo.common.base.IRedisService;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
+import com.tisson.demo.common.base.cahce.RedisCache;
 import com.tisson.demo.common.base.expt.UnauthorizedException;
 import com.tisson.demo.common.base.shiro.JWTToken;
 import com.tisson.demo.common.util.JWTUtil;
@@ -71,8 +72,10 @@ public class SysUsersController {
 	private SysUsersService sysUsersService;
 	@Autowired
 	private GlobalProperties globalProperties;
+//	@Autowired
+//	private IRedisService<Boolean> userName2TokenService;
 	@Autowired
-	private IRedisService<Boolean> userName2TokenService;
+	private RedisCache cache;
 	
 	@PostMapping(value = "/usersList")
 	@RequiresPermissions("/user/usersList")
@@ -269,7 +272,8 @@ public class SysUsersController {
 	public ResponseBean<String> logout(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token)throws UnauthorizedException {
 		Subject subject = SecurityUtils.getSubject();
         subject.logout();
-        userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(token), token);
+//        userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(token), token);
+        cache.delHash("ssoToken:" + JWTUtil.getUserName(token), token);
         return new ResponseBean<String>("logout Success",null);
 	}
 	
@@ -384,17 +388,24 @@ public class SysUsersController {
 	}
 	
 	
-	@GetMapping(value = "/ssoToken")
+	@PostMapping(value = "/ssoToken")
 	@RequiresPermissions("/user/ssoToken")
-	public ResponseBean<List> loginTokenList(@RequestBody ListQuery<SysUsers> query){
-		//TODO
-		sysUsersService.loginTokenList(query);
-		return null;
+	public ResponseBean<List> loadTokenList(@RequestBody SysUsers query){
+		return new ResponseBean<List>("loadTokenList success",sysUsersService.loadTokenList(query));
 	}
 	
+	@PostMapping(value = "/ssoToken/kickOut")
+	@RequiresAuthentication
 	public ResponseBean<String> kickOut(@RequestBody List<String> ssoTokens){
 		sysUsersService.kickOut(ssoTokens);
-		return null;
+		return new ResponseBean<String>("kickOut success","kickOut success");
+	}
+	
+	@PostMapping(value = "/ssoToken/rollBack")
+	@RequiresAuthentication
+	public ResponseBean<String> rollBack(@RequestBody List<String> ssoTokens){
+		sysUsersService.rollBack(ssoTokens);
+		return new ResponseBean<String>("rollBack success","rollBack success");
 	}
 	 
 	private Set<SysPages> filterAccessPageList(List<SysPages> list){

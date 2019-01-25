@@ -1,9 +1,14 @@
 package com.tisson.demo.common.base.shiro;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -16,7 +21,11 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.IRedisService;
+import com.tisson.demo.common.base.JsonSerializer;
+import com.tisson.demo.common.base.cahce.RedisCache;
+import com.tisson.demo.common.base.cahce.RedisCallBack;
 import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysOrganizations;
@@ -41,22 +50,25 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthRealm extends AuthorizingRealm{
 	@Autowired
     private SysUsersMapper sysUsersMapper;
+//	@Autowired
+//	private IRedisService<Boolean> userName2TokenService;
 	@Autowired
-	private IRedisService<Boolean> userName2TokenService;
+	private RedisCache cache;
 	
 	@Override
     public boolean supports(AuthenticationToken token) {
 		return token instanceof JWTToken;
     }
 	
+
+	/**  
+	* @Title: doGetAuthorizationInfo  
+	* @Description: 获取授权信息
+	* @return    返回类型  
+	* @throws  
+	*/  
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-		/**  
-		* @Title: doGetAuthorizationInfo  
-		* @Description: TODO(这里用一句话描述这个方法的作用)  
-		* @return    返回类型  
-		* @throws  
-		*/  
 		// 获取用户名
 		Object principal =  principals.getPrimaryPrincipal();
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
@@ -75,15 +87,16 @@ public class AuthRealm extends AuthorizingRealm{
 		}
         return simpleAuthorizationInfo;
 	}
-
+	
+	/**  
+	* @Title: doGetAuthenticationInfo  
+	* @Description: 获取认证信息
+	* @return    返回类型  
+	* @throws  
+	*/
+	
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-		/**  
-		* @Title: doGetAuthenticationInfo  
-		* @Description: TODO(这里用一句话描述这个方法的作用)  
-		* @return    返回类型  
-		* @throws  
-		*/
 		String token = (String) auth.getCredentials();
         // 解密获得userName，用于和数据库对比
         String userName = JWTUtil.getUserName(token);
@@ -97,17 +110,49 @@ public class AuthRealm extends AuthorizingRealm{
         if ( !JWTUtil.verify(token,userName,sysUsers.getPassword())){
             throw new AuthenticationException("userName or passsword error");
         }
+        // hash结构expire会使全部hashkey都执行
         String key = "ssoToken:" + userName;
-        Integer maxOnlineCount = sysUsers.getMaxOnlineCount();
-        Integer cacheMaxCount = userName2TokenService.count(key).intValue();
+        // 判断是否踢出
+        Type type=new TypeToken<Map<String,String>>(){}.getType();
+        Map<String,String> resultMap = cache.getHash("ssoToken:"+userName, token, type, new RedisCallBack<Map<String,String>>() {
+	     	@Override
+	     	public <T> T callbackForSingleObject(byte[] data, Type type) {
+	     		return JsonSerializer.deserialize(data, type);
+	     	}
+	     	@Override
+	     	public <T> List<T> callbackForList(byte[] data, Type type) {
+	     		return null;
+	     	}
+	    });
+        if(resultMap!=null) {
+        	String kickOutResult=resultMap.get("kickOut");
+    	    if(kickOutResult!=null && kickOutResult.toLowerCase().equals("true")) {
+    	    	throw new AuthenticationException("token was kicked out");
+    	    }
+        }
+	    
+	    Integer maxOnlineCount = sysUsers.getMaxOnlineCount();
+	    List<String> hashKeyList=new ArrayList<String>(cache.getAllHashKey(key));
+	    Integer cacheMaxCount=hashKeyList.size();
+	    Date now = new Date();
+	    for(String hashKey:hashKeyList) {
+	    	Date expireTime = JWTUtil.getExpiresAt(hashKey);
+	    	if(expireTime.getTime()<=now.getTime()) {
+	    		cache.delHash(key, hashKey);
+	    		cacheMaxCount--;
+	    	}
+        }
         if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
-        		&& !userName2TokenService.isKeyExists(key, token)) {
+        		&& !cache.hashKeyExists(key, token)) {
 			throw new AuthenticationException(userName + " has too many token online");
 		}
         if (maxOnlineCount > 1 && cacheMaxCount <= maxOnlineCount) {
-			if (!userName2TokenService.isKeyExists("ssoToken:" + userName, token)) {
-				userName2TokenService.put("ssoToken:" + userName, token, false,
-						Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).longValue());
+			if (!cache.hashKeyExists("ssoToken:" + userName, token)) {
+				Map<String,String> dataMap=new HashMap<String,String>();
+				dataMap.put("kickOut", "false");
+				cache.setHash("ssoToken:" + userName, token, dataMap);
+				cache.expire("ssoToken:" + userName, 
+						Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).intValue());
 			}
 		}
         // 根据user的id查询出所有角色
