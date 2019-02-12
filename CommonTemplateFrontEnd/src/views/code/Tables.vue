@@ -8,40 +8,40 @@
       fit
       highlight-current-row
       style="width: 100%;">
-      <el-table-column :label="table.number" align="center" width="65">
+      <el-table-column :label="$t('table.number')" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.number }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.jdbcName" min-width="150px">
+      <el-table-column :label="$t('table.jdbcName')" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.jdbcName }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.comment" min-width="150px">
+      <el-table-column :label="$t('table.comment')" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.comment }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.actions" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleGenerateCode(scope.row)">{{ table.generateCode }}</el-button>
+          <el-button type="primary" size="mini" @click="handleGenerateCode(scope.row)">{{ $t('table.generateCode') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="table.packageName" prop="packageName">
+        <el-form-item :label="$t('table.packageName')" prop="packageName">
           <el-input v-model="temp.packageName"/>
         </el-form-item>
-        <el-form-item :label="table.projectPackageName" prop="projectPackageName">
+        <el-form-item :label="$t('table.projectPackageName')" prop="projectPackageName">
           <el-input v-model="temp.projectPackageName"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ table.cancel }}</el-button>
-        <el-button type="primary" @click="generateCode()">{{ table.confirm }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="generateCode()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
   </div>

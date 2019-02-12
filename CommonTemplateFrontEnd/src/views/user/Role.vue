@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input :placeholder="table.name" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
+      <el-input :placeholder="$t('table.name')" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
 
-      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ table.search }}</el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ table.add }}</el-button>
+      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">{{ $t('table.add') }}</el-button>
     </div>
 
     <el-table
@@ -16,27 +16,27 @@
       highlight-current-row
       style="width: 100%;"
       @sort-change="sortChange">
-      <el-table-column :label="table.number" align="center" width="65">
+      <el-table-column :label="$t('table.number')" align="center" width="65">
         <template slot-scope="scope">
           <span>{{ scope.row.number }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.name" prop="name" sortable="custom" min-width="150px">
+      <el-table-column :label="$t('table.name')" prop="name" sortable="custom" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.label" prop="label" sortable="custom" min-width="150px">
+      <el-table-column :label="$t('table.label')" prop="label" sortable="custom" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.label }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="table.actions" align="center" width="350" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="350" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ table.edit }}</el-button>
-          <el-button type="primary" size="mini" @click="handleAccessPageUpdate(scope.row)">{{ table.accessPage }}</el-button>
-          <el-button type="primary" size="mini" @click="handleResourceUpdate(scope.row)">{{ table.resource }}</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ table.delete }}</el-button>
+          <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
+          <el-button type="primary" size="mini" @click="handleAccessPageUpdate(scope.row)">{{ $t('table.accessPage') }}</el-button>
+          <el-button type="primary" size="mini" @click="handleResourceUpdate(scope.row)">{{ $t('table.resource') }}</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ $t('table.delete') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,35 +45,35 @@
 
     <el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="table.name" prop="name">
+        <el-form-item :label="$t('table.name')" prop="name">
           <el-input v-model="temp.name"/>
         </el-form-item>
-        <el-form-item :label="table.label" prop="label">
+        <el-form-item :label="$t('table.label')" prop="label">
           <el-input v-model="temp.label"/>
         </el-form-item>
-        <el-form-item :label="table.remark">
+        <el-form-item :label="$t('table.remark')">
           <el-input :autosize="{ minRows: 2, maxRows: 4}" v-model="temp.memo" type="textarea" placeholder="请输入"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ table.cancel }}</el-button>
-        <el-button type="primary" @click="dialogStatus==='新增'?createData():updateData()">{{ table.confirm }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="dialogStatus==='新增'?createData():updateData()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :title="resourceDialogTitle" :visible.sync="resourceFormVisible">
       <el-tree ref="resourceTree" :data="resourceOptions" :props="defaultProps" :default-checked-keys="temp.resourceIds" show-checkbox node-key="id"/>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="resourceFormVisible = false">{{ table.cancel }}</el-button>
-        <el-button type="primary" @click="updateResource()">{{ table.confirm }}</el-button>
+        <el-button @click="resourceFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="updateResource()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :title="accessPageDialogTitle" :visible.sync="accessPageFormVisible">
       <el-tree ref="accessPageTree" :data="accessPageOptions" :props="defaultProps" :default-checked-keys="temp.accessPageIds" show-checkbox node-key="id"/>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="accessPageFormVisible = false">{{ table.cancel }}</el-button>
-        <el-button type="primary" @click="updateAccessPage()">{{ table.confirm }}</el-button>
+        <el-button @click="accessPageFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="updateAccessPage()">{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
   </div>
@@ -125,23 +125,6 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'label'
-      },
-      table: {
-        name: '名称',
-        label: '昵称',
-        status: '状态',
-        search: '搜索',
-        add: '添加',
-        export: '导出',
-        number: '序号',
-        cancel: '取消',
-        remark: '备注',
-        confirm: '确认',
-        actions: '操作',
-        edit: '修改',
-        delete: '删除',
-        accessPage: '页面权限',
-        resource: '接口权限'
       }
     }
   },

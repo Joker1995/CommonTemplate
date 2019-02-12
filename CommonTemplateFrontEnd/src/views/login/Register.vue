@@ -77,7 +77,7 @@ export default {
       loading: false,
       pwdType: 'password',
       redirect: undefined,
-      projectName: 'vue-template'
+      projectName: '爬虫后台'
     }
   },
   watch: {
