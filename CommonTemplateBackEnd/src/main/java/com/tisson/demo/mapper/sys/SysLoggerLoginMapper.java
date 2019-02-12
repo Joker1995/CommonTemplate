@@ -1,4 +1,4 @@
-package com.tisson.demo.dao.sys;
+package com.tisson.demo.mapper.sys;
 
 import com.tisson.demo.common.base.Mapper;
 import com.tisson.demo.entity.sys.SysLoggerLogin;

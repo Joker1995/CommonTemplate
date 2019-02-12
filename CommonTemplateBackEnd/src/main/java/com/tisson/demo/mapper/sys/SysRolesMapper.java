@@ -1,4 +1,4 @@
-package com.tisson.demo.dao.sys;
+package com.tisson.demo.mapper.sys;
 
 import java.util.List;
 
