@@ -73,6 +73,7 @@ import Pagination from '@/components/Pagination'
 import { doGetResourceChildNodes, doGetResourceList, doCreateResource, doUpdateResource,
   doDeleteResource } from '@/api/user/resource'
 import { generateTreeData } from '@/utils'
+import deepcopy from 'deepcopy'
 
 export default {
   components: { Pagination, Tree, Container },
@@ -85,8 +86,8 @@ export default {
       total: 0,
       listLoading: true,
       listQuery: {
-        page: 1,
-        limit: 20,
+        page: -1,
+        limit: -1,
         name: undefined,
         url: undefined,
         parentId: undefined
@@ -111,8 +112,10 @@ export default {
     getList() {
       doGetResourceList(this.listQuery).then(response => {
         const data = response.data.list
-        this.resourceOptions = generateTreeData(null, data)
-        const firstNodeId = this.resourceOptions.length > 0 ? this.resourceOptions[0].id : null
+        const root = [{ id: 'root', label: '根节点', children: undefined }]
+        root[0].children = generateTreeData(null, data)
+        this.resourceOptions = root
+        const firstNodeId = root[0].children.length > 0 ? root[0].children[0].id : null
         if (this.currentNodeKey === '') {
           this.currentNodeKey = firstNodeId
           this.initNodeChildList(firstNodeId)
@@ -140,7 +143,11 @@ export default {
     },
     append(data, event) {
       this.resetTemp()
-      this.temp.parentId = data.id
+      if (data.id === 'root') {
+        this.temp.parentId = null
+      } else {
+        this.temp.parentId = data.id
+      }
       this.dialogStatus = '新增'
       this.dialogFormVisible = true
       this.$nextTick(() => { this.$refs['dataForm'].clearValidate() })
@@ -148,8 +155,11 @@ export default {
     },
     remove(node, data, event) {
       this.resetTemp()
-      this.temp.id = data.id
-      this.temp.parentId = data.id
+      if (data.id === 'root') {
+        this.temp.id = null
+      } else {
+        this.temp.id = data.id
+      }
       this.$confirm('此操作将永久删除该节点及其下属节点, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -161,15 +171,26 @@ export default {
     },
     renderContent(h, { node, data, store }) {
       /* 生成树状结构 */
-      return (
-        <span class='custom-tree-node'>
-          <span>{node.label}</span>
-          <span>
-            <el-button size='mini' type='text' on-click={ (event) => this.append(data, event) }>新增</el-button>
-            <el-button size='mini' type='text' on-click={ (event) => this.remove(node, data, event) }>删除</el-button>
+      if (data.id === 'root') {
+        return (
+          <span class='custom-tree-node'>
+            <span>{node.label}</span>
+            <span>
+              <el-button size='mini' type='text' on-click={ (event) => this.append(data, event) }>新增</el-button>
+            </span>
           </span>
-        </span>
-      )
+        )
+      } else {
+        return (
+          <span class='custom-tree-node'>
+            <span>{node.label}</span>
+            <span>
+              <el-button size='mini' type='text' on-click={ (event) => this.append(data, event) }>新增</el-button>
+              <el-button size='mini' type='text' on-click={ (event) => this.remove(node, data, event) }>删除</el-button>
+            </span>
+          </span>
+        )
+      }
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -206,7 +227,7 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.temp = deepcopy(row) // copy obj
       this.dialogStatus = '修改'
       this.dialogFormVisible = true
       this.$nextTick(() => {

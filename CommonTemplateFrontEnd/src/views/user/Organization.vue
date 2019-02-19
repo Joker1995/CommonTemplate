@@ -54,6 +54,7 @@
 <script>
 import { doGetOrganizationList, doCreateOrganization, doUpdateOrganization, doDeleteOrganization } from '@/api/user/organization'
 import Pagination from '@/components/Pagination'
+import deepcopy from 'deepcopy'
 
 export default {
   components: { Pagination },
@@ -131,7 +132,7 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.temp = deepcopy(row) // copy obj
       this.dialogStatus = '修改'
       this.dialogFormVisible = true
       this.$nextTick(() => {

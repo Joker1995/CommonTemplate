@@ -86,6 +86,7 @@ import { Tree } from 'element-ui'
 import Pagination from '@/components/Pagination'
 import { generateTreeData, filterSelectNodeId } from '@/utils'
 import request from '@/utils/request'
+import deepcopy from 'deepcopy'
 
 export default {
   components: { Pagination, Tree },
@@ -207,7 +208,7 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
+      this.temp = deepcopy(row) // copy obj
       this.dialogStatus = '修改'
       this.dialogFormVisible = true
       this.$nextTick(() => {

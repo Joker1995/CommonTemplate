@@ -144,7 +144,7 @@
 
 <script>
 import { doGetUserList, doGetUserResourcesList, doGetUserRolesList, doGetUserAccessPagesList,
-  doUpdateUserRoleList, doCreateUser, doUpdateUserResourceList, doDownloadUserList,
+  doUpdateUserRoleList, doCreateUser, doDeleteUser, doUpdateUserResourceList, doDownloadUserList,
   doUpdateUserAccessPageList, doUpdateUser, doGetUserTokenList, doKickOutUserToken, doRollBackUserToken } from '@/api/user/user'
 import { doGetOrganizationList } from '@/api/user/organization'
 import { doGetRoleList } from '@/api/user/role'
@@ -154,6 +154,7 @@ import { Tree } from 'element-ui'
 import Pagination from '@/components/Pagination'
 import { generateTreeData, filterSelectNode } from '@/utils'
 import request from '@/utils/request'
+import deepcopy from 'deepcopy'
 
 export default {
   components: { Pagination, Tree },
@@ -317,7 +318,7 @@ export default {
       })
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy 简单Object
+      this.temp = deepcopy(row) // copy 简单Object
       this.dialogStatus = '修改'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -327,7 +328,7 @@ export default {
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
+          const tempData = deepcopy(this.temp)
           doUpdateUser(tempData).then(() => {
             this.refreshUserList()
             this.dialogFormVisible = false
@@ -342,11 +343,14 @@ export default {
       })
     },
     handleDelete(row) {
-      this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
-        duration: 2000
+      doDeleteUser(row).then(response => {
+        this.refreshUserList()
+        this.$notify({
+          title: '成功',
+          message: '删除成功',
+          type: 'success',
+          duration: 2000
+        })
       })
     },
     handleDownload() {
@@ -359,7 +363,7 @@ export default {
     handleResourceUpdate(row) {
       this.resourceFormVisible = true
       const userId = row.id
-      this.temp = Object.assign({}, row) // copy obj
+      this.temp = deepcopy(row) // copy obj
       doGetUserResourcesList(userId).then(response => {
         const data = response.data
         const userResourceIds = []
@@ -373,7 +377,7 @@ export default {
     handleRoleUpdate(row) {
       this.roleFormVisible = true
       this.roleLabelList = []
-      this.temp = Object.assign({}, row)
+      this.temp = deepcopy(row)
       const userId = this.temp.id
       doGetUserRolesList(userId).then(response => {
         const data = response.data
@@ -487,11 +491,9 @@ export default {
             duration: 2000
           })
         } else {
-          this.$notify({
+          this.$notify.error({
             title: '失败',
-            message: '踢出会话失败',
-            type: 'error',
-            duration: 2000
+            message: '踢出会话失败'
           })
         }
       })
