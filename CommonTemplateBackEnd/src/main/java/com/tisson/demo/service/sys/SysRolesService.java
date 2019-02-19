@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.ListQuery;
-import com.tisson.demo.dao.sys.SysRolesMapper;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
+import com.tisson.demo.mapper.sys.SysRolesMapper;
 
 /**  
 * @Title: SysRolesService.java  

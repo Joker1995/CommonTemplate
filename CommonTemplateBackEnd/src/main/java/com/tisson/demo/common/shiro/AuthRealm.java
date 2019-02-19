@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.shiro;
+package com.tisson.demo.common.shiro;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -24,15 +24,15 @@ import org.springframework.stereotype.Component;
 import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.IRedisService;
 import com.tisson.demo.common.base.JsonSerializer;
-import com.tisson.demo.common.base.cahce.RedisCache;
-import com.tisson.demo.common.base.cahce.RedisCallBack;
+import com.tisson.demo.common.cahce.RedisCache;
+import com.tisson.demo.common.cahce.RedisCallBack;
 import com.tisson.demo.common.util.JWTUtil;
-import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
+import com.tisson.demo.mapper.sys.SysUsersMapper;
 
 import lombok.extern.slf4j.Slf4j;
 

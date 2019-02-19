@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.expt;
+package com.tisson.demo.common.expt;
 /**  
 * @Title: UnauthorizedException.java  
 * @Package com.tisson.demo.common.base  

@@ -1,8 +1,8 @@
 package com.tisson.demo.controller.sys;
 
 
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -32,10 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.codeGenerate.DataSourceConfig;
-import com.tisson.demo.common.codeGenerate.ProjectTask;
 import com.tisson.demo.common.codeGenerate.GenerateTask;
 import com.tisson.demo.common.codeGenerate.MySQLGenerateTask;
 import com.tisson.demo.common.codeGenerate.MySQLMetaData;
+import com.tisson.demo.common.codeGenerate.ProjectTask;
 import com.tisson.demo.common.codeGenerate.Table;
 import com.tisson.demo.common.codeGenerate.TaskUnit;
 import com.tisson.demo.common.util.ApplicationContextUtil;
@@ -66,6 +66,8 @@ public class SysCodeController {
 	
 	@Resource(name = "defaultThreadPool")
 	private ThreadPoolTaskExecutor executor;
+	
+	private final static String DEFAULT_DRIVER_CLASS="com.mysql.jdbc.Driver";
 
 	@GetMapping(value = "/dataSource")
 	@RequiresPermissions("/code/dataSource")
@@ -131,7 +133,7 @@ public class SysCodeController {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
 				.getApplicationContext();
-		if (configurableApplicationContext.getBean(config.getName()) != null) {
+		if (configurableApplicationContext.containsBean(config.getName())) {
 			return new ResponseBean<Boolean>("addDataSource failure,bean:" + config.getName() + " is exists", true);
 		}
 		
@@ -180,7 +182,8 @@ public class SysCodeController {
 	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		// TODO
 		GenerateTask task = new MySQLGenerateTask(unit);
-		unit.setTable(unit.getTable().setJavaName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), false)));
+		unit.setTable(unit.getTable().setJavaName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), false))
+				.setEntityName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), true)));
 		String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
 				+ UUID.randomUUID().toString().replace("-", "");
 		String codeTemplateDirPath=globalProperties.getCodeTemplateDirPath();
@@ -195,7 +198,7 @@ public class SysCodeController {
 			File codeFile = task.generate();
 			String downLoadFileName = unit.getTable().getJdbcName() + ".zip";
 			resp.setHeader("Content-Disposition", "attachment;fileName=" + URLEncoder.encode(downLoadFileName, "utf-8"));
-			try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
+			try(ServletOutputStream out = resp.getOutputStream();BufferedInputStream inputStream = FileUtil.getInputStream(codeFile);){
 				int bitVal = 0;
 				byte[] buffer = new byte[1024];
 				while (bitVal != -1) {
@@ -222,7 +225,7 @@ public class SysCodeController {
 		task.setGenerateDirPath(generatePath);
 		task.setTemplateDirPath(codeTemplateDirPath);
 		File codeFile = task.generate();
-		try(ServletOutputStream out = resp.getOutputStream();FileInputStream inputStream = new FileInputStream(codeFile);){
+		try(ServletOutputStream out = resp.getOutputStream();BufferedInputStream inputStream = FileUtil.getInputStream(codeFile);){
 			int bitVal = 0;
 			byte[] buffer = new byte[1024];
 			while (bitVal != -1) {
@@ -238,6 +241,9 @@ public class SysCodeController {
 		Connection conn = null;
 		boolean isFinished = false;
 		try {
+			if(config.getDriverClassName()==null) {
+				config.setDriverClassName(DEFAULT_DRIVER_CLASS);
+			}
 			Class.forName(config.getDriverClassName());
 			conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(), config.getPassword());
 			// TODO 后边改为通过classDriver选择测试SQL
@@ -249,8 +255,9 @@ public class SysCodeController {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Test Connection: JDBC-URL---{};USER-NAME:{};PASSWORD:{}", config.getJdbcUrl(),
+			log.error("Test Connection failed: JDBC-URL---{};USER-NAME:{};PASSWORD:{}", config.getJdbcUrl(),
 					config.getUserName(), config.getPassword());
+			log.error("error:",e);
 		} finally {
 			try {
 				if (conn != null && !conn.isClosed()) {

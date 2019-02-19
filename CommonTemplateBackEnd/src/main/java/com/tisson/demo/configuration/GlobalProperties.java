@@ -1,7 +1,6 @@
 package com.tisson.demo.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**  
@@ -13,59 +12,86 @@ import org.springframework.stereotype.Component;
 * @version V1.0  
 */
 @Component
-@PropertySource(value = "classpath:props/global.properties",encoding="utf-8")
+@ConfigurationProperties(prefix = "global")
 public class GlobalProperties {
-	@Value("${global.encypt_salt}")
+	
 	private String encyptSalt;
+
+	private String specialUserName;
+
+	private String sessionRedisKey;
+
+	private String templatePath;
+
+	private String excelGenerateDirPath;
+
+	private String excelTemplateDirPath;
+	
+	private String codeGenerateDirPath;
+	
+	private String codeTemplateDirPath;
 
 	public String getEncyptSalt() {
 		return encyptSalt;
 	}
-	
-	@Value("${global.special_username}")
-	private String specialUserName;
+
+	public void setEncyptSalt(String encyptSalt) {
+		this.encyptSalt = encyptSalt;
+	}
 
 	public String getSpecialUserName() {
 		return specialUserName;
 	}
-	
-	@Value("${global.session_key}")
-	private String sessionRedisKey;
+
+	public void setSpecialUserName(String specialUserName) {
+		this.specialUserName = specialUserName;
+	}
 
 	public String getSessionRedisKey() {
 		return sessionRedisKey;
 	}
-	
-	@Value("${global.session_key}")
-	private String templatePath;
+
+	public void setSessionRedisKey(String sessionRedisKey) {
+		this.sessionRedisKey = sessionRedisKey;
+	}
 
 	public String getTemplatePath() {
 		return templatePath;
 	}
-	@Value("${code.generateDirPath}")
-	private String codeGenerateDirPath;
 
-	public String getCodeGenerateDirPath() {
-		return codeGenerateDirPath;
+	public void setTemplatePath(String templatePath) {
+		this.templatePath = templatePath;
 	}
-	
-	@Value("${code.codeTemplateDirPath}")
-	private String codeTemplateDirPath;
-
-	public String getCodeTemplateDirPath() {
-		return codeTemplateDirPath;
-	}
-	@Value("${excel.generateDirPath}")
-	private String excelGenerateDirPath;
 
 	public String getExcelGenerateDirPath() {
 		return excelGenerateDirPath;
 	}
-	@Value("${excel.templateDirPath}")
-	private String excelTemplateDirPath;
+
+	public void setExcelGenerateDirPath(String excelGenerateDirPath) {
+		this.excelGenerateDirPath = excelGenerateDirPath;
+	}
 
 	public String getExcelTemplateDirPath() {
 		return excelTemplateDirPath;
 	}
-	
+
+	public void setExcelTemplateDirPath(String excelTemplateDirPath) {
+		this.excelTemplateDirPath = excelTemplateDirPath;
+	}
+
+	public String getCodeGenerateDirPath() {
+		return codeGenerateDirPath;
+	}
+
+	public void setCodeGenerateDirPath(String codeGenerateDirPath) {
+		this.codeGenerateDirPath = codeGenerateDirPath;
+	}
+
+	public String getCodeTemplateDirPath() {
+		return codeTemplateDirPath;
+	}
+
+	public void setCodeTemplateDirPath(String codeTemplateDirPath) {
+		this.codeTemplateDirPath = codeTemplateDirPath;
+	}
 }

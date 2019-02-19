@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.cahce;
+package com.tisson.demo.common.cahce;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -1233,7 +1233,7 @@ public class RedisCache implements IRedisManager{
         Assert.hasText(key, "key不能为空");
         Assert.notNull(jedisCluster, "jedisCluster连接初始化失败");
     }
-
+    // 实现crazycake IRedisManager的方法
 	@Override
 	public byte[] get(byte[] key) {
 		validateKeyParam(new String(key));

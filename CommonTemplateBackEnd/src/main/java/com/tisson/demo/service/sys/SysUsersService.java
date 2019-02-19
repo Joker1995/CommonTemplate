@@ -19,15 +19,15 @@ import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.base.ListQuery;
-import com.tisson.demo.common.base.cahce.RedisCache;
-import com.tisson.demo.common.base.cahce.RedisCallBack;
+import com.tisson.demo.common.cahce.RedisCache;
+import com.tisson.demo.common.cahce.RedisCallBack;
 import com.tisson.demo.common.util.JWTUtil;
-import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
+import com.tisson.demo.mapper.sys.SysUsersMapper;
 
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;

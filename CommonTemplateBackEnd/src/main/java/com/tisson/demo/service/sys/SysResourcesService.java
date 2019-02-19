@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tisson.demo.common.base.BaseService;
-import com.tisson.demo.dao.sys.SysResourcesMapper;
 import com.tisson.demo.entity.sys.SysResources;
+import com.tisson.demo.mapper.sys.SysResourcesMapper;
 
 /**
  * @Title: SysResourcesService.java

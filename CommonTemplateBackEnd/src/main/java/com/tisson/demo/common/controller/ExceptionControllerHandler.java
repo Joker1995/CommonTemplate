@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.tisson.demo.common.base.ResponseBean;
-import com.tisson.demo.common.base.expt.UnauthorizedException;
+import com.tisson.demo.common.expt.UnauthorizedException;
 
 import cn.hutool.json.JSONUtil;
 

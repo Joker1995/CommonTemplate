@@ -39,6 +39,7 @@ public class NameConverter {
 		typeMappingMap.put("TIME", "java.util.Date");
 		typeMappingMap.put("DATETIME", "java.util.Date");
 		typeMappingMap.put("TIMESTAMP", "java.util.Date");
+		typeMappingMap.put("TEXT", "String");
 	}
 	
 	private static Map<String,String>  getTypeMappingMap(){

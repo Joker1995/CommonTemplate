@@ -61,4 +61,17 @@ public interface Service<T> {
      * @return
      */
     List<T> queryAll();
+    
+    /**
+     * 根据Record条件查找列表
+     * @param t
+     * @return
+     */
+    List<T> queryByRecord(T t);
+    
+    /**
+     * 根据Record条件删除
+     * @param t
+     */
+    void deleteByRecord(T t);
 }

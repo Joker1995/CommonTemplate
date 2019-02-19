@@ -19,9 +19,13 @@ public class Table {
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String jdbcName;
 
-    // java 实体的名称
+    // java 实体的名称(首字母大写)
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String javaName;
+	
+	// java 实体的名称(首字母小写)
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private String entityName;
 
     // 数据库表的描述
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -74,6 +78,16 @@ public class Table {
         }
         return names;
     }
+	
+	public String getEntityName() {
+		return entityName;
+	}
+
+	public Table setEntityName(String entityName) {
+		this.entityName = entityName;
+		return this;
+	}
+
 	@Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;
@@ -82,21 +96,18 @@ public class Table {
         return Objects.equals( getJdbcName(), that.getJdbcName() ) &&
                 Objects.equals( getJavaName(), that.getJavaName() ) &&
                 Objects.equals( getComment(), that.getComment() ) &&
+                Objects.equals( getEntityName(), that.getEntityName() ) &&
                 Objects.equals( getColumns(), that.getColumns() ) ;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash( getJdbcName(), getJavaName(), getComment(), getColumns());
+        return Objects.hash( getJdbcName(), getJavaName(), getComment(), getColumns(), getEntityName());
     }
 
-    @Override
-    public String toString() {
-        return "TableEntity{" +
-                "jdbcName='" + jdbcName + '\'' +
-                ", javaName='" + javaName + '\'' +
-                ", comment='" + comment + '\'' +
-                ", columns=" + columns +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "Table [jdbcName=" + jdbcName + ", javaName=" + javaName + ", entityName=" + entityName + ", comment="
+				+ comment + ", columns=" + columns + "]";
+	}
 }

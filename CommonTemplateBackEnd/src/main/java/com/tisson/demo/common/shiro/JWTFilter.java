@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.shiro;
+package com.tisson.demo.common.shiro;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -33,11 +33,11 @@ import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.IRedisService;
 import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.base.ResponseBean;
-import com.tisson.demo.common.base.cahce.RedisCache;
-import com.tisson.demo.common.base.cahce.RedisCallBack;
+import com.tisson.demo.common.cahce.RedisCache;
+import com.tisson.demo.common.cahce.RedisCallBack;
 import com.tisson.demo.common.util.JWTUtil;
-import com.tisson.demo.dao.sys.SysUsersMapper;
 import com.tisson.demo.entity.sys.SysUsers;
+import com.tisson.demo.mapper.sys.SysUsersMapper;
 
 /**
  * @Title: JWTFilter.java

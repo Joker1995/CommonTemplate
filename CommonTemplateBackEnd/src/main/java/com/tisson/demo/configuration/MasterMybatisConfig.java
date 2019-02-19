@@ -1,5 +1,7 @@
 package com.tisson.demo.configuration;
 
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -16,6 +18,8 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import com.github.pagehelper.PageHelper;
+
 import tk.mybatis.spring.annotation.MapperScan;
 
 /**  
@@ -27,7 +31,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 * @version V1.0  
 */
 @Configuration
-@MapperScan(basePackages= {"com.tisson.demo.dao"},
+@MapperScan(basePackages= {"com.tisson.demo.mapper"},
 	sqlSessionTemplateRef ="masterSqlSessionTemplate")
 public class MasterMybatisConfig {
 	@Bean(name = "masterDatasource")
@@ -63,5 +67,18 @@ public class MasterMybatisConfig {
     public SqlSessionTemplate masterSqlSessionTemplate(@Qualifier("masterSqlSessionFactory") SqlSessionFactory sqlSessionFactory) throws Exception {
         SqlSessionTemplate template = new SqlSessionTemplate(sqlSessionFactory); // 使用上面配置的Factory
         return template;
+    }
+    
+
+    @Bean
+    public PageHelper pageHelper() {
+        PageHelper pageHelper = new PageHelper();
+        Properties p = new Properties();
+        p.setProperty("offsetAsPageNum", "true");
+        p.setProperty("rowBoundsWithCount", "true");
+        p.setProperty("reasonable", "true");
+        p.setProperty("dialect","mysql");
+        pageHelper.setProperties(p);
+        return pageHelper;
     }
 }

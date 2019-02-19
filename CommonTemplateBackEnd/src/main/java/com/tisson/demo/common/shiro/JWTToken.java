@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.shiro;
+package com.tisson.demo.common.shiro;
 
 import org.apache.shiro.authc.AuthenticationToken;
 

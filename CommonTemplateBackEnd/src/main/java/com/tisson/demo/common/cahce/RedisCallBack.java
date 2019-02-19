@@ -1,4 +1,4 @@
-package com.tisson.demo.common.base.cahce;
+package com.tisson.demo.common.cahce;
 
 import java.lang.reflect.Type;
 import java.util.List;

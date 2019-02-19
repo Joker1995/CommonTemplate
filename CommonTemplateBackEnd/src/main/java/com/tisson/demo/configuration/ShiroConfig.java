@@ -7,19 +7,22 @@ import javax.servlet.Filter;
 
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.mgt.SessionsSecurityManager;
+import org.apache.shiro.session.mgt.SessionManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
+import org.crazycake.shiro.RedisSessionDAO;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.tisson.demo.common.base.cahce.RedisCache;
-import com.tisson.demo.common.base.shiro.AuthRealm;
-import com.tisson.demo.common.base.shiro.JWTFilter;
+import com.tisson.demo.common.cahce.RedisCache;
+import com.tisson.demo.common.shiro.AuthRealm;
+import com.tisson.demo.common.shiro.JWTFilter;
 
 
 /**  
@@ -32,9 +35,9 @@ import com.tisson.demo.common.base.shiro.JWTFilter;
 */
 @Configuration
 public class ShiroConfig {
-	
 	@Bean
-	public SessionsSecurityManager securityManager(AuthRealm authRealm,RedisCacheManager redisCacheManager) {
+	public SessionsSecurityManager securityManager(AuthRealm authRealm,RedisCacheManager redisCacheManager,
+			SessionManager sessionManager) {
 		DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
 		authRealm.setCachingEnabled(true);
 		authRealm.setAuthenticationCachingEnabled(true);
@@ -44,6 +47,7 @@ public class ShiroConfig {
 		// 自定义缓存实现 使用redis
 		securityManager.setCacheManager(redisCacheManager);
 		securityManager.setRealm(authRealm);
+		securityManager.setSessionManager(sessionManager);
 		return securityManager;
 	}
 	
@@ -72,6 +76,21 @@ public class ShiroConfig {
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }
+	
+	@Bean
+	public RedisSessionDAO redisSessionDAO(RedisCache cache) {
+		RedisSessionDAO redisSessionDAO=new RedisSessionDAO();
+		redisSessionDAO.setRedisManager(cache);
+		redisSessionDAO.setKeyPrefix("shiro:session:");
+		return redisSessionDAO;
+	}
+	
+	@Bean
+	public SessionManager sessionManager(RedisSessionDAO redisSessionDAO) {
+		DefaultWebSessionManager sessionManager=new DefaultWebSessionManager();
+		sessionManager.setSessionDAO(redisSessionDAO);
+		return  sessionManager;
+	}
 
 	/**
      * cacheManager 缓存 redis实现

@@ -68,4 +68,12 @@ public abstract class BaseService<T> implements Service<T> {
 		List<T> result=mapper.select(query.data);
 		return new PageInfo<T>(result);
 	}
+	
+	public List<T> queryByRecord(T record) {
+		return mapper.select(record);
+	}
+
+	public void deleteByRecord(T record) {
+		mapper.delete(record);
+	}
 }

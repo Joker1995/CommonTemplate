@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.ListQuery;
-import com.tisson.demo.dao.sys.SysPagesMapper;
 import com.tisson.demo.entity.sys.SysPages;
+import com.tisson.demo.mapper.sys.SysPagesMapper;
 
 /**  
 * @Title: SysRolesService.java  

@@ -1,0 +1,8 @@
+global:
+  encypt-salt: '8b6e6521f3'  ###密码盐值
+  session-key: 'session:'
+  special-username: 'admin'  ###特殊用户列表(,号分割)登陆用户为列表中的才可看全部,否则隐藏此用户列表
+  generate-dirPath: 'F:\temp\替换\log\'
+  template-dirPath: 'F:\STSWorkspace\CommonTemplate\src\main\resources\templates\excelTemplate\'
+  codeGenerateDirPath: 'F:\temp\替换\log\'
+  codeTemplateDirPath: 'F:\temp\替换\log\'

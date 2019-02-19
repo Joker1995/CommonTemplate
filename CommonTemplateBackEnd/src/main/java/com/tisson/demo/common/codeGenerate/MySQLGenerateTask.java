@@ -10,6 +10,7 @@ package com.tisson.demo.common.codeGenerate;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import com.tisson.demo.common.util.NameConverter;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.template.Engine;
@@ -78,12 +80,59 @@ public class MySQLGenerateTask extends GenerateTask {
 		this.unit.getTable().setColumns(columnList);
 		generateEntity(this.unit);
 		generateMapper(this.unit);
+		generateMapperXml(this.unit);
 		generateService(this.unit);
 		generateController(this.unit);
+		generateFrontResource(this.unit);
 		FileUtil.touch(this.getGenerateDirPath()+".zip");
 		File codeZip=ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
 		FileUtil.del(this.getGenerateDirPath());
 		return codeZip;
+	}
+
+	private void generateMapperXml(TaskUnit unit) throws Exception{
+		String generateEntityFilePath = this.getGenerateDirPath() + File.separator 
+				+"resources"+File.separator+"mapper"+File.separator+"master"+File.separator
+				+unit.getTable().getJavaName()+"Mapper.xml";
+		Engine engine = new ThymeleafEngine(initTemplateEngine());
+		FileUtil.touch(generateEntityFilePath);
+		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"mapper-xml.vm");
+		try(BufferedWriter writer = FileUtil.getWriter(generateEntityFilePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
+	}
+
+	/**
+	 * 生成前端代码
+	 * @param unit
+	 * @throws IOException 
+	 * @throws IORuntimeException 
+	 */
+	private void generateFrontResource(TaskUnit unit) throws Exception {
+		String generateRequestAPIPath = this.getGenerateDirPath() + File.separator
+				+"frontResource"+File.separator+unit.getTable().getEntityName() + ".js";
+		String generatePagePath = this.getGenerateDirPath() + File.separator
+				+"frontResource"+File.separator+unit.getTable().getJavaName() + ".vue";
+		Engine engine = new ThymeleafEngine(initTemplateEngine());
+		FileUtil.touch(generateRequestAPIPath);
+		FileUtil.touch(generatePagePath);
+		Template template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"frontResource"
+				+File.separator+"api.vm");
+		try(BufferedWriter writer = FileUtil.getWriter(generateRequestAPIPath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
+		
+		template = engine.getTemplate(this.getTemplateDirPath()+File.separator+"frontResource"
+				+File.separator+"page.vm");
+		try(BufferedWriter writer = FileUtil.getWriter(generatePagePath, "UTF-8", false);){
+			template.render(Dict.create().set("unit", unit).set("table", unit.getTable()).set("generateDate",
+					new DateTime().toString("yyyy/MM/dd")), writer);
+			writer.flush();
+		}
 	}
 
 	private void generateEntity(TaskUnit unit) throws Exception {
