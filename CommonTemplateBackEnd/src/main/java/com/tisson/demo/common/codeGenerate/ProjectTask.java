@@ -52,6 +52,14 @@ public class ProjectTask extends GenerateTask{
 		}
 	}
 	
+	private void generateProjectFrontEnd(String resourceDirPath) {
+		String frontEndTemplateZipFilePath=this.getTemplateDirPath()+File.separator+"frontResource"
+				+File.separator+"frontEnd-src.zip";
+		String frontEndTargetZipFilePath=this.getGenerateDirPath()+File.separator+"frontEnd-src.zip";
+		FileUtil.copy(frontEndTemplateZipFilePath, frontEndTargetZipFilePath, true);
+	}
+
+	
 	private void generateProjectOthFile(String resourceDirPath) throws Exception {
 		String packageName=this.unit.getProjectPackageName();
 		Integer index=packageName.lastIndexOf(".")+1;
@@ -180,13 +188,13 @@ public class ProjectTask extends GenerateTask{
 		generateApplication(srcCodeDir);
 		generateResource(srcResourceDir);
 		generateProjectCode(srcCodeDir);
+		generateProjectFrontEnd(srcCodeDir);
 		generateProjectOthFile(srcResourceDir);
 		FileUtil.touch(this.getGenerateDirPath()+".zip");
 		File codeZip=ZipUtil.zip(this.getGenerateDirPath(), this.getGenerateDirPath()+".zip");
 		FileUtil.del(this.getGenerateDirPath());
 		return codeZip;
 	}
-	
 	private TemplateEngine initTemplateEngine() {
 		TemplateEngine templateEngine = new TemplateEngine();
 		FileTemplateResolver templateResolver = new FileTemplateResolver();
@@ -197,7 +205,4 @@ public class ProjectTask extends GenerateTask{
         templateEngine.setTemplateResolver(templateResolver);
         return templateEngine;
 	}
-	
-	
-	
 }

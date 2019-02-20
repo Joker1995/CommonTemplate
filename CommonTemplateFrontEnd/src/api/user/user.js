@@ -40,13 +40,6 @@ export function doLogout() {
   })
 }
 
-export function doGetAccessPage() {
-  return request({
-    url: '/user/accessPages',
-    method: 'get'
-  })
-}
-
 export function doGetUserList(query) {
   return request({
     url: '/user/usersList',
@@ -55,38 +48,33 @@ export function doGetUserList(query) {
   })
 }
 
-export function doCreateUser() {
+export function doCreateUser(data) {
   return request({
     url: '/user/',
-    method: 'post'
+    method: 'post',
+    data: data
   })
 }
 
-export function doUpdateUser(userData) {
+export function doUpdateUser(data) {
   return request({
     url: '/user/',
     method: 'put',
-    data: userData
+    data: data
   })
 }
 
-export function doGetOrganizationList() {
+export function doDeleteUser(data) {
   return request({
-    url: '/user/organization',
-    method: 'get'
+    url: '/user/',
+    method: 'delete',
+    data: data
   })
 }
 
-export function doGetRoleList() {
+export function doGetAccessPage() {
   return request({
-    url: '/user/roleList',
-    method: 'get'
-  })
-}
-
-export function doGetResourceList() {
-  return request({
-    url: '/user/resourceList',
+    url: '/user/accessPages',
     method: 'get'
   })
 }
@@ -171,4 +159,20 @@ export function doRollBackUserToken(query) {
 
 export function doDownloadUserList(data, fileName) {
   return request.download('/user/downloadUserList', data, fileName)
+}
+
+export function doUpdateSelfPwd(data) {
+  return request({
+    url: '/user/self/password',
+    method: 'post',
+    data: data
+  })
+}
+
+export function doUpdateUserPwd(data) {
+  return request({
+    url: '/user/' + data.id + '/password',
+    method: 'post',
+    data: data
+  })
 }

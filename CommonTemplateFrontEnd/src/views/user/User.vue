@@ -48,12 +48,13 @@
           <span>{{ scope.row.role }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="520" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="640" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">{{ $t('table.edit') }}</el-button>
           <el-button type="primary" size="mini" @click="handleRoleUpdate(scope.row)">{{ $t('table.role') }}</el-button>
           <el-button type="primary" size="mini" @click="handleResourceUpdate(scope.row)">{{ $t('table.resource') }}</el-button>
           <el-button type="primary" size="mini" @click="handleAccessPageUpdate(scope.row)">{{ $t('table.accessPage') }}</el-button>
+          <el-button type="primary" size="mini" @click="showPwdDialog(scope.row)">{{ $t('table.updateUserPassword') }}</el-button>
           <el-button type="primary" size="mini" @click="handleToken(scope.row)">{{ $t('table.token') }}</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ $t('table.delete') }}</el-button>
         </template>
@@ -139,13 +140,26 @@
         <el-button @click="tokenFormVisible = false">{{ $t('table.cancel') }}</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :title="$t('table.updateSelfPassword')" :visible.sync="passwordDialogVisible">
+      <el-form ref="passwordForm" :rules="rules" :model="passwordTemp" label-position="left" label-width="70px" style="width: 300px; margin-left:50px;">
+        <el-form-item :label="$t('table.password')" prop="password">
+          <el-input v-model="passwordTemp.password" style="width:200px"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="passwordDialogVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button type="primary" @click="handleUpDateUserPwd">{{ $t('table.confirm') }}</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { doGetUserList, doGetUserResourcesList, doGetUserRolesList, doGetUserAccessPagesList,
   doUpdateUserRoleList, doCreateUser, doDeleteUser, doUpdateUserResourceList, doDownloadUserList,
-  doUpdateUserAccessPageList, doUpdateUser, doGetUserTokenList, doKickOutUserToken, doRollBackUserToken } from '@/api/user/user'
+  doUpdateUserAccessPageList, doUpdateUser, doGetUserTokenList, doKickOutUserToken, doRollBackUserToken,
+  doUpdateUserPwd } from '@/api/user/user'
 import { doGetOrganizationList } from '@/api/user/organization'
 import { doGetRoleList } from '@/api/user/role'
 import { doGetResourceList } from '@/api/user/resource'
@@ -155,10 +169,20 @@ import Pagination from '@/components/Pagination'
 import { generateTreeData, filterSelectNode } from '@/utils'
 import request from '@/utils/request'
 import deepcopy from 'deepcopy'
+import { getEncyptSalt } from '@/utils'
+import md5 from 'js-md5'
+import { validatePwd } from '@/utils/validate'
 
 export default {
   components: { Pagination, Tree },
   data() {
+    const validatePass = (rule, value, callback) => {
+      if (!validatePwd(value)) {
+        callback(new Error('密码必须是8-16位数字、大、小写字母、特殊符号中的三种及三种以上的组合'))
+      } else {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: null,
@@ -201,7 +225,8 @@ export default {
         name: [{ required: true, message: 'name is required', trigger: 'blur' }],
         label: [{ required: true, message: 'nickName is required', trigger: 'blur' }],
         organization: [{ required: true, message: 'organization is required', trigger: 'change' }],
-        status: [{ required: true, message: 'status is required', trigger: 'change' }]
+        status: [{ required: true, message: 'status is required', trigger: 'change' }],
+        password: [{ required: true, trigger: 'blur', validator: validatePass }]
       },
       downloadLoading: false,
       resourceDialogTitle: '接口权限修改',
@@ -215,6 +240,11 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'label'
+      },
+      passwordDialogVisible: false,
+      passwordTemp: {
+        id: undefined,
+        password: undefined
       }
     }
   },
@@ -268,6 +298,12 @@ export default {
         mobilePhone: undefined,
         organization: undefined,
         status: undefined
+      }
+    },
+    resetPasswordTemp() {
+      this.passwordTemp = {
+        id: undefined,
+        password: undefined
       }
     },
     refreshUserList() {
@@ -516,6 +552,40 @@ export default {
             message: '恢复会话失败',
             type: 'error',
             duration: 2000
+          })
+        }
+      })
+    },
+    showPwdDialog(row) {
+      this.resetPasswordTemp()
+      this.passwordDialogVisible = true
+      this.passwordTemp.id = row.id
+    },
+    handleUpDateUserPwd() {
+      this.$refs['passwordForm'].validate((valid) => {
+        if (valid) {
+          const data = {}
+          data.id = this.passwordTemp.id
+          data.password = md5(md5(this.passwordTemp.password + getEncyptSalt()))
+          doUpdateUserPwd(data).then(response => {
+            const data = response.data
+            if (data) {
+              this.dialogVisible = false
+              this.$notify({
+                title: '成功',
+                message: '修改密码成功',
+                type: 'success',
+                duration: 2000
+              })
+              this.passwordDialogVisible = false
+            } else {
+              this.$notify({
+                title: '失败',
+                message: '修改密码失败',
+                type: 'error',
+                duration: 2000
+              })
+            }
           })
         }
       })

@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -22,10 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.reflect.TypeToken;
-import com.tisson.demo.common.base.IRedisService;
 import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.cahce.RedisCache;
 import com.tisson.demo.common.cahce.RedisCallBack;
+import com.tisson.demo.common.expt.SessionKickoutException;
+import com.tisson.demo.common.expt.SessionOnlineLimitException;
+import com.tisson.demo.common.expt.UserNameOrPwdException;
 import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
@@ -101,14 +102,14 @@ public class AuthRealm extends AuthorizingRealm{
         // 解密获得userName，用于和数据库对比
         String userName = JWTUtil.getUserName(token);
         if (userName == null ) {
-            throw new AuthenticationException("token invalid");
+            throw new UserNameOrPwdException();
         }
         SysUsers sysUsers = sysUsersMapper.loadByName(userName);
         if (sysUsers == null ) {
-            throw new AuthenticationException("User didn't existed");
+            throw new UserNameOrPwdException();
         }
         if ( !JWTUtil.verify(token,userName,sysUsers.getPassword())){
-            throw new AuthenticationException("userName or passsword error");
+            throw new UserNameOrPwdException();
         }
         // hash结构expire会使全部hashkey都执行
         String key = "ssoToken:" + userName;
@@ -127,7 +128,7 @@ public class AuthRealm extends AuthorizingRealm{
         if(resultMap!=null) {
         	String kickOutResult=resultMap.get("kickOut");
     	    if(kickOutResult!=null && kickOutResult.toLowerCase().equals("true")) {
-    	    	throw new AuthenticationException("token was kicked out");
+    	    	throw new SessionKickoutException();
     	    }
         }
 	    
@@ -144,7 +145,7 @@ public class AuthRealm extends AuthorizingRealm{
         }
         if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
         		&& !cache.hashKeyExists(key, token)) {
-			throw new AuthenticationException(userName + " has too many token online");
+			throw new SessionOnlineLimitException();
 		}
         if (maxOnlineCount > 1 && cacheMaxCount <= maxOnlineCount) {
 			if (!cache.hashKeyExists("ssoToken:" + userName, token)) {

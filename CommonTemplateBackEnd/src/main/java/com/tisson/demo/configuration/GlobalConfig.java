@@ -3,8 +3,12 @@ package com.tisson.demo.configuration;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.github.pagehelper.PageHelper;
@@ -29,6 +33,23 @@ public class GlobalConfig {
 		p.setProperty("dialect", "mysql"); // 配置mysql数据库
 		pageHelper.setProperties(p);
 		return pageHelper;
+	}
+	
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer properties(Environment env) {
+	    PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+	    YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
+//	    yaml.setResources(new FileSystemResource("/dir/application.yml"));//File引入
+	    String[] actvieProfiles = env.getActiveProfiles();
+	    if(actvieProfiles.length>0) {
+	    	for(String actvieProfile:actvieProfiles) {
+		    	yaml.setResources(new ClassPathResource("props/global-"+actvieProfile+".yml"));//class引入
+		    }
+	    }else {
+	    	yaml.setResources(new ClassPathResource("props/global.yml"));//class引入
+	    }
+	    configurer.setProperties(yaml.getObject());
+	    return configurer;
 	}
 	
 	@Bean

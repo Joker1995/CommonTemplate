@@ -1,4 +1,9 @@
 export default {
+  code: {
+    generateCode: 'generate code',
+    packageName: 'package name',
+    projectPackageName: 'project package name'
+  },
   table: {
     name: 'name',
     url: 'url',
@@ -23,6 +28,12 @@ export default {
     kickOut: 'kick out of session',
     rollBack: 'restore session',
     authCode: 'authorization code',
-    expireTime: 'expire time'
+    expireTime: 'expire time',
+    dataBaseName: 'data base name',
+    jdbcUrl: 'JDBC url',
+    userName: 'JDBC userName',
+    password: 'JDBC password',
+    selectTable: 'select data table',
+    detail: 'table detail info'
   }
 }

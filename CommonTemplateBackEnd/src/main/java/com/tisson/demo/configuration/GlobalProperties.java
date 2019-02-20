@@ -21,8 +21,6 @@ public class GlobalProperties {
 
 	private String sessionRedisKey;
 
-	private String templatePath;
-
 	private String excelGenerateDirPath;
 
 	private String excelTemplateDirPath;
@@ -35,7 +33,7 @@ public class GlobalProperties {
 		return encyptSalt;
 	}
 
-	public void setEncyptSalt(String encyptSalt) {
+	public void setEncyptSalt(final String encyptSalt) {
 		this.encyptSalt = encyptSalt;
 	}
 
@@ -53,14 +51,6 @@ public class GlobalProperties {
 
 	public void setSessionRedisKey(String sessionRedisKey) {
 		this.sessionRedisKey = sessionRedisKey;
-	}
-
-	public String getTemplatePath() {
-		return templatePath;
-	}
-
-	public void setTemplatePath(String templatePath) {
-		this.templatePath = templatePath;
 	}
 
 	public String getExcelGenerateDirPath() {

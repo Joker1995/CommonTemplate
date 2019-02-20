@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +14,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
@@ -34,11 +34,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.druid.util.StringUtils;
 import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.GlobalConstant;
-import com.tisson.demo.common.base.IRedisService;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.cahce.RedisCache;
 import com.tisson.demo.common.expt.UnauthorizedException;
+import com.tisson.demo.common.expt.UserNameOrPwdException;
 import com.tisson.demo.common.shiro.JWTToken;
 import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.configuration.GlobalProperties;
@@ -118,7 +118,7 @@ public class SysUsersController {
 	}
 	
 	@PostMapping(value = "/downloadUserList")
-	public void testDownload(HttpServletResponse resp,@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
+	public void exportUserList(HttpServletResponse resp,@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
 			@RequestBody ListQuery<SysUsers> query) {
 		String generatePath=globalProperties.getExcelGenerateDirPath()+File.separator+"sysUser"
 				+File.separator+UUID.randomUUID().toString().replace("-", "")
@@ -236,7 +236,7 @@ public class SysUsersController {
 
 	@PostMapping(value = "/login")
 	public ResponseBean<String> login(@RequestParam("userName") String userName, 
-			@RequestParam("password") String password)throws UnauthorizedException {
+			@RequestParam("password") String password)throws Exception {
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
 		//TODO 改造token
 		LOGGER.info("查询出来的密码:{}",sysUsers.getPassword());
@@ -245,9 +245,14 @@ public class SysUsersController {
 			String token=JWTUtil.sign(userName, password);
 			Subject subject = SecurityUtils.getSubject();
 			subject.login(new JWTToken(token));
+			Map<String,String> dataMap=new HashMap<String,String>();
+			dataMap.put("kickOut", "false");
+			cache.setHash("ssoToken:" + userName, token,dataMap);
+			cache.expire("ssoToken:" + userName, 
+					Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).intValue());
 			return new ResponseBean<String>(200, "Login Success", token);
 		} else {
-			return new ResponseBean<String>(500, "Login Fail", null);
+			throw new UserNameOrPwdException();
 		}
 	}
 	
@@ -407,6 +412,31 @@ public class SysUsersController {
 		sysUsersService.rollBack(ssoTokens);
 		return new ResponseBean<String>("rollBack success","rollBack success");
 	}
+	
+	@PostMapping(value = "/self/password")
+	@RequiresAuthentication
+	public ResponseBean<Boolean> updateSelfPassword(@RequestBody SysUsers sysUsers){
+		SysUsers loginUser = null;
+		Subject subject = SecurityUtils.getSubject();
+		Object principal = subject.getPrincipal();
+		if(principal instanceof SysUsers) {
+			loginUser=(SysUsers)principal;
+			loginUser.setPassword(sysUsers.getPassword());
+			sysUsersService.update(loginUser);
+			return new ResponseBean<Boolean>("updateSelfPassword success",Boolean.TRUE);
+		}
+		return new ResponseBean<Boolean>("updateSelfPassword failed",Boolean.FALSE);
+	}
+	
+	@PostMapping(value = "/{id}/password")
+	@RequiresAuthentication
+	public ResponseBean<Boolean> updateUserPassword(@PathVariable("id") String id,@RequestBody SysUsers sysUsers){
+		SysUsers dbUser = sysUsersService.loadById(id);
+		dbUser.setPassword(sysUsers.getPassword());
+		sysUsersService.update(dbUser);
+		return new ResponseBean<Boolean>("updateUserPassword success",Boolean.TRUE);
+	}
+	
 	 
 	private Set<SysPages> filterAccessPageList(List<SysPages> list){
 		HashSet<SysPages> set = new HashSet<SysPages>();

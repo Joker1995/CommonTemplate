@@ -1,4 +1,9 @@
 export default {
+  code: {
+    generateCode: '生成代码',
+    packageName: '类包名',
+    projectPackageName: '项目包名'
+  },
   table: {
     name: '名称',
     url: '对应链接',
@@ -23,6 +28,12 @@ export default {
     kickOut: '踢出会话',
     rollBack: '恢复会话',
     authCode: '授权码',
-    expireTime: '过期时间'
+    expireTime: '过期时间',
+    dataBaseName: '数据库名称',
+    jdbcUrl: 'JDBC链接',
+    userName: '用户名',
+    password: '密码',
+    selectTable: '选择数据表',
+    detail: '详细'
   }
 }

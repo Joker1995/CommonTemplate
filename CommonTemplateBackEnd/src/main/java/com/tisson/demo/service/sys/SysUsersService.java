@@ -2,6 +2,8 @@ package com.tisson.demo.service.sys;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.JsonSerializer;
@@ -29,6 +30,7 @@ import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
 import com.tisson.demo.mapper.sys.SysUsersMapper;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -161,6 +163,21 @@ public class SysUsersService extends BaseService<SysUsers> {
 			item.put("authCode", token);
 			result.add(item);
 		}
+		Collections.sort(result, new Comparator<Map<String,String>>(){
+			@Override
+			public int compare(Map<String, String> o1, Map<String, String> o2) {
+				if(o1.containsKey("expireTime") && o2.containsKey("expireTime")) {
+					DateTime o1Time=DateUtil.parse(o1.get("expireTime"),"yyyy-MM-dd HH:mm:ss");
+					DateTime o2Time=DateUtil.parse(o2.get("expireTime"),"yyyy-MM-dd HH:mm:ss");
+					if(o1Time.isAfter(o2Time)) {
+						return -1;
+					}else if(o1Time.isBefore(o2Time)) {
+						return 1;
+					}
+				}
+				return 0;
+			}
+		});
 		return result;
 	}
 	public void kickOut(List<String> ssoTokens) {

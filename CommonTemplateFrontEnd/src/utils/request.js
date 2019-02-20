@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message, MessageBox } from 'element-ui'
+import { Message } from 'element-ui'
 import store from '../store'
 import { getToken, setToken } from '@/utils/cookie'
 
@@ -45,12 +45,53 @@ service.download = (url, data, fileName) => {
       console.log('IE10+下载')
       navigator.msSaveBlob(blob, fileName)
     }
-  }, error => {
-    // 下载错误时候处理
-    console.log('error:' + error)
-    Promise.reject(error)
   }).catch((error) => {
     console.log('error:' + error)
+    if (error.response && error.response.data &&
+      error.response.data.type === 'application/json') {
+      console.log(error.response)
+      const data = error.response.data
+      console.log(data)
+      const filereader = new FileReader()
+      filereader.onload = e => {
+        const resultStr = e.target.result
+        const resultObj = JSON.parse(resultStr)
+        console.log(resultObj)
+        if (resultObj.code && resultObj.msg) {
+          const code = resultObj.code
+          const message = resultObj.msg
+          if (code === 1001 || code === 1003 || code === 1004 || code === 1007) {
+            let msg = ''
+            switch (code) {
+              case 1001: msg = 'Token失效,请重新登录,正在退出中......'; break
+              case 1003: msg = '接口未授权或无授权码,请重新登录,正在退出中......'; break
+              case 1004: msg = '会话无效,请重新登录,正在退出中......'; break
+              case 1007: msg = '在线会话超出限制,请稍候重试,正在退出中......'; break
+            }
+            if (getToken() !== '') {
+              const msgComponent = Message({
+                message: msg,
+                type: 'error',
+                duration: 5 * 1000
+              })
+              msgComponent.close = () => {
+                store.dispatch('FedLogOut').then(() => {
+                  location.reload() // 为了重新实例化vue-router对象 避免bug
+                })
+              }
+              setToken('')
+            }
+          } else {
+            Message({
+              message: message,
+              type: 'error',
+              duration: 5 * 1000
+            })
+          }
+        }
+      }
+      filereader.readAsText(data)
+    }
   })
 }
 // request拦截器
@@ -81,39 +122,46 @@ service.interceptors.response.use(
     }
     const res = response.data
     if (res.code !== 200) {
-      Message({
-        message: res.msg,
-        type: 'error',
-        duration: 5 * 1000
-      })
-      if (res.code === 10001 || res.code === 10002 || res.code === 401) {
-        // 10001非法token , 10002token过期
-        MessageBox.confirm(
-          '你已被登出，可以取消继续留在该页面，或者重新登录',
-          '确定登出',
-          {
-            confirmButtonText: '重新登录',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        ).then(() => {
-          store.dispatch('FedLogOut').then(() => {
-            location.reload() // 为了重新实例化vue-router对象 避免bug
-          })
-        })
-      }
-      return Promise.reject('error')
+      return Promise.reject(response)
     } else {
       return response.data
     }
   }, error => {
     console.log('err:' + error) // for debug
-    console.log(error.response)
-    Message({
-      message: '请求错误',
-      type: 'error',
-      duration: 5 * 1000
-    })
+    if (error && error.response && error.response.data) {
+      console.log(error.response)
+      const response = error.response
+      const data = response.data
+      const code = response.data.code
+      if (code === 1001 || code === 1003 || code === 1004 || code === 1007) {
+        let msg = ''
+        switch (code) {
+          case 1001: msg = 'Token失效,请重新登录,正在退出中......'; break
+          case 1003: msg = '接口未授权或无授权码,请重新登录,正在退出中......'; break
+          case 1004: msg = '会话无效,请重新登录,正在退出中......'; break
+          case 1007: msg = '在线会话超出限制,请稍候重试,正在退出中......'; break
+        }
+        if (getToken() !== '') {
+          const msgComponent = Message({
+            message: msg,
+            type: 'error',
+            duration: 5 * 1000
+          })
+          msgComponent.close = () => {
+            store.dispatch('FedLogOut').then(() => {
+              location.reload() // 为了重新实例化vue-router对象 避免bug
+            })
+          }
+          setToken('')
+        }
+      } else {
+        Message({
+          message: data.msg,
+          type: 'error',
+          duration: 5 * 1000
+        })
+      }
+    }
     return Promise.reject(error)
   }
 )

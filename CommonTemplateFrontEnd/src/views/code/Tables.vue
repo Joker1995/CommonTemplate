@@ -25,17 +25,17 @@
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button type="primary" size="mini" @click="handleGenerateCode(scope.row)">{{ $t('table.generateCode') }}</el-button>
+          <el-button type="primary" size="mini" @click="handleGenerateCode(scope.row)">{{ $t('code.generateCode') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="110px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.packageName')" prop="packageName">
+        <el-form-item :label="$t('code.packageName')" prop="packageName">
           <el-input v-model="temp.packageName"/>
         </el-form-item>
-        <el-form-item :label="$t('table.projectPackageName')" prop="projectPackageName">
+        <el-form-item :label="$t('code.projectPackageName')" prop="projectPackageName">
           <el-input v-model="temp.projectPackageName"/>
         </el-form-item>
       </el-form>
