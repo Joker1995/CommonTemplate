@@ -30,7 +30,6 @@
       <el-table-column :label="$t('table.actions')" align="center" width="270" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handleSeleceTable(scope.row)">{{ $t('table.selectTable') }}</el-button>
-          <el-button type="primary" size="mini" @click="handleQueryDetail(scope.row)">{{ $t('table.detail') }}</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.row)">{{ $t('table.delete') }}</el-button>
         </template>
       </el-table-column>
