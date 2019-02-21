@@ -154,6 +154,12 @@ service.interceptors.response.use(
           }
           setToken('')
         }
+      } else if( typeof(data.message) !== 'undefined' ) {
+        Message({
+          message: data.message,
+          type: 'error',
+          duration: 5 * 1000
+        })
       } else {
         Message({
           message: data.msg,
