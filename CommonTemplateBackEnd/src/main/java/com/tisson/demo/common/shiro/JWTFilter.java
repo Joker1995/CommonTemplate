@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -153,7 +154,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 					dataMap.put("kickOut", "false");
 					cache.setHash("ssoToken:" + userName, newToken,dataMap);
 					cache.expire("ssoToken:" + userName, 
-							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).intValue());
+							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + new Random().nextInt(30)).intValue());
 				}
 				cache.delHash("ssoToken:" + userName,authorization);
 			}

@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -249,7 +250,7 @@ public class SysUsersController {
 			dataMap.put("kickOut", "false");
 			cache.setHash("ssoToken:" + userName, token,dataMap);
 			cache.expire("ssoToken:" + userName, 
-					Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + Math.random() * 30).intValue());
+					Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + new Random().nextInt(30)).intValue());
 			return new ResponseBean<String>(200, "Login Success", token);
 		} else {
 			throw new UserNameOrPwdException();

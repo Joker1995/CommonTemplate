@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,12 +74,17 @@ public class SysCodeController {
 	@RequiresPermissions("/code/dataSource")
 	public ResponseBean<List<Map<String, Object>>> dataBases() {
 		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-		Map<String, HikariDataSource> dataBaseList = contextUtil.getApplicationContext()
-				.getBeansOfType(HikariDataSource.class);
-		for (Map.Entry<String, HikariDataSource> entry : dataBaseList.entrySet()) {
+		// 将applicationContext转换为ConfigurableApplicationContext
+		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
+						.getApplicationContext();
+		// 获取bean工厂并转换为DefaultListableBeanFactory
+		DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext
+						.getBeanFactory();
+		String[] beanNames = defaultListableBeanFactory.getBeanNamesForType(ResolvableType.forRawClass(HikariDataSource.class));
+		for(String beanName:beanNames) {
 			Map<String, Object> item = new HashMap<String, Object>();
-			HikariDataSource dataSource = entry.getValue();
-			item.put("dataBaseName", entry.getKey());
+			HikariDataSource dataSource = (HikariDataSource)defaultListableBeanFactory.getBean(beanName);
+			item.put("dataBaseName", beanName);
 			item.put("userName", dataSource.getUsername());
 			item.put("password", dataSource.getPassword());
 			item.put("jdbcUrl", dataSource.getJdbcUrl());
@@ -238,34 +244,26 @@ public class SysCodeController {
 	}
 
 	private boolean testConnection(DataSourceConfig config) {
-		Connection conn = null;
 		boolean isFinished = false;
 		try {
 			if(config.getDriverClassName()==null) {
 				config.setDriverClassName(DEFAULT_DRIVER_CLASS);
 			}
 			Class.forName(config.getDriverClassName());
-			conn = DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(), config.getPassword());
 			// TODO 后边改为通过classDriver选择测试SQL
-			ResultSet resultset = conn.createStatement().executeQuery("SELECT 1");
-			while (resultset.next()) {
-				int result = resultset.getInt(1);
-				if (result == 1) {
-					isFinished = true;
+			try(Connection conn =DriverManager.getConnection(config.getJdbcUrl(), config.getUserName(), config.getPassword());
+					ResultSet resultset = conn.createStatement().executeQuery("SELECT 1")){
+				while (resultset.next()) {
+					int result = resultset.getInt(1);
+					if (result == 1) {
+						isFinished = true;
+					}
 				}
 			}
 		} catch (Exception e) {
 			log.error("Test Connection failed: JDBC-URL---{};USER-NAME:{};PASSWORD:{}", config.getJdbcUrl(),
 					config.getUserName(), config.getPassword());
 			log.error("error:",e);
-		} finally {
-			try {
-				if (conn != null && !conn.isClosed()) {
-					conn.close();
-				}
-			} catch (Exception e) {
-				log.error("Other Exception:{}", e);
-			}
 		}
 		return isFinished;
 	}
