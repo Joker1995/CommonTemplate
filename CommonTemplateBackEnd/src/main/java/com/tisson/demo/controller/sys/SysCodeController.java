@@ -80,6 +80,8 @@ public class SysCodeController {
 		// 获取bean工厂并转换为DefaultListableBeanFactory
 		DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) configurableApplicationContext
 						.getBeanFactory();
+		//这里不用getBeansOfType()因为需要刷新context,
+		//但是GenericApplicationContext只能被刷新一次,因此只能通过beanDefinitionNames获取到相应的beanDefinition
 		String[] beanNames = defaultListableBeanFactory.getBeanNamesForType(ResolvableType.forRawClass(HikariDataSource.class));
 		for(String beanName:beanNames) {
 			Map<String, Object> item = new HashMap<String, Object>();
