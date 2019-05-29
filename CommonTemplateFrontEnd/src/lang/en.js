@@ -37,7 +37,6 @@ export default {
     home: 'home page',
     jdbcUrl: 'JDBC url',
     userName: 'JDBC userName',
-    password: 'JDBC password',
     selectTable: 'select data table',
     detail: 'table detail info'
   }

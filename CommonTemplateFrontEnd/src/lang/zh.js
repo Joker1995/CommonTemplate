@@ -37,7 +37,6 @@ export default {
     dataBaseName: '数据库名称',
     jdbcUrl: 'JDBC链接',
     userName: '用户名',
-    password: '密码',
     selectTable: '选择数据表',
     detail: '详细'
   }

@@ -154,7 +154,7 @@ service.interceptors.response.use(
           }
           setToken('')
         }
-      } else if( typeof(data.message) !== 'undefined' ) {
+      } else if (typeof (data.message) !== 'undefined') {
         Message({
           message: data.message,
           type: 'error',
