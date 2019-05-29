@@ -2,6 +2,8 @@
 /CommonTemplateBackEnd/!.mvn/wrapper/maven-wrapper.jar
 /CommonTemplateBackEnd/log/
 /CommonTemplateBackEnd/src/test/
+/CommonTemplateFrontEnd/dist/
+/CommonTemplateFrontEnd/node_modules/
 ### STS ###
 .apt_generated
 .classpath
