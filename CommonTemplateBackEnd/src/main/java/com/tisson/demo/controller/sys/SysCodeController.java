@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tisson.demo.common.base.ResponseBean;
@@ -45,6 +46,10 @@ import com.tisson.demo.configuration.GlobalProperties;
 import com.zaxxer.hikari.HikariDataSource;
 
 import cn.hutool.core.io.FileUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -58,6 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/code")
 @SuppressWarnings("static-access")
+@Api("/code")
 @Slf4j
 public class SysCodeController {
 	@Autowired
@@ -72,6 +78,7 @@ public class SysCodeController {
 
 	@GetMapping(value = "/dataSource")
 	@RequiresPermissions("/code/dataSource")
+	@ApiOperation(value="获取当前应用context中的datasource",httpMethod="GET",  response=ResponseBean.class)
 	public ResponseBean<List<Map<String, Object>>> dataBases() {
 		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 		// 将applicationContext转换为ConfigurableApplicationContext
@@ -97,12 +104,16 @@ public class SysCodeController {
 
 	@PostMapping(value = "/dataSource/test")
 	@RequiresPermissions("/code/dataSource/test")
+	@ApiOperation(value="测试当前datasource连接情况",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
 	public ResponseBean<Boolean> testDataSourceConnection(@RequestBody DataSourceConfig config) {
 		return new ResponseBean<Boolean>("testDataSourceConnection success", testConnection(config));
 	}
 
 	@PostMapping(value = "/dataSource/tables")
 	@RequiresPermissions("/code/dataSource/tables")
+	@ApiOperation(value="获取当前datasource中的所有表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
 	public ResponseBean<List<Table>> queryDataBaseTables(@RequestBody DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
@@ -137,6 +148,8 @@ public class SysCodeController {
 
 	@PostMapping(value = "/dataSource")
 	@RequiresPermissions("/code/addDataSource")
+	@ApiOperation(value="添加datasource到context",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
 	public ResponseBean<Boolean> addDataSource(@RequestBody DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
@@ -167,6 +180,8 @@ public class SysCodeController {
 
 	@DeleteMapping(value = "/dataSource")
 	@RequiresPermissions("/code/deleteDataSource")
+	@ApiOperation(value="删除当前datasource",httpMethod="DELETE",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
 	public ResponseBean<Boolean> deleteDataSource(@RequestBody DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
@@ -187,6 +202,8 @@ public class SysCodeController {
 
 	@PostMapping("/generateCode")
 	@RequiresPermissions("/code/generateSimpleCode")
+	@ApiOperation(value="生成简易MVC代码",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
 	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		// TODO
 		GenerateTask task = new MySQLGenerateTask(unit);
@@ -224,6 +241,8 @@ public class SysCodeController {
 	
 	@PostMapping("/generateProject")
 	@RequiresPermissions("/code/generateProject")
+	@ApiOperation(value="生成简易项目代码",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
 	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		ProjectTask task=new ProjectTask(unit);
 		String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator

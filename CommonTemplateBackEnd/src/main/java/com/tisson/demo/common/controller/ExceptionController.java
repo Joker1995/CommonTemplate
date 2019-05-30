@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tisson.demo.common.base.ResponseBean;
+import com.tisson.demo.common.base.ResultCode;
 
 /**  
 * @Title: ExceptionController.java  
@@ -20,6 +21,7 @@ public class ExceptionController {
 	@RequestMapping(path = "/401")
 	@ResponseStatus(HttpStatus.UNAUTHORIZED)
 	public ResponseBean<String> unauthorized() {
-		return new ResponseBean<String>(401, "Unauthorized", null);
+		return new ResponseBean<String>(ResultCode.URL_UNAUTHORIZED.getCode(),
+				ResultCode.URL_UNAUTHORIZED.getDesc(), null);
 	}
 }

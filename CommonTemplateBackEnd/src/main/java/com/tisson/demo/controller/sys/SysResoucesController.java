@@ -1,6 +1,5 @@
 package com.tisson.demo.controller.sys;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,25 +7,23 @@ import java.util.Set;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
-import com.tisson.demo.common.base.GlobalConstant;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
-import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.entity.sys.SysResources;
-import com.tisson.demo.entity.sys.SysRoles;
-import com.tisson.demo.entity.sys.SysUsers;
 import com.tisson.demo.service.sys.SysResourcesService;
-import com.tisson.demo.service.sys.SysUsersService;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 /**  
 * @Title: SysPagesController.java  
@@ -39,16 +36,21 @@ import com.tisson.demo.service.sys.SysUsersService;
 @RestController
 @RequestMapping("/resource")
 @RequiresPermissions("/resource")
+@Api("/resource")
 public class SysResoucesController {
 	@Autowired
 	private SysResourcesService sysResourcesService;
 	
 	@PostMapping(value = "/resources")
+	@ApiOperation(value="获取授权接口列表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody ListQuery<SysResources> query){
 		return new ResponseBean<PageInfo<SysResources>>("queryResourceList success",sysResourcesService.queryPage(query));
 	}
 	
 	@PostMapping(value = "/{id}/childList")
+	@ApiOperation(value="获取id为{id}的授权接口列表的子列表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public ResponseBean<PageInfo<SysResources>> queryResourcesChildList(@PathVariable("id") String id,
 			@RequestBody ListQuery<SysResources> query){
 		if(query.data==null) {
@@ -59,18 +61,24 @@ public class SysResoucesController {
 	}
 	
 	@PostMapping
+	@ApiOperation(value="添加授权接口列表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
 	public ResponseBean<String> addResources(@RequestBody SysResources sysResources){
 		sysResourcesService.save(sysResources);
 		return new ResponseBean<String>("addResources success","addResources success");
 	}
 	
 	@DeleteMapping
+	@ApiOperation(value="删除授权接口列表",httpMethod="DELETE",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
 	public ResponseBean<String> deleteResources(@RequestBody SysResources sysResources){
 		sysResourcesService.deleteResources(sysResources);
 		return new ResponseBean<String>("deleteResources success","deleteResources success");
 	}
 	
 	@PutMapping
+	@ApiOperation(value="更新授权接口列表",httpMethod="PUT",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
 	public ResponseBean<String> updateResources(@RequestBody SysResources sysResources){
 		sysResourcesService.update(sysResources);
 		return new ResponseBean<String>("updateResources success","updateResources success");

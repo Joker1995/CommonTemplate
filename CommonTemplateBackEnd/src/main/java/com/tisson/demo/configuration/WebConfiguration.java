@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 /**  
@@ -30,5 +31,13 @@ public class WebConfiguration extends WebMvcConfigurationSupport{
 	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		configurer.setTaskExecutor(new ConcurrentTaskExecutor(Executors.newFixedThreadPool(20)));
 		configurer.setDefaultTimeout(30000);
+	}
+
+	@Override
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+		registry.addResourceHandler("swagger-ui.html")
+        	.addResourceLocations("classpath:/META-INF/resources/");
+		registry.addResourceHandler("/webjars/**")
+         .addResourceLocations("classpath:/META-INF/resources/webjars/");
 	}
 }

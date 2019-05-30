@@ -55,6 +55,10 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 
 /**  
 * @Title: SysUsersController.java  
@@ -67,6 +71,7 @@ import cn.hutool.poi.excel.ExcelWriter;
 @RestController
 @RequestMapping("/user")
 @SuppressWarnings("rawtypes")
+@Api("/user")
 public class SysUsersController {
 	private final static Logger LOGGER = LoggerFactory.getLogger(SysUsersController.class);
 	@Autowired
@@ -80,6 +85,8 @@ public class SysUsersController {
 	
 	@PostMapping(value = "/usersList")
 	@RequiresPermissions("/user/usersList")
+	@ApiOperation(value="获取用户列表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public ResponseBean<PageInfo<SysUsers>> usersList(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
 			@RequestBody ListQuery<SysUsers> query) {
 		String userName = JWTUtil.getUserName(token);
@@ -119,6 +126,8 @@ public class SysUsersController {
 	}
 	
 	@PostMapping(value = "/downloadUserList")
+	@ApiOperation(value="导出用户列表",httpMethod="POST",  response=Void.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public void exportUserList(HttpServletResponse resp,@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
 			@RequestBody ListQuery<SysUsers> query) {
 		String generatePath=globalProperties.getExcelGenerateDirPath()+File.separator+"sysUser"
@@ -194,6 +203,8 @@ public class SysUsersController {
 
 	@GetMapping(value = "/{id}")
 	@RequiresPermissions("/user/loadUserById")
+	@ApiOperation(value="获取id为{id}的用户",httpMethod="GET",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String"),})
 	public ResponseBean<SysUsers> loadUserById(@PathVariable("id") String id) {
 		SysUsers user =  sysUsersService.loadById(id);
 		user.setPassword(null);
@@ -202,6 +213,8 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/role/{id}")
 	@RequiresPermissions("/user/loadUserRolesById")
+	@ApiOperation(value="获取id为{id}的用户角色列表",httpMethod="GET",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String"),})
 	public ResponseBean<List<SysRoles>> loadUserRolesById(@PathVariable("id") String id) {
 		List<SysRoles> roles = sysUsersService.queryRoles(id);
 		return new ResponseBean<List<SysRoles>>("loadUserRolesById:"+id+" success",roles);
@@ -209,6 +222,8 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/accessPage/{id}")
 	@RequiresPermissions("/user/loadUserAccessPagesById")
+	@ApiOperation(value="获取id为{id}的用户可授权界面列表",httpMethod="GET",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String"),})
 	public ResponseBean<List<SysPages>> loadUserAccessPagesById(@PathVariable("id") String id) {
 		List<SysRoles> roles = sysUsersService.queryRoles(id);
 		List<SysPages> sysPagesList=sysUsersService.queryPagesByUserId(id);
@@ -223,6 +238,8 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/resource/{id}")
 	@RequiresPermissions("/user/loadUserResourcesById")
+	@ApiOperation(value="获取id为{id}的用户可授权接口列表",httpMethod="GET",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String"),})
 	public ResponseBean<List<SysResources>> loadUserResourcesById(@PathVariable("id") String id) {
 		List<SysRoles> roles = sysUsersService.queryRoles(id);
 		List<SysResources> sysPagesList=sysUsersService.queryResourcesByUserId(id);
@@ -236,6 +253,10 @@ public class SysUsersController {
 	}
 
 	@PostMapping(value = "/login")
+	@ApiOperation(value="登录",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "password", value = "用户密码", required = true, dataType = "String"),})
 	public ResponseBean<String> login(@RequestParam("userName") String userName, 
 			@RequestParam("password") String password)throws Exception {
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
@@ -258,6 +279,10 @@ public class SysUsersController {
 	}
 	
 	@PostMapping(value = "/register")
+	@ApiOperation(value="注册",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "password", value = "用户密码", required = true, dataType = "String"),})
 	public ResponseBean<String> register(@RequestParam("userName") String userName, 
 			@RequestParam("password") String password)throws UnauthorizedException {
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
@@ -275,6 +300,7 @@ public class SysUsersController {
 	}
 	
 	@PostMapping(value = "/logout")
+	@ApiOperation(value="退出",httpMethod="POST",  response=ResponseBean.class)
 	public ResponseBean<String> logout(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token)throws UnauthorizedException {
 		Subject subject = SecurityUtils.getSubject();
         subject.logout();
@@ -285,6 +311,7 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/userInfo")
 	@RequiresPermissions("/user/queryLoginUserInfo")
+	@ApiOperation(value="获取登录用户信息",httpMethod="GET",  response=ResponseBean.class)
 	public ResponseBean<SysUsers> queryLoginUserInfo(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token){
 		SysUsers userInfo= null;
 		Subject subject = SecurityUtils.getSubject();
@@ -304,6 +331,7 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/accessPages")
 	@RequiresPermissions("/user/queryAccessPages")
+	@ApiOperation(value="获取登录用户可授权界面列表",httpMethod="GET",  response=ResponseBean.class)
 	public ResponseBean<List<SysPages>> queryAccessPages(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token){
 		SysUsers sysUsers = null;
 		Subject subject = SecurityUtils.getSubject();
@@ -334,6 +362,7 @@ public class SysUsersController {
 	
 	@GetMapping(value = "/organization")
 	@RequiresAuthentication
+	@ApiOperation(value="获取登录用户部门列表",httpMethod="GET",  response=ResponseBean.class)
 	public ResponseBean<List<SysOrganizations>> queryOrganizations(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token){
 		SysUsers sysUsers = null;
 		Subject subject = SecurityUtils.getSubject();
@@ -351,6 +380,8 @@ public class SysUsersController {
 	
 	@PostMapping
 	@RequiresPermissions("/user/addSysUsers")
+	@ApiOperation(value="添加用户",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> addSysUsers(@RequestBody SysUsers sysUsers){
 		sysUsersService.save(sysUsers);
 		sysUsersService.saveUserOrganizationRelation(sysUsers);
@@ -359,6 +390,8 @@ public class SysUsersController {
 	
 	@DeleteMapping
 	@RequiresPermissions("/user/deleteSysUsers")
+	@ApiOperation(value="删除用户",httpMethod="DELETE",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> deleteSysUsers(@RequestBody SysUsers sysUsers){
 		sysUsersService.deleteSysUsers(sysUsers);
 		return new ResponseBean<String>("deleteSysUsers success","deleteSysUsers success");
@@ -366,6 +399,8 @@ public class SysUsersController {
 	
 	@PutMapping
 	@RequiresPermissions("/user/updateSysUsers")
+	@ApiOperation(value="更新用户",httpMethod="PUT",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> updateSysUsers(@RequestBody SysUsers sysUsers){
 		sysUsersService.update(sysUsers);
 		sysUsersService.saveUserOrganizationRelation(sysUsers);
@@ -374,6 +409,8 @@ public class SysUsersController {
 	
 	@PutMapping("/accessPage")
 	@RequiresPermissions("/user/updateUserAccessPages")
+	@ApiOperation(value="更新用户可授权界面列表",httpMethod="PUT",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> updateUserAccessPages(@RequestBody SysUsers sysUsers){
 		sysUsersService.updateUserAccessPages(sysUsers);
 		return new ResponseBean<String>("updateUserAccessPages success","updateUserAccessPages success");
@@ -381,6 +418,8 @@ public class SysUsersController {
 	
 	@PutMapping("/resource")
 	@RequiresPermissions("/user/updateUserResources")
+	@ApiOperation(value="更新用户可授权接口列表",httpMethod="PUT",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> updateUserResources(@RequestBody SysUsers sysUsers){
 		sysUsersService.updateUserResources(sysUsers);
 		return new ResponseBean<String>("updateUserResources success","updateUserResources success");
@@ -388,6 +427,8 @@ public class SysUsersController {
 	
 	@PutMapping("/role")
 	@RequiresPermissions("/user/updateUserRoles")
+	@ApiOperation(value="更新用户角色列表",httpMethod="PUT",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<String> updateUserRoles(@RequestBody SysUsers sysUsers)throws Exception{
 		sysUsersService.updateUserRoles(sysUsers);
 		return new ResponseBean<String>("updateUserRoles success","updateUserRoles success");
@@ -396,12 +437,16 @@ public class SysUsersController {
 	
 	@PostMapping(value = "/ssoToken")
 	@RequiresPermissions("/user/ssoToken")
+	@ApiOperation(value="获取用户TOKEN列表",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<List> loadTokenList(@RequestBody SysUsers query){
 		return new ResponseBean<List>("loadTokenList success",sysUsersService.loadTokenList(query));
 	}
 	
 	@PostMapping(value = "/ssoToken/kickOut")
 	@RequiresAuthentication
+	@ApiOperation(value="对用户TOKEN列表进行踢出",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "ssoTokens", value = "token列表", required = true, dataType = "List<String>"),})
 	public ResponseBean<String> kickOut(@RequestBody List<String> ssoTokens){
 		sysUsersService.kickOut(ssoTokens);
 		return new ResponseBean<String>("kickOut success","kickOut success");
@@ -409,6 +454,8 @@ public class SysUsersController {
 	
 	@PostMapping(value = "/ssoToken/rollBack")
 	@RequiresAuthentication
+	@ApiOperation(value="对用户踢出TOKEN列表进行回滚",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "ssoTokens", value = "token列表", required = true, dataType = "List<String>"),})
 	public ResponseBean<String> rollBack(@RequestBody List<String> ssoTokens){
 		sysUsersService.rollBack(ssoTokens);
 		return new ResponseBean<String>("rollBack success","rollBack success");
@@ -416,6 +463,8 @@ public class SysUsersController {
 	
 	@PostMapping(value = "/self/password")
 	@RequiresAuthentication
+	@ApiOperation(value="更新登录用户密码",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<Boolean> updateSelfPassword(@RequestBody SysUsers sysUsers){
 		SysUsers loginUser = null;
 		Subject subject = SecurityUtils.getSubject();
@@ -431,6 +480,10 @@ public class SysUsersController {
 	
 	@PostMapping(value = "/{id}/password")
 	@RequiresAuthentication
+	@ApiOperation(value="更新id为{id}的用户密码",httpMethod="POST",  response=ResponseBean.class)
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "id", value = "用户ID", required = true, dataType = "String"),
+		@ApiImplicitParam(name = "sysUsers", value = "用户", required = true, dataType = "SysUsers"),})
 	public ResponseBean<Boolean> updateUserPassword(@PathVariable("id") String id,@RequestBody SysUsers sysUsers){
 		SysUsers dbUser = sysUsersService.loadById(id);
 		dbUser.setPassword(sysUsers.getPassword());
