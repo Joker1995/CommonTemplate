@@ -2,6 +2,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import store from '../store'
 import { getToken, setToken } from '@/utils/cookie'
+import msgOfErrorCode from '@/utils/errorMsg'
 
 console.log('current environment:' + process.env.NODE_ENV + ',current baseUrl:' + process.env.BASE_API +
 ',the mock mode status:' + process.env.USEING_MOCK)
@@ -61,15 +62,8 @@ service.download = (url, data, fileName) => {
         if (resultObj.code && resultObj.msg) {
           const code = resultObj.code
           const message = resultObj.msg
-          if (code === 1001 || code === 1002 || code === 1003 || code === 1004 || code === 1007) {
-            let msg = ''
-            switch (code) {
-              case 1001: msg = 'Token失效,请重新登录,正在退出中......'; break
-              case 1002: msg = '用户名和密码校验失败,请重新登录,正在退出中......'; break
-              case 1003: msg = '接口未授权或无授权码,请重新登录,正在退出中......'; break
-              case 1004: msg = '会话无效,请重新登录,正在退出中......'; break
-              case 1007: msg = '在线会话超出限制,请稍候重试,正在退出中......'; break
-            }
+          const msg = msgOfErrorCode(code)
+          if (msg !== '') {
             if (getToken() !== '') {
               const msgComponent = Message({
                 message: msg,
@@ -141,15 +135,8 @@ service.interceptors.response.use(
       const response = error.response
       const data = response.data
       const code = response.data.code
-      if (code === 1001 || code === 1002 || code === 1003 || code === 1004 || code === 1007) {
-        let msg = ''
-        switch (code) {
-          case 1001: msg = 'Token失效,请重新登录,正在退出中......'; break
-          case 1002: msg = '用户名和密码校验失败,请重新登录,正在退出中......'; break
-          case 1003: msg = '接口未授权或无授权码,请重新登录,正在退出中......'; break
-          case 1004: msg = '会话无效,请重新登录,正在退出中......'; break
-          case 1007: msg = '在线会话超出限制,请稍候重试,正在退出中......'; break
-        }
+      const msg = msgOfErrorCode(code)
+      if (msg !== '') {
         if (getToken() !== '') {
           const msgComponent = Message({
             message: msg,
