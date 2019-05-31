@@ -12,10 +12,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.NoTransactionException;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -35,7 +32,6 @@ import com.tisson.demo.mapper.sys.SysUsersMapper;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Title: SysUsersService.java
@@ -46,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version V1.0
  */
 @Service
-@Slf4j
 public class SysUsersService extends BaseService<SysUsers> {
 	@Autowired
     private SysUsersMapper sysUsersMapper;

@@ -493,10 +493,6 @@ public class SysUsersController {
 	
 	 
 	private Set<SysPages> filterAccessPageList(List<SysPages> list){
-		HashSet<SysPages> set = new HashSet<SysPages>();
-        for (SysPages resource : list ) {
-            set.add(resource);
-        }
-        return set;
+		return  new HashSet<SysPages>(list);
 	}
 }

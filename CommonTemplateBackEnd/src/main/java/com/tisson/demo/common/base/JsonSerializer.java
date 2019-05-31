@@ -23,7 +23,6 @@ public class JsonSerializer {
 	 * @param <T>
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> byte[] serialize(T obj) {
 		return gson.toJson(obj).getBytes(CharsetUtil.CHARSET_UTF_8);
 	}

@@ -37,7 +37,7 @@ public class LoginLogAspect {
 	@Resource(name = "defaultThreadPool")
 	private ThreadPoolTaskExecutor executor;
 	
-	@Pointcut(" execution(public * com.tisson.demo.controller..*.login*(..)) "
+	@Pointcut(" execution(public * com.tisson.demo.controller..*.login*(..)) && "
 			+ " @annotation(org.springframework.web.bind.annotation.RestController) ")
 	public void loginAspectPoint() {
 	}

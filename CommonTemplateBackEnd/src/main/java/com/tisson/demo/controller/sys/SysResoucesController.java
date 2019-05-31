@@ -1,9 +1,5 @@
 package com.tisson.demo.controller.sys;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -82,13 +78,5 @@ public class SysResoucesController {
 	public ResponseBean<String> updateResources(@RequestBody SysResources sysResources){
 		sysResourcesService.update(sysResources);
 		return new ResponseBean<String>("updateResources success","updateResources success");
-	}
-	
-	private Set<SysResources> filterResourcesList(List<SysResources> list){
-		HashSet<SysResources> set = new HashSet<SysResources>();
-        for (SysResources resource : list ) {
-            set.add(resource);
-        }
-        return set;
 	}
 }

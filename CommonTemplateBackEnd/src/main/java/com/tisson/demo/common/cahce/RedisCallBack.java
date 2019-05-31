@@ -11,6 +11,7 @@ import java.util.List;
 * @date 2019年1月7日  
 * @version V1.0  
 */
+@SuppressWarnings("hiding")
 public interface RedisCallBack<T>{
 	public <T> T callbackForSingleObject(byte[] data,Type type);
 	public <T> List<T> callbackForList(byte[] data,Type type);

@@ -1182,7 +1182,7 @@ public class RedisCache implements IRedisManager{
     public void clearAll() {
         log.error("缓存的clear方法被调用，所有缓存数据都被清除！");
 //        redisClient.invoke(jedisPool, BinaryJedis::flushAll);
-        jedisCluster.flushAll();
+//        jedisCluster.flushAll();
     }
 
     /**

@@ -35,8 +35,6 @@ import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
 import com.tisson.demo.mapper.sys.SysUsersMapper;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**  
 * @Title: AuthRealm.java  
 * @Package com.tisson.demo.auth  
@@ -46,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 * @version V1.0  
 */
 @SuppressWarnings({"unchecked","rawtypes"})
-@Slf4j
 @Component
 public class AuthRealm extends AuthorizingRealm{
 	@Autowired

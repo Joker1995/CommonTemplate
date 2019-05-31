@@ -19,7 +19,6 @@ import cn.hutool.core.util.ZipUtil;
 import cn.hutool.extra.template.Engine;
 import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.engine.thymeleaf.ThymeleafEngine;
-import lombok.extern.slf4j.Slf4j;
 
 /**  
 * @Title: GenerateProjectTask.java  
@@ -29,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 * @date 2019年1月18日  
 * @version V1.0  
 */
-@Slf4j
 public class ProjectTask extends GenerateTask{
 
 	public ProjectTask(TaskUnit unit) {

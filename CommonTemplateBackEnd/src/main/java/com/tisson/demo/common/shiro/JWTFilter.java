@@ -46,7 +46,6 @@ import com.tisson.demo.entity.sys.SysUsers;
 import com.tisson.demo.mapper.sys.SysUsersMapper;
 
 import cn.hutool.core.date.DateTime;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Title: JWTFilter.java
@@ -57,7 +56,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version V1.0
  */
 @Component("jwtFilter")
-@Slf4j
 public class JWTFilter extends BasicHttpAuthenticationFilter {
 	/**
 	 * 距离失效前5分钟重发签名

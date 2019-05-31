@@ -20,7 +20,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
 
 /**  
 * @Title: SysPagesController.java  
@@ -33,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/accessPage")
 @RequiresPermissions("/accessPage")
-@Slf4j
 @Api("/organization")
 public class SysPagesController {
 	@Autowired
