@@ -94,15 +94,6 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    proxyTable: {
-        '/template':{
-          target:'http://172.16.28.149:8090/template',
-          changeOrigin:true,
-          pathRewrite:{
-            '^/template':''
-          }
-        }
-    },
     /**
      * You can set by youself according to actual condition
      * You will need to set this if you plan to deploy your site under a sub path,

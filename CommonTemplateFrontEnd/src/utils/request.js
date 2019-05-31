@@ -78,7 +78,13 @@ service.download = (url, data, fileName) => {
               })
               msgComponent.close = () => {
                 store.dispatch('FedLogOut').then(() => {
-                  location.reload() // 为了重新实例化vue-router对象 避免bug
+                  const delayTime = Math.floor(Math.random() * 2000 + 3000)
+                  setTimeout(() => {
+                    const hashRouter = location.hash
+                    if (hashRouter !== '/#/login') {
+                      location.reload() // 为了重新实例化vue-router对象 避免bug
+                    }
+                  }, delayTime)
                 })
               }
               setToken('')
@@ -152,7 +158,13 @@ service.interceptors.response.use(
           })
           msgComponent.close = () => {
             store.dispatch('FedLogOut').then(() => {
-              location.reload() // 为了重新实例化vue-router对象 避免bug
+              const delayTime = Math.floor(Math.random() * 2000 + 3000)
+              setTimeout(() => {
+                const hashRouter = location.hash
+                if (hashRouter !== '/#/login') {
+                  location.reload() // 为了重新实例化vue-router对象 避免bug
+                }
+              }, delayTime)
             })
           }
           setToken('')
