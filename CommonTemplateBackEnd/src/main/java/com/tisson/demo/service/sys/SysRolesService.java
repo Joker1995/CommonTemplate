@@ -60,7 +60,7 @@ public class SysRolesService extends BaseService<SysRoles>{
 		role.setResourceList(resourceList);
 		return role;
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteRole(SysRoles query) {
 		/**  
 		* @Title: deleteRole  
@@ -70,7 +70,7 @@ public class SysRolesService extends BaseService<SysRoles>{
 		*/
 		sysRolesMapper.deleteRole(query);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void updateRoleAccessPages(SysRoles query) {
 		/**  
 		* @Title: updateRoleAccessPage  
@@ -81,7 +81,7 @@ public class SysRolesService extends BaseService<SysRoles>{
 		sysRolesMapper.deleteRoleAccessPages(query);
 		sysRolesMapper.addRoleAccessPages(query);
 	}
-	
+	@Transactional(rollbackFor=Exception.class)
 	public void updateRoleResources(SysRoles query) {
 		/**  
 		* @Title: updateRoleAccessPage  

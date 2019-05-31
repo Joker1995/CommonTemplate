@@ -4,6 +4,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -28,27 +29,27 @@ public abstract class BaseService<T> implements Service<T> {
         ParameterizedType pt = (ParameterizedType) this.getClass().getGenericSuperclass();
         modelClass = (Class<T>) pt.getActualTypeArguments()[0];
     }
-
+	@Transactional(rollbackFor=Exception.class)
 	public void save(T model) {
 		mapper.insertSelective(model);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void save(List<T> models) {
 		mapper.insertList(models);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteById(String id) {
 		mapper.deleteByPrimaryKey(id);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteByIds(String ids) {
 		mapper.deleteByIds(ids);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void update(T model) {
 		mapper.updateByPrimaryKeySelective(model);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public T loadById(String id) {
 		return mapper.selectByPrimaryKey(id);
 	}
@@ -72,7 +73,7 @@ public abstract class BaseService<T> implements Service<T> {
 	public List<T> queryByRecord(T record) {
 		return mapper.select(record);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteByRecord(T record) {
 		mapper.delete(record);
 	}

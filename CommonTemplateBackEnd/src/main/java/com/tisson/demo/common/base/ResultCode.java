@@ -10,7 +10,7 @@ package com.tisson.demo.common.base;
 public enum ResultCode {
 	URL_UNAUTHORIZED(401,"URL未授权"),
 	TOKEN_INVALIDATE_ERROR(1001,"Token失效"),
-	USERNAME_OR_PWD_ERROR(1002,"用户名或密码错误"),
+	USERNAME_OR_PWD_ERROR(1002,"用户名和密码校验失败"),
 	UNAUTHORIZED_ERROR(1003,"接口未授权或无授权码"),
 	SESSION_KICKOUT_ERROR(1004,"会话无效"),
 	PARAMS_ERROR(1005,"请求参数错误"),

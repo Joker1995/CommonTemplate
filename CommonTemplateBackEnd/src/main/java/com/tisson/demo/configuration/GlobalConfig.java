@@ -1,17 +1,33 @@
 package com.tisson.demo.configuration;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
+import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.interceptor.NameMatchTransactionAttributeSource;
+import org.springframework.transaction.interceptor.RollbackRuleAttribute;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionAttribute;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
 
 import com.github.pagehelper.PageHelper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Title: GlobalConfig.java
@@ -22,7 +38,9 @@ import com.github.pagehelper.PageHelper;
  * @version V1.0
  */
 @Configuration
+@Slf4j
 public class GlobalConfig {
+	
 	@Bean
 	public PageHelper pageHelper() {
 		PageHelper pageHelper = new PageHelper();
@@ -39,15 +57,15 @@ public class GlobalConfig {
 	public static PropertySourcesPlaceholderConfigurer properties(Environment env) {
 	    PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
 	    YamlPropertiesFactoryBean yaml = new YamlPropertiesFactoryBean();
-//	    yaml.setResources(new FileSystemResource("/dir/application.yml"));//File引入
 	    String[] actvieProfiles = env.getActiveProfiles();
 	    if(actvieProfiles.length>0) {
 	    	for(String actvieProfile:actvieProfiles) {
 		    	yaml.setResources(new ClassPathResource("props/global-"+actvieProfile+".yml"));//class引入
 		    }
 	    }else {
-	    	yaml.setResources(new ClassPathResource("props/global.yml"));//class引入
+	    	 yaml.setResources(new ClassPathResource("props/global.yml"));//class引入
 	    }
+	   
 	    configurer.setProperties(yaml.getObject());
 	    return configurer;
 	}

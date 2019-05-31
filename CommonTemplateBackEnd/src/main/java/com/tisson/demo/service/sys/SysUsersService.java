@@ -12,7 +12,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.NoTransactionException;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -43,7 +46,6 @@ import lombok.extern.slf4j.Slf4j;
  * @version V1.0
  */
 @Service
-@Transactional(rollbackFor=Exception.class)
 @Slf4j
 public class SysUsersService extends BaseService<SysUsers> {
 	@Autowired
@@ -123,30 +125,30 @@ public class SysUsersService extends BaseService<SysUsers> {
 		initUserRelations(result);
 		return new PageInfo<SysUsers>(result);
 	}
-
+	
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteSysUsers(SysUsers sysUsers) {
-		/**  
-		* @Title: deleteSysUsers  
-		* @Description: TODO(这里用一句话描述这个方法的作用)  
-		* @return    返回类型  
-		* @throws  
-		*/  
 		sysUsersMapper.deleteSysUsers(sysUsers);
 	}
-	
+	@Transactional(rollbackFor=Exception.class)
 	public void updateUserRoles(SysUsers sysUsers) throws Exception{
 		sysUsersMapper.deleteUserRoles(sysUsers);
 		sysUsersMapper.addUserRoles(sysUsers);
 	}
-	
+	@Transactional(rollbackFor=Exception.class)
 	public void updateUserResources(SysUsers sysUsers) {
 		sysUsersMapper.deleteUserResources(sysUsers);
 		sysUsersMapper.addUserResources(sysUsers);
 	}
-	
+	@Transactional(rollbackFor=Exception.class)
 	public void updateUserAccessPages(SysUsers sysUsers) {
 		sysUsersMapper.deleteUserAccessPages(sysUsers);
 		sysUsersMapper.addUserAccessPages(sysUsers);
+	}
+	@Transactional(rollbackFor=Exception.class)
+	public void saveUserOrganizationRelation(SysUsers sysUsers) {
+		sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
+		sysUsersMapper.insertUserOrganizationRelation(sysUsers);
 	}
 
 	public List<SysOrganizations> queryOrganizationByUserId(String id) {
@@ -257,10 +259,5 @@ public class SysUsersService extends BaseService<SysUsers> {
 			}
 			user.setResourceIds(resourceIds);
 		}
-	}
-
-	public void saveUserOrganizationRelation(SysUsers sysUsers) {
-		sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
-		sysUsersMapper.insertUserOrganizationRelation(sysUsers);
 	}
 }

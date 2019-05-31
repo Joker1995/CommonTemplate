@@ -39,7 +39,7 @@ public class SysPagesService extends BaseService<SysPages>{
 		*/ 
 		return queryPage(query);
 	}
-
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteAccessPages(SysPages sysPages) {
 		/**  
 		* @Title: deleteAccessPages  

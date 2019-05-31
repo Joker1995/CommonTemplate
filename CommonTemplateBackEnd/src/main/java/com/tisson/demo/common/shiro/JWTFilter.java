@@ -194,6 +194,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 				}else if(throwable instanceof SessionOnlineLimitException){
 					response(request, response,
 							ResultCode.SESSION_ONLINE_LIMIT_ERROR.getCode(),ResultCode.SESSION_ONLINE_LIMIT_ERROR.getDesc());
+				}else if (throwable instanceof UserNameOrPwdException){
+					response(request, response,
+							ResultCode.USERNAME_OR_PWD_ERROR.getCode(),ResultCode.USERNAME_OR_PWD_ERROR.getDesc());
 				}else {
 					response(request, response,500, "系统错误");
 				}

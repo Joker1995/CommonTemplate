@@ -213,6 +213,7 @@ public class SysCodeController {
 				+ UUID.randomUUID().toString().replace("-", "");
 		String codeTemplateDirPath=globalProperties.getCodeTemplateDirPath();
 		FileUtil.mkdir(generatePath);
+		log.info("generatePath:{},codeTemplateDirPath:{}",generatePath,codeTemplateDirPath);
 		task.setGenerateDirPath(generatePath);
 		task.setTemplateDirPath(codeTemplateDirPath);
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil

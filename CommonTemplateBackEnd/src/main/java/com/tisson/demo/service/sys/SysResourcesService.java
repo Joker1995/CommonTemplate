@@ -26,7 +26,7 @@ import com.tisson.demo.mapper.sys.SysResourcesMapper;
 public class SysResourcesService extends BaseService<SysResources> {
 	@Autowired
 	private SysResourcesMapper sysResourcesMapper;
-	
+	@Transactional(rollbackFor=Exception.class)
 	public void deleteResources(SysResources sysResources) {
 		/**  
 		* @Title: deleteResources  
