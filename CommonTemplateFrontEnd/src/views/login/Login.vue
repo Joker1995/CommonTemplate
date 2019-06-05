@@ -128,7 +128,7 @@ export default {
         const data = response.data
         this.captcha.token = data.token
         this.captcha.image = data.image
-        this.$refs.captchaImage.src = 'data:image/png;base64,' + this.captcha.image
+        this.$refs.captchaImage.src = 'data:image/gif;base64,' + this.captcha.image
       })
     }
   }
