@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**  
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Table {
 	// 数据库表的名称
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	@NotEmpty
     private String jdbcName;
 
     // java 实体的名称(首字母大写)

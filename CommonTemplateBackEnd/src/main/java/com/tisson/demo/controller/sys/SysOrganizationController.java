@@ -1,7 +1,10 @@
 package com.tisson.demo.controller.sys;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,21 +44,21 @@ public class SysOrganizationController {
 	@PostMapping(value = "/organizationList")
 	@ApiOperation(value="获取部门列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysOrganizations>> organizationList(@RequestBody ListQuery<SysOrganizations> query){
+	public ResponseBean<PageInfo<SysOrganizations>> organizationList(@RequestBody @Validated ListQuery<SysOrganizations> query){
 		return new ResponseBean<PageInfo<SysOrganizations>>("queryOrganizationList success",sysOrganizationService.queryPage(query));
 	}
 	
 	@GetMapping("/{id}")
 	@ApiOperation(value="获取id为{id}的部门",httpMethod="GET",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "部门ID", required = true, dataType = "String"),})
-	public ResponseBean<SysOrganizations> queryOrganizationInfo(@PathVariable("id") String id){
+	public ResponseBean<SysOrganizations> queryOrganizationInfo(@PathVariable("id") @NotEmpty String id){
 		return new ResponseBean<SysOrganizations>("queryOrganizationInfo success",sysOrganizationService.loadById(id));
 	}
 	
 	@PutMapping
 	@ApiOperation(value="更新部门信息",httpMethod="PUT",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "部门", required = true, dataType = "SysOrganizations"),})
-	public ResponseBean<String> updateOrganization(@RequestBody SysOrganizations query){
+	public ResponseBean<String> updateOrganization(@RequestBody @Validated SysOrganizations query){
 		sysOrganizationService.update(query);
 		return new ResponseBean<String>("updateOrganization success","updateOrganization success");
 	}
@@ -63,7 +66,7 @@ public class SysOrganizationController {
 	@PostMapping
 	@ApiOperation(value="添加部门信息",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "部门", required = true, dataType = "SysOrganizations"),})
-	public ResponseBean<String> addOrganization(@RequestBody SysOrganizations query){
+	public ResponseBean<String> addOrganization(@RequestBody @Validated SysOrganizations query){
 		sysOrganizationService.save(query);
 		return new ResponseBean<String>("addOrganization success","addOrganization success");
 	}
@@ -71,7 +74,7 @@ public class SysOrganizationController {
 	@DeleteMapping
 	@ApiOperation(value="删除部门信息",httpMethod="DELETE",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "部门", required = true, dataType = "SysOrganizations"),})
-	public ResponseBean<String> deleteOrganization(@RequestBody SysOrganizations query){
+	public ResponseBean<String> deleteOrganization(@RequestBody @Validated SysOrganizations query){
 		sysOrganizationService.deleteById(query.getId());
 		return new ResponseBean<String>("deleteOrganization success","deleteOrganization success");
 	}

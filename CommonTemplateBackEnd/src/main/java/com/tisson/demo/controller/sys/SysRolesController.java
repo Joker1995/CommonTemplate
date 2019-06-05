@@ -2,8 +2,11 @@ package com.tisson.demo.controller.sys;
 
 import java.util.List;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,35 +48,35 @@ public class SysRolesController {
 	@PostMapping("/roleList")
 	@ApiOperation(value="获取角色列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysRoles>> roleList(@RequestBody ListQuery<SysRoles> query){
+	public ResponseBean<PageInfo<SysRoles>> roleList(@RequestBody @Validated ListQuery<SysRoles> query){
 		return new ResponseBean<PageInfo<SysRoles>>("queryRoleList",sysRolesService.queryRoleList(query));
 	}
 	
 	@GetMapping("/{id}")
 	@ApiOperation(value="获取id为{id}的角色",httpMethod="GET",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "角色ID", required = true, dataType = "String"),})
-	public ResponseBean<SysRoles> queryRoleInfo(@PathVariable("id") String id){
+	public ResponseBean<SysRoles> queryRoleInfo(@PathVariable("id") @NotEmpty String id){
 		return new ResponseBean<SysRoles>("queryOrganizationInfo success",sysRolesService.queryRoleInfo(id));
 	}
 	
 	@GetMapping("/resource/{id}")
 	@ApiOperation(value="获取id为{id}的角色可授权接口列表",httpMethod="GET",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "角色ID", required = true, dataType = "String"),})
-	public ResponseBean<List<SysResources>> loadRoleResourcesById(@PathVariable("id") String id){
+	public ResponseBean<List<SysResources>> loadRoleResourcesById(@PathVariable("id") @NotEmpty String id){
 		return new ResponseBean<List<SysResources>>("loadRoleResourcesById "+id+" success",sysRolesService.queryResourcesByRoleId(id));
 	}
 	
 	@GetMapping("/accessPage/{id}")
 	@ApiOperation(value="获取id为{id}的角色可授权界面列表",httpMethod="GET",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "角色ID", required = true, dataType = "String"),})
-	public ResponseBean<List<SysPages>> loadRoleAccessPagesById(@PathVariable("id") String id){
+	public ResponseBean<List<SysPages>> loadRoleAccessPagesById(@PathVariable("id") @NotEmpty String id){
 		return new ResponseBean<List<SysPages>>("loadRoleAccessPagesById "+id+" success",sysRolesService.queryAccessPagesByRoleId(id));
 	}
 	
 	@PutMapping
 	@ApiOperation(value="获取id为{id}的角色可授权界面列表",httpMethod="GET",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "id", value = "角色ID", required = true, dataType = "String"),})
-	public ResponseBean<String> updateRole(@RequestBody SysRoles query){
+	public ResponseBean<String> updateRole(@RequestBody @Validated SysRoles query){
 		sysRolesService.update(query);
 		return new ResponseBean<String>("updateRole success","updateRole success");
 	}
@@ -81,7 +84,7 @@ public class SysRolesController {
 	@PutMapping("/accessPage")
 	@ApiOperation(value="更新角色可授权界面列表",httpMethod="PUT",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "角色", required = true, dataType = "SysRoles"),})
-	public ResponseBean<String> updateRoleAccessPages(@RequestBody SysRoles query){
+	public ResponseBean<String> updateRoleAccessPages(@RequestBody @Validated SysRoles query){
 		sysRolesService.updateRoleAccessPages(query);
 		return new ResponseBean<String>("updateRoleAccessPages success","updateRoleAccessPages success");
 	}
@@ -89,7 +92,7 @@ public class SysRolesController {
 	@PutMapping("/resource")
 	@ApiOperation(value="更新角色可授权接口列表",httpMethod="PUT",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "角色", required = true, dataType = "SysRoles"),})
-	public ResponseBean<String> updateRoleResources(@RequestBody SysRoles query){
+	public ResponseBean<String> updateRoleResources(@RequestBody @Validated SysRoles query){
 		sysRolesService.updateRoleResources(query);
 		return new ResponseBean<String>("updateRoleResources success","updateRoleResources success");
 	}
@@ -97,7 +100,7 @@ public class SysRolesController {
 	@PostMapping
 	@ApiOperation(value="添加角色",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "角色", required = true, dataType = "SysRoles"),})
-	public ResponseBean<String> addRole(@RequestBody SysRoles query){
+	public ResponseBean<String> addRole(@RequestBody @Validated SysRoles query){
 		sysRolesService.save(query);
 		return new ResponseBean<String>("addRole success","addRole success");
 	}
@@ -105,7 +108,7 @@ public class SysRolesController {
 	@DeleteMapping
 	@ApiOperation(value="删除角色",httpMethod="DELETE",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "角色", required = true, dataType = "SysRoles"),})
-	public ResponseBean<String> deleteRole(@RequestBody SysRoles query){
+	public ResponseBean<String> deleteRole(@RequestBody @Validated SysRoles query){
 		sysRolesService.deleteRole(query);
 		return new ResponseBean<String>("deleteRole success","deleteRole success");
 	}

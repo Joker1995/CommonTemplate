@@ -69,6 +69,7 @@ public class ShiroConfig {
         // 权限控制map.
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
         filterChainDefinitionMap.put("/user/login", "anon");
+        filterChainDefinitionMap.put("/user/captcha", "anon");
         filterChainDefinitionMap.put("/user/logout", "anon");
         filterChainDefinitionMap.put("/401", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");

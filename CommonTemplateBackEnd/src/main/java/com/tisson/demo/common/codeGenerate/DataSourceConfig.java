@@ -1,4 +1,7 @@
 package com.tisson.demo.common.codeGenerate;
+
+import javax.validation.constraints.NotEmpty;
+
 /**  
 * @Title: DataSourceConfig.java  
 * @Package com.tisson.demo.common.base  
@@ -9,6 +12,7 @@ package com.tisson.demo.common.codeGenerate;
 */
 public class DataSourceConfig {
 	private String driverClassName;
+	@NotEmpty
 	private String name;
 	private String userName;
 	private String password;

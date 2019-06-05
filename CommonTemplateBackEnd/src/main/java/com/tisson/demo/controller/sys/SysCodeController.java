@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -105,7 +106,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/dataSource/test")
 	@ApiOperation(value="测试当前datasource连接情况",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
-	public ResponseBean<Boolean> testDataSourceConnection(@RequestBody DataSourceConfig config) {
+	public ResponseBean<Boolean> testDataSourceConnection(@RequestBody @Validated DataSourceConfig config) {
 		return new ResponseBean<Boolean>("testDataSourceConnection success", testConnection(config));
 	}
 
@@ -113,7 +114,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/dataSource/tables")
 	@ApiOperation(value="获取当前datasource中的所有表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
-	public ResponseBean<List<Table>> queryDataBaseTables(@RequestBody DataSourceConfig config) {
+	public ResponseBean<List<Table>> queryDataBaseTables(@RequestBody @Validated DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
 				.getApplicationContext();
@@ -149,7 +150,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/addDataSource")
 	@ApiOperation(value="添加datasource到context",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
-	public ResponseBean<Boolean> addDataSource(@RequestBody DataSourceConfig config) {
+	public ResponseBean<Boolean> addDataSource(@RequestBody @Validated DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
 				.getApplicationContext();
@@ -181,7 +182,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/deleteDataSource")
 	@ApiOperation(value="删除当前datasource",httpMethod="DELETE",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "config", value = "数据库配置项", required = true, dataType = "DataSourceConfig"),})
-	public ResponseBean<Boolean> deleteDataSource(@RequestBody DataSourceConfig config) {
+	public ResponseBean<Boolean> deleteDataSource(@RequestBody @Validated DataSourceConfig config) {
 		// 将applicationContext转换为ConfigurableApplicationContext
 		ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) contextUtil
 				.getApplicationContext();
@@ -203,7 +204,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/generateSimpleCode")
 	@ApiOperation(value="生成简易MVC代码",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
-	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
+	public void generateSimpleCode(HttpServletResponse resp, @RequestBody @Validated TaskUnit unit) throws Exception{
 		// TODO
 		GenerateTask task = new MySQLGenerateTask(unit);
 		unit.setTable(unit.getTable().setJavaName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), false))
@@ -243,7 +244,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/generateProject")
 	@ApiOperation(value="生成简易项目代码",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
-	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
+	public void generateProject(HttpServletResponse resp, @RequestBody @Validated TaskUnit unit) throws Exception{
 		ProjectTask task=new ProjectTask(unit);
 		String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
 				+ UUID.randomUUID().toString().replace("-", "");

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -97,7 +98,12 @@ public class ExceptionControllerHandler {
         return new ResponseBean<String>(ResultCode.REQUEST_METHOD_UNSUPPORTED_ERROR.getCode(),
         		ResultCode.REQUEST_METHOD_UNSUPPORTED_ERROR.getDesc(), null);
     }
-    
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+	public ResponseBean<String>  handlerParamsValidate(){
+    	return new ResponseBean<String>(ResultCode.PARAMS_VALIDATE_FAILURE.getCode(),
+        		ResultCode.PARAMS_VALIDATE_FAILURE.getDesc(), null);
+    }
 	/**
 	 * 捕捉所有其他异常
 	 * 

@@ -1,7 +1,10 @@
 package com.tisson.demo.controller.sys;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,15 +43,15 @@ public class SysResoucesController {
 	@PostMapping(value = "/resources")
 	@ApiOperation(value="获取授权接口列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody ListQuery<SysResources> query){
+	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody @Validated ListQuery<SysResources> query){
 		return new ResponseBean<PageInfo<SysResources>>("queryResourceList success",sysResourcesService.queryPage(query));
 	}
 	
 	@PostMapping(value = "/{id}/childList")
 	@ApiOperation(value="获取id为{id}的授权接口列表的子列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysResources>> queryResourcesChildList(@PathVariable("id") String id,
-			@RequestBody ListQuery<SysResources> query){
+	public ResponseBean<PageInfo<SysResources>> queryResourcesChildList(@PathVariable("id")@NotEmpty String id,
+			@RequestBody @Validated ListQuery<SysResources> query){
 		if(query.data==null) {
 			query.data=new SysResources();
 		}
@@ -59,7 +62,7 @@ public class SysResoucesController {
 	@PostMapping
 	@ApiOperation(value="添加授权接口列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
-	public ResponseBean<String> addResources(@RequestBody SysResources sysResources){
+	public ResponseBean<String> addResources(@RequestBody @Validated SysResources sysResources){
 		sysResourcesService.save(sysResources);
 		return new ResponseBean<String>("addResources success","addResources success");
 	}
@@ -67,7 +70,7 @@ public class SysResoucesController {
 	@DeleteMapping
 	@ApiOperation(value="删除授权接口列表",httpMethod="DELETE",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
-	public ResponseBean<String> deleteResources(@RequestBody SysResources sysResources){
+	public ResponseBean<String> deleteResources(@RequestBody @Validated SysResources sysResources){
 		sysResourcesService.deleteResources(sysResources);
 		return new ResponseBean<String>("deleteResources success","deleteResources success");
 	}
@@ -75,7 +78,7 @@ public class SysResoucesController {
 	@PutMapping
 	@ApiOperation(value="更新授权接口列表",httpMethod="PUT",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "sysResources", value = "授权接口", required = true, dataType = "sysResources"),})
-	public ResponseBean<String> updateResources(@RequestBody SysResources sysResources){
+	public ResponseBean<String> updateResources(@RequestBody @Validated SysResources sysResources){
 		sysResourcesService.update(sysResources);
 		return new ResponseBean<String>("updateResources success","updateResources success");
 	}

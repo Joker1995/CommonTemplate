@@ -179,8 +179,13 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		
-		
+		<!-- 验证码 -->
+		<dependency>
+			<groupId>com.github.whvcse</groupId>
+			<artifactId>EasyCaptcha</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<!-- shiro-redis 依赖 -->
 		<dependency>
 			<groupId>org.crazycake</groupId>
 			<artifactId>shiro-redis</artifactId>
@@ -191,6 +196,17 @@
 					<artifactId>shiro-core</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.9.2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.9.2</version>
 		</dependency>
 	</dependencies>
 
@@ -311,7 +327,7 @@
 			</repository> -->
 		<repository>
 			<id>projectlombok.org</id>
-			<url>https://projectlombok.org/edge-releases</url>
+			<url>https://projectlombok.org/download-edge</url>
 		</repository>
 	</repositories>
 </project>

@@ -1,4 +1,8 @@
 package com.tisson.demo.common.base;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+
 /**  
 * @Title: ListQuery.java  
 * @Package com.tisson.demo.common.base  
@@ -8,10 +12,11 @@ package com.tisson.demo.common.base;
 * @version V1.0  
 */
 public class ListQuery<T> {
+	@Min(1)
 	public Integer page;
-	
+	@Min(1)
 	public Integer limit;
-	
+	@Valid
 	public T data;
 	
 	public ListQuery() {

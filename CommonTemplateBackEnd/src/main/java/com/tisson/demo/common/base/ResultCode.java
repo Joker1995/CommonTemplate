@@ -15,7 +15,8 @@ public enum ResultCode {
 	SESSION_KICKOUT_ERROR(1004,"会话无效"),
 	PARAMS_ERROR(1005,"请求参数错误"),
 	REQUEST_METHOD_UNSUPPORTED_ERROR(1006,"请求方法错误"),
-	SESSION_ONLINE_LIMIT_ERROR(1007,"在线会话超出限制");
+	SESSION_ONLINE_LIMIT_ERROR(1007,"在线会话超出限制"),
+	PARAMS_VALIDATE_FAILURE(1008,"参数校验失败");
 	
 	
 	private int code;

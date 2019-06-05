@@ -1,7 +1,10 @@
 package com.tisson.demo.controller.sys;
 
+import javax.validation.constraints.NotEmpty;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,7 +43,7 @@ public class SysPagesController {
 	@PostMapping(value = "/accessPages")
 	@ApiOperation(value="获取前端授权界面列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysPages>> queryAccessPages(@RequestBody ListQuery<SysPages> query){
+	public ResponseBean<PageInfo<SysPages>> queryAccessPages(@RequestBody @Validated ListQuery<SysPages> query){
 		return new ResponseBean<PageInfo<SysPages>>("queryAccessPages success",sysPagesService.queryPage(query));
 	}
 	
@@ -49,8 +52,8 @@ public class SysPagesController {
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "id", value = "前端授权界面ID", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysPages>> queryAccessPagesChildList(@PathVariable("id") String id,
-			@RequestBody ListQuery<SysPages> query){
+	public ResponseBean<PageInfo<SysPages>> queryAccessPagesChildList(@PathVariable("id")@NotEmpty String id,
+			@RequestBody @Validated ListQuery<SysPages> query){
 		if(query.data==null) {
 			query.data=new SysPages();
 		}
@@ -62,7 +65,7 @@ public class SysPagesController {
 	@ApiOperation(value="添加前端授权界面",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "sysPages", value = "前端授权界面", required = true, dataType = "SysPages")})
-	public ResponseBean<String> addAccessPages(@RequestBody SysPages sysPages){
+	public ResponseBean<String> addAccessPages(@RequestBody @Validated SysPages sysPages){
 		sysPagesService.save(sysPages);
 		return new ResponseBean<String>("addAccessPages success","addAccessPages success");
 	}
@@ -71,7 +74,7 @@ public class SysPagesController {
 	@ApiOperation(value="删除前端授权界面",httpMethod="DELETE",  response=ResponseBean.class)
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "sysPages", value = "前端授权界面", required = true, dataType = "SysPages")})
-	public ResponseBean<String> deleteAccessPages(@RequestBody SysPages sysPages){
+	public ResponseBean<String> deleteAccessPages(@RequestBody @Validated SysPages sysPages){
 		sysPagesService.deleteAccessPages(sysPages);
 		return new ResponseBean<String>("deleteAccessPages success","deleteAccessPages success");
 	}
@@ -80,7 +83,7 @@ public class SysPagesController {
 	@ApiOperation(value="更新前端授权界面",httpMethod="PUT",  response=ResponseBean.class)
 	@ApiImplicitParams({
 		@ApiImplicitParam(name = "sysPages", value = "前端授权界面", required = true, dataType = "SysPages")})
-	public ResponseBean<String> updateAccessPages(@RequestBody SysPages sysPages){
+	public ResponseBean<String> updateAccessPages(@RequestBody @Validated SysPages sysPages){
 		sysPagesService.update(sysPages);
 		return new ResponseBean<String>("updateAccessPages success","updateAccessPages success");
 	}
