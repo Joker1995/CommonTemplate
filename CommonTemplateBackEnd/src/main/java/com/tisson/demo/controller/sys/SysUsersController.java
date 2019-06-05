@@ -1,5 +1,6 @@
 package com.tisson.demo.controller.sys;
 
+import java.awt.Font;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +56,7 @@ import com.tisson.demo.entity.sys.SysRoles;
 import com.tisson.demo.entity.sys.SysUsers;
 import com.tisson.demo.service.sys.SysUsersService;
 import com.wf.captcha.Captcha;
-import com.wf.captcha.SpecCaptcha;
+import com.wf.captcha.GifCaptcha;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
@@ -517,19 +518,20 @@ public class SysUsersController {
 				+ "tempCaptcha";
 		Map<String, String> result = new HashMap<String, String>();
 		String token = UUID.randomUUID().toString().replace("-", "");
-		File tempFile = FileUtil.touch(tempDirPath + File.separator + token + ".png");
+		File tempFile = FileUtil.touch(tempDirPath + File.separator + token + ".gif");
 		if (!tempFile.getParentFile().exists()) {
 			tempFile.mkdirs();
 			tempFile.createNewFile();
 		}
 		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(tempFile));) {
 			// 三个参数分别为宽、高、位数
-			SpecCaptcha specCaptcha = new SpecCaptcha(130, 45, 4);
+			GifCaptcha gifCaptcha = new GifCaptcha(130, 45, 4);
+			gifCaptcha.setFont(new Font("Verdana", Font.PLAIN, 32));
 			// 设置类型，纯数字、纯字母、字母数字混合
-			specCaptcha.setCharType(Captcha.TYPE_ONLY_NUMBER);
+			gifCaptcha.setCharType(Captcha.TYPE_ONLY_NUMBER);
 			// 生成的验证码
-			String code = specCaptcha.text();
-			specCaptcha.out(out);
+			String code = gifCaptcha.text();
+			gifCaptcha.out(out);
 			String context = Base64.encode(tempFile);
 			cache.put("captcha:" + token, code, 30, TimeUnit.SECONDS);// 验证码30s
 			LOGGER.info("获取验证码===验证码:[{}],验证token:[{}]", code, token);
