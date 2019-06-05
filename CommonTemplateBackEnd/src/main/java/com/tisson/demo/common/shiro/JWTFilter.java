@@ -177,27 +177,27 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			try {
 				executeLogin(request, response);
 			} catch (Exception e) {
-				LOGGER.error("ERROR:", e.getCause());
-				LOGGER.error("ERROR class:{}", e.getCause().getClass().getName());
-				Throwable throwable=e.getCause();
-				if(throwable instanceof AuthenticationException) {
+				LOGGER.error("判断token发生错误:", e);
+				if(e instanceof AuthenticationException) {
 					response(request, response,
 							ResultCode.UNAUTHORIZED_ERROR.getCode(),ResultCode.UNAUTHORIZED_ERROR.getDesc());
-				} else if(throwable instanceof TokenInvalidateException) {
+				} else if(e instanceof TokenInvalidateException) {
 					response(request, response,
 							ResultCode.TOKEN_INVALIDATE_ERROR.getCode(),ResultCode.TOKEN_INVALIDATE_ERROR.getDesc());
-				}else if(throwable instanceof SessionKickoutException) {
+				}else if(e instanceof SessionKickoutException) {
 					response(request, response,
 							ResultCode.SESSION_KICKOUT_ERROR.getCode(),ResultCode.SESSION_KICKOUT_ERROR.getDesc());
-				}else if(throwable instanceof SessionOnlineLimitException){
+				}else if(e instanceof SessionOnlineLimitException){
 					response(request, response,
 							ResultCode.SESSION_ONLINE_LIMIT_ERROR.getCode(),ResultCode.SESSION_ONLINE_LIMIT_ERROR.getDesc());
-				}else if (throwable instanceof UserNameOrPwdException){
+				}else if (e instanceof UserNameOrPwdException){
 					response(request, response,
 							ResultCode.USERNAME_OR_PWD_ERROR.getCode(),ResultCode.USERNAME_OR_PWD_ERROR.getDesc());
 				}else {
-					response(request, response,500, "系统错误");
+					response(request, response,ResultCode.INTERNAL_SERVER_ERROR.getCode(),
+							ResultCode.INTERNAL_SERVER_ERROR.getDesc());
 				}
+				return false;
 			}
 		}
 		return true;
@@ -236,6 +236,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			}
 			String data = new Gson().toJson(new ResponseBean<String>(statusCode, msg, null));
 			out.append(data);
+			out.flush();
 		} catch (IOException e) {
 			LOGGER.error("ERROR IN WRITE RESPONSE:", e);
 		}
