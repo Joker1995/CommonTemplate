@@ -30,7 +30,7 @@ const user = {
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
-        doLogin(username, userInfo.password).then(resp => {
+        doLogin(username, userInfo.password, userInfo.captcha, userInfo.captchaToken).then(resp => {
           const data = resp.data
           setToken(data)
           commit('SET_TOKEN', data)

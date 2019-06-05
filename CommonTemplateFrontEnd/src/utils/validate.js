@@ -1,4 +1,14 @@
 /* 校验密码 */
+export function validateCaptcha(captchaVal) {
+  if (!captchaVal) {
+    return false
+  } else if (captchaVal && captchaVal.length !== 4) {
+    return false
+  } else {
+    return true
+  }
+}
+
 export function validatePwd(pwdVal) {
   let num = 0
   const rule1 = /\d+/

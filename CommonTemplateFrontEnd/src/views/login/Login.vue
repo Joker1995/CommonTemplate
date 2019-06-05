@@ -23,6 +23,13 @@
           <svg-icon icon-class="eye" />
         </span>
       </el-form-item>
+      <el-form-item prop="captcha">
+        <span class="svg-container">
+          <svg-icon icon-class="password" />
+        </span>
+        <el-input v-model="temp.captcha" name="captcha" type="text" auto-complete="on" placeholder="capatcha"/>
+        <img id="captchaImage" ref="captchaImage" @click.prevent="refreshCaptcha">
+      </el-form-item>
       <el-form-item>
         <el-button :loading="loading" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
           登录
@@ -39,7 +46,8 @@
 </template>
 
 <script>
-import { validatePwd } from '@/utils/validate'
+import { validatePwd, validateCaptcha } from '@/utils/validate'
+import { doGetCaptcha } from '@/api/user/user'
 
 export default {
   name: 'Login',
@@ -51,13 +59,27 @@ export default {
         callback()
       }
     }
+    const validateCapt = (rule, value, callback) => {
+      if (!validateCaptcha(value)) {
+        callback(new Error('验证码为4位'))
+      } else {
+        callback()
+      }
+    }
     return {
       temp: {
         username: undefined,
-        password: undefined
+        password: undefined,
+        captcha: undefined,
+        captchaToken: undefined
+      },
+      captcha: {
+        token: undefined,
+        image: undefined
       },
       loginRules: {
-        password: [{ required: true, trigger: 'blur', validator: validatePass }]
+        password: [{ required: true, trigger: 'blur', validator: validatePass }],
+        captcha: [{ required: true, trigger: 'blur', validator: validateCapt }]
       },
       loading: false,
       pwdType: 'password',
@@ -73,6 +95,9 @@ export default {
       immediate: true
     }
   },
+  mounted: function() {
+    this.refreshCaptcha()
+  },
   methods: {
     showPwd() {
       if (this.pwdType === 'password') {
@@ -85,6 +110,7 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          this.temp.captchaToken = this.captcha.token
           this.$store.dispatch('Login', this.temp).then(() => {
             this.loading = false
             this.$router.push({ path: this.redirect || '/' })
@@ -96,6 +122,14 @@ export default {
     },
     handleRegister() {
       this.$router.push('/register')
+    },
+    refreshCaptcha() {
+      doGetCaptcha().then(async response => {
+        const data = response.data
+        this.captcha.token = data.token
+        this.captcha.image = data.image
+        this.$refs.captchaImage.src = 'data:image/png;base64,' + this.captcha.image
+      })
     }
   }
 }
@@ -152,6 +186,12 @@ $light_gray:#eee;
     max-width: 100%;
     padding: 35px 35px 15px 35px;
     margin: 120px auto;
+  }
+  .el-form-item{
+    #captchaImage{
+      position: absolute;
+      right: 0;
+    }
   }
   .tips {
     font-size: 14px;

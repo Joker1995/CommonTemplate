@@ -2,14 +2,16 @@ import request from '@/utils/request'
 import { getEncyptSalt } from '@/utils'
 import md5 from 'js-md5'
 
-export function doLogin(userName, password) {
+export function doLogin(userName, password, captcha, captchaToken) {
   const encyptPassword = md5(md5(password + getEncyptSalt()))
   return request({
     url: '/user/login',
     method: 'post',
     params: {
       userName: userName,
-      password: encyptPassword
+      password: encyptPassword,
+      captcha: captcha,
+      captchaToken: captchaToken
     }
   })
 }
@@ -174,5 +176,12 @@ export function doUpdateUserPwd(data) {
     url: '/user/' + data.id + '/password',
     method: 'post',
     data: data
+  })
+}
+
+export function doGetCaptcha() {
+  return request({
+    url: '/user/captcha',
+    method: 'get'
   })
 }
