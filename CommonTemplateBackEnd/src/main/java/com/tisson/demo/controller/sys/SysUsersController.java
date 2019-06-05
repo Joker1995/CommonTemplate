@@ -272,10 +272,15 @@ public class SysUsersController {
 			@RequestParam("password") @NotEmpty String password,
 			@RequestParam("captcha") @NotEmpty String captcha,
 			@RequestParam("captchaToken") @NotEmpty String captchaToken) throws Exception {
-		String cacheCode = cache.get("captcha:" + captchaToken);
+		String captchaTokenKey="captcha:" + captchaToken;
+		if(!cache.exists(captchaTokenKey)) {
+			throw new UserNameOrPwdException();
+		}
+		String cacheCode = cache.get(captchaTokenKey);
 		if(StringUtil.isEmpty(cacheCode) || !cacheCode.equals(captcha)) {
 			throw new UserNameOrPwdException();
 		}
+		cache.remove(captchaTokenKey);
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
 		// TODO 改造token
 		LOGGER.info("查询出来的密码:{}", sysUsers.getPassword());
@@ -514,8 +519,9 @@ public class SysUsersController {
 	@GetMapping(value = "/captcha")
 	@ApiOperation(value = "获取验证码", httpMethod = "GET", response = ResponseBean.class)
 	public ResponseBean<Map<String, String>> captcha() throws Exception {
-		String tempDirPath = this.getClass().getClassLoader().getResource("/").toString() + File.separator
-				+ "tempCaptcha";
+		String tempDirPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+				+ File.separator + "tempCaptcha";
+		LOGGER.info("验证码存储文件夹路径:[{}]",tempDirPath);
 		Map<String, String> result = new HashMap<String, String>();
 		String token = UUID.randomUUID().toString().replace("-", "");
 		File tempFile = FileUtil.touch(tempDirPath + File.separator + token + ".gif");
