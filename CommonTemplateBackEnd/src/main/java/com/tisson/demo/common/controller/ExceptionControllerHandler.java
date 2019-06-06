@@ -2,6 +2,8 @@ package com.tisson.demo.common.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.catalina.connector.ClientAbortException;
+import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.base.ResultCode;
+import com.tisson.demo.common.expt.CaptchaValidateException;
 import com.tisson.demo.common.expt.SessionKickoutException;
 import com.tisson.demo.common.expt.TokenInvalidateException;
 import com.tisson.demo.common.expt.UnauthorizedException;
@@ -122,6 +125,29 @@ public class ExceptionControllerHandler {
         		ResultCode.PARAMS_VALIDATE_FAILURE.getDesc(), null);
     }
     
+    /**
+     * 捕捉shiro校验异常
+     * @return
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(UnauthenticatedException.class)
+	public ResponseBean<String>  handlerUnauthenticated(){
+    	return new ResponseBean<String>(ResultCode.UNAUTHORIZED_ERROR.getCode(),
+        		ResultCode.UNAUTHORIZED_ERROR.getDesc(), null);
+    }
+    
+    /**
+     * 捕捉验证码校验异常
+     * @return
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CaptchaValidateException.class)
+	public ResponseBean<String>  handlerCaptchaInvalidate(){
+    	return new ResponseBean<String>(ResultCode.CAPTCHA_INVALIDATE_ERROR.getCode(),
+        		ResultCode.CAPTCHA_INVALIDATE_ERROR.getDesc(), null);
+    }
+    
+    
 	/**
 	 * 捕捉所有其他异常
 	 * 
@@ -132,12 +158,18 @@ public class ExceptionControllerHandler {
 	@ExceptionHandler(Exception.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseBean<String> globalException(HttpServletRequest request, Throwable ex) {
-		LOGGER.error("捕捉系统错误类型:[{}],请求URL:[{}],请求参数:[{}]",
-				ex.getClass().getName(),request.getRequestURI(),
-				JSONUtil.toJsonStr(request.getParameterMap()));
-		LOGGER.error("捕捉系统错误栈信息:",ex);
-		return new ResponseBean<String>(ResultCode.INTERNAL_SERVER_ERROR.getCode(),
-				ResultCode.INTERNAL_SERVER_ERROR.getDesc(),null);
+		if(ex instanceof ClientAbortException || ex instanceof IllegalStateException) {
+			LOGGER.info("可能是response getOutputStream打开两次以上,忽略该错误");
+			return null;
+		}else {
+			LOGGER.error("捕捉系统错误类型:[{}],请求URL:[{}],请求参数:[{}]",
+					ex.getClass().getName(),request.getRequestURI(),
+					JSONUtil.toJsonStr(request.getParameterMap()));
+			LOGGER.error("捕捉系统错误栈信息:",ex);
+			return new ResponseBean<String>(ResultCode.INTERNAL_SERVER_ERROR.getCode(),
+					ResultCode.INTERNAL_SERVER_ERROR.getDesc(),null);
+		}
+		
 	}
 
 	@SuppressWarnings("unused")

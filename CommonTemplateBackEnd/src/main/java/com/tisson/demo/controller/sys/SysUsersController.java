@@ -44,6 +44,7 @@ import com.tisson.demo.common.base.GlobalConstant;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.cahce.RedisCache;
+import com.tisson.demo.common.expt.CaptchaValidateException;
 import com.tisson.demo.common.expt.UnauthorizedException;
 import com.tisson.demo.common.expt.UserNameOrPwdException;
 import com.tisson.demo.common.shiro.JWTToken;
@@ -274,17 +275,16 @@ public class SysUsersController {
 			@RequestParam("captchaToken") @NotEmpty String captchaToken) throws Exception {
 		String captchaTokenKey="captcha:" + captchaToken;
 		if(!cache.exists(captchaTokenKey)) {
-			throw new UserNameOrPwdException();
+			throw new CaptchaValidateException();
 		}
 		String cacheCode = cache.get(captchaTokenKey);
 		if(StringUtil.isEmpty(cacheCode) || !cacheCode.equals(captcha)) {
-			throw new UserNameOrPwdException();
+			throw new CaptchaValidateException();
 		}
 		cache.remove(captchaTokenKey);
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
 		// TODO 改造token
-		LOGGER.info("查询出来的密码:{}", sysUsers.getPassword());
-		LOGGER.info("请求中的密码:{}", password);
+		LOGGER.info("查询出来的密码:[{}],请求中的密码:[{}]", sysUsers.getPassword(),password);
 		if (sysUsers.getPassword().equals(password)) {
 			String token = JWTUtil.sign(userName, password);
 			Subject subject = SecurityUtils.getSubject();
