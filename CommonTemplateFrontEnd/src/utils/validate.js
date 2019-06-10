@@ -1,4 +1,4 @@
-/* 校验密码 */
+/* 校验验证码 */
 export function validateCaptcha(captchaVal) {
   if (!captchaVal) {
     return false
@@ -9,6 +9,18 @@ export function validateCaptcha(captchaVal) {
   }
 }
 
+/* 校验邮箱 */
+export function validateEmail(emailVal) {
+  if (!emailVal) {
+    return false
+  } else if (!emailVal.includes('@')) {
+    return false
+  } else {
+    return true
+  }
+}
+
+/* 校验密码 */
 export function validatePwd(pwdVal) {
   let num = 0
   const rule1 = /\d+/

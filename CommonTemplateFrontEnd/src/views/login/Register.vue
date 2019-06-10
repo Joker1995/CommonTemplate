@@ -8,6 +8,12 @@
         </span>
         <el-input v-model="temp.username" name="username" type="text" auto-complete="on" placeholder="username" />
       </el-form-item>
+      <el-form-item prop="email">
+        <span class="svg-container">
+          <svg-icon icon-class="user" />
+        </span>
+        <el-input v-model="temp.email" name="email" type="text" auto-complete="on" placeholder="email" />
+      </el-form-item>
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
@@ -53,7 +59,7 @@
 </template>
 
 <script>
-import { validatePwd } from '@/utils/validate'
+import { validatePwd, validateEmail } from '@/utils/validate'
 
 export default {
   name: 'Login',
@@ -65,19 +71,28 @@ export default {
         callback()
       }
     }
+    const validateMail = (rule, value, callback) => {
+      if (!validateEmail(value)) {
+        callback(new Error('请输入正确格式的邮箱'))
+      } else {
+        callback()
+      }
+    }
     return {
       temp: {
         username: undefined,
         password: undefined,
-        repeatPassword: undefined
+        repeatPassword: undefined,
+        email: undefined
       },
       registerRules: {
-        password: [{ required: true, trigger: 'blur', validator: validatePass }]
+        password: [{ required: true, trigger: 'blur', validator: validatePass }],
+        email: [{ required: true, trigger: 'blur', validator: validateMail }]
       },
       loading: false,
       pwdType: 'password',
       redirect: undefined,
-      projectName: '爬虫后台'
+      projectName: '通用模板'
     }
   },
   watch: {
@@ -101,9 +116,11 @@ export default {
         if (valid) {
           this.loading = true
           this.$store.dispatch('Register', this.temp).then(() => {
-            this.loading = false
             this.$router.push('/login')
           })
+          setTimeout(() => {
+            this.loading = false
+          }, 5000)
         }
       })
     },
@@ -119,7 +136,7 @@ $bg:#2d3a4b;
 $light_gray:#eee;
 
 /* reset element-ui css */
-.login-container {
+.register-container {
   .el-input {
     display: inline-block;
     height: 47px;
@@ -152,12 +169,12 @@ $light_gray:#eee;
 $bg:#2d3a4b;
 $dark_gray:#889aa4;
 $light_gray:#eee;
-.login-container {
+.register-container {
   position: fixed;
   height: 100%;
   width: 100%;
   background-color: $bg;
-  .login-form {
+  .register-form {
     position: absolute;
     left: 0;
     right: 0;
@@ -165,6 +182,12 @@ $light_gray:#eee;
     max-width: 100%;
     padding: 35px 35px 15px 35px;
     margin: 120px auto;
+  }
+  .el-form-item{
+    #captchaImage{
+      position: absolute;
+      right: 0;
+    }
   }
   .tips {
     font-size: 14px;

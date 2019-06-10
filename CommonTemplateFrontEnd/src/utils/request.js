@@ -73,11 +73,12 @@ service.download = (url, data, fileName) => {
               msgComponent.close = () => {
                 store.dispatch('FedLogOut').then(() => {
                   const currentHashRouter = location.hash
-                  if (currentHashRouter !== '/#/login') {
+                  if (currentHashRouter.startsWith('#/login') && currentHashRouter.startsWith('#/register')) {
                     const delayTime = Math.floor(Math.random() * 2000 + 3000)
                     setTimeout(() => {
                       const hashRouter = location.hash
-                      if (hashRouter !== '/#/login') {
+                      console.log(hashRouter)
+                      if (hashRouter.startsWith('#/login') && hashRouter.startsWith('#/register')) {
                         location.reload() // 为了重新实例化vue-router对象 避免bug
                       }
                     }, delayTime)
@@ -149,11 +150,12 @@ service.interceptors.response.use(
           msgComponent.close = () => {
             store.dispatch('FedLogOut').then(() => {
               const currentHashRouter = location.hash
-              if (currentHashRouter !== '/#/login') {
+              if (currentHashRouter.startsWith('#/login') && currentHashRouter.startsWith('#/register')) {
                 const delayTime = Math.floor(Math.random() * 2000 + 3000)
                 setTimeout(() => {
                   const hashRouter = location.hash
-                  if (hashRouter !== '/#/login') {
+                  console.log(hashRouter)
+                  if (hashRouter.startsWith('#/login') && hashRouter.startsWith('#/register')) {
                     location.reload() // 为了重新实例化vue-router对象 避免bug
                   }
                 }, delayTime)

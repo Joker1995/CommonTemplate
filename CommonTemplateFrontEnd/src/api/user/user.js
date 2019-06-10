@@ -16,14 +16,15 @@ export function doLogin(userName, password, captcha, captchaToken) {
   })
 }
 
-export function doRegister(username, password) {
+export function doRegister(username, password, email) {
   const encyptPassword = md5(md5(password + getEncyptSalt()))
   return request({
     url: '/user/register',
     method: 'post',
-    data: {
-      username,
-      encyptPassword
+    params: {
+      userName: username,
+      password: encyptPassword,
+      email: email
     }
   })
 }
