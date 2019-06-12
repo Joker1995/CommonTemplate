@@ -17,6 +17,10 @@
   	select * from sys_pages where parent_id=#{id,jdbcType=CHAR}
   </select>
   
+  <select id="queryRootPages" resultMap="BaseResultMap">
+  	select * from sys_pages where parent_id is null
+  </select>
+  
   <delete id="deleteAccessPages">
   	<if test="query!=null">
         <if test="query.id!=null">

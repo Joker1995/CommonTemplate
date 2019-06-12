@@ -20,4 +20,6 @@ public interface SysPagesMapper extends Mapper<SysPages>{
 
 	void deleteAccessPages(Map<String,Object> params);
 
+	List<SysPages> queryRootPages();
+
 }

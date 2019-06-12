@@ -44,7 +44,7 @@ public class SysOrganizationController {
 	@PostMapping(value = "/organizationList")
 	@ApiOperation(value="获取部门列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysOrganizations>> organizationList(@RequestBody @Validated ListQuery<SysOrganizations> query){
+	public ResponseBean<PageInfo<SysOrganizations>> organizationList(@RequestBody ListQuery<SysOrganizations> query){
 		return new ResponseBean<PageInfo<SysOrganizations>>("queryOrganizationList success",sysOrganizationService.queryPage(query));
 	}
 	

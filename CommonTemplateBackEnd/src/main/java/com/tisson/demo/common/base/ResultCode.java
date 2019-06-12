@@ -18,7 +18,9 @@ public enum ResultCode {
 	REQUEST_METHOD_UNSUPPORTED_ERROR(1006,"请求方法错误"),
 	SESSION_ONLINE_LIMIT_ERROR(1007,"在线会话超出限制"),
 	PARAMS_VALIDATE_FAILURE(1008,"参数校验失败"),
-	CAPTCHA_INVALIDATE_ERROR(1009,"验证码校验失败");
+	CAPTCHA_INVALIDATE_ERROR(1009,"验证码校验失败"),
+	PROCESS_RESOURCE_FILE_ERROR(1010,"流程文件异常"),
+	REGISTER_USER_ERROR(1011,"注册用户名已存在或注册参数格式错误");
 	
 	
 	private int code;

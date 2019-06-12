@@ -58,4 +58,9 @@ public class SysPagesService extends BaseService<SysPages>{
 		params.put("subListIds", subListIds);
 		sysPagesMapper.deleteAccessPages(params);
 	}
+	public PageInfo<SysPages> queryRootPages() {
+		PageInfo<SysPages> result =new PageInfo<SysPages>();
+		result.setList(sysPagesMapper.queryRootPages());
+		return result;
+	}
 }

@@ -204,7 +204,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/generateSimpleCode")
 	@ApiOperation(value="生成简易MVC代码",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
-	public void generateSimpleCode(HttpServletResponse resp, @RequestBody @Validated TaskUnit unit) throws Exception{
+	public void generateSimpleCode(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		// TODO
 		GenerateTask task = new MySQLGenerateTask(unit);
 		unit.setTable(unit.getTable().setJavaName(NameConverter.convertNormal2CamelCaseName(unit.getTable().getJdbcName(), false))
@@ -244,7 +244,7 @@ public class SysCodeController {
 	@RequiresPermissions("/code/generateProject")
 	@ApiOperation(value="生成简易项目代码",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "unit", value = "生成任务配置项", required = true, dataType = "TaskUnit"),})
-	public void generateProject(HttpServletResponse resp, @RequestBody @Validated TaskUnit unit) throws Exception{
+	public void generateProject(HttpServletResponse resp, @RequestBody TaskUnit unit) throws Exception{
 		ProjectTask task=new ProjectTask(unit);
 		String generatePath = globalProperties.getCodeGenerateDirPath() + File.separator
 				+ UUID.randomUUID().toString().replace("-", "");

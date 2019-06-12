@@ -186,3 +186,18 @@ export function doGetCaptcha() {
     method: 'get'
   })
 }
+
+export function doGetRegisterTask() {
+  return request({
+    url: '/user/registerTask',
+    method: 'get'
+  })
+}
+
+export function doApprovalRegisterTask(data) {
+  return request({
+    url: '/user/approvalRegisterTask',
+    method: 'post',
+    params: data
+  })
+}

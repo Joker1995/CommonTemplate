@@ -7,8 +7,12 @@ import Role from '@/views/user/Role'
 import Organization from '@/views/user/Organization'
 import AccessPage from '@/views/user/AccessPage'
 import Resource from '@/views/user/Resource'
+import RegisterTask from '@/views/user/RegisterTask'
+
 import Login from '@/views/logger/Login'
 import Operation from '@/views/logger/Operation'
+
+import Process from '@/views/process/Process'
 
 import DataSource from '@/views/code/DataSource'
 import Tables from '@/views/code/Tables'
@@ -70,6 +74,18 @@ export const asyncRouterMap = [
         name: 'Resource',
         component: Resource,
         meta: { title: '接口权限维护', icon: 'user', permission: '/system/resource' }
+      },
+      {
+        path: 'registerTask',
+        name: 'RegisterTask',
+        component: RegisterTask,
+        meta: { title: '注册任务审批', icon: 'user', permission: '/system/registerTask' }
+      },
+      {
+        path: 'process',
+        name: 'Process',
+        component: Process,
+        meta: { title: '流程维护', icon: 'user', permission: '/system/process' }
       }
     ]
   },

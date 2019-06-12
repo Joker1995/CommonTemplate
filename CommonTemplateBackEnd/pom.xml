@@ -185,6 +185,22 @@
 			<artifactId>EasyCaptcha</artifactId>
 			<version>1.5.0</version>
 		</dependency>
+		<!-- acitiviti -->
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-engine</artifactId>
+			<version>5.22.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-spring</artifactId>
+			<version>5.22.0</version>
+		</dependency>
+		<!-- email -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 		<!-- shiro-redis 依赖 -->
 		<dependency>
 			<groupId>org.crazycake</groupId>

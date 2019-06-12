@@ -71,7 +71,7 @@
         <el-form-item :label="$t('table.label')" prop="label">
           <el-input v-model="temp.label"/>
         </el-form-item>
-        <el-form-item :label="$t('table.organization')" prop="organization">
+        <el-form-item :label="$t('table.organization')">
           <el-select v-model="temp.organizationId" class="filter-item" placeholder="请选择">
             <el-option v-for="item in organizationOptions" :key="item.id" :label="item.name" :value="item.id"/>
           </el-select>
@@ -207,13 +207,14 @@ export default {
       roleLabelList: [],
       roleIdList: [],
       tokenDataList: [],
-      statusOptions: [{ value: 'S0A', label: '正常' }, { value: 'SXA', label: '禁用' }],
+      statusOptions: [{ value: 'S0A', label: '正常' }, { value: 'S0X', label: '禁用' }],
       temp: {
         id: undefined,
         name: undefined,
         label: undefined,
         mobilePhone: undefined,
         organization: undefined,
+        organizationId: undefined,
         status: undefined,
         roleIds: [],
         accessPageIds: [],
@@ -224,7 +225,6 @@ export default {
       rules: {
         name: [{ required: true, message: 'name is required', trigger: 'blur' }],
         label: [{ required: true, message: 'nickName is required', trigger: 'blur' }],
-        organization: [{ required: true, message: 'organization is required', trigger: 'change' }],
         status: [{ required: true, message: 'status is required', trigger: 'change' }],
         password: [{ required: true, trigger: 'blur', validator: validatePass }]
       },

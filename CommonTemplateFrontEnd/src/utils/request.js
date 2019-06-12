@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import store from '../store'
 import { getToken, setToken } from '@/utils/cookie'
-import msgOfErrorCode from '@/utils/errorMsg'
+import handleErrorCode from '@/utils/errorMsg'
 
 console.log('current environment:' + process.env.NODE_ENV + ',current baseUrl:' + process.env.BASE_API +
 ',the mock mode status:' + process.env.USEING_MOCK)
@@ -62,30 +62,32 @@ service.download = (url, data, fileName) => {
         if (resultObj.code && resultObj.msg) {
           const code = resultObj.code
           const message = resultObj.msg
-          const msg = msgOfErrorCode(code)
-          if (msg !== '') {
+          const handler = handleErrorCode(code)
+          if (handler.msg !== '') {
+            const msgComponent = Message({
+              message: handler.msg,
+              type: 'error',
+              duration: 5 * 1000
+            })
             if (getToken() !== '') {
-              const msgComponent = Message({
-                message: msg,
-                type: 'error',
-                duration: 5 * 1000
-              })
-              msgComponent.close = () => {
-                store.dispatch('FedLogOut').then(() => {
-                  const currentHashRouter = location.hash
-                  if (currentHashRouter.startsWith('#/login') && currentHashRouter.startsWith('#/register')) {
-                    const delayTime = Math.floor(Math.random() * 2000 + 3000)
-                    setTimeout(() => {
-                      const hashRouter = location.hash
-                      console.log(hashRouter)
-                      if (hashRouter.startsWith('#/login') && hashRouter.startsWith('#/register')) {
-                        location.reload() // 为了重新实例化vue-router对象 避免bug
-                      }
-                    }, delayTime)
-                  }
-                })
+              msgComponent.onClose = () => {
+                if (handler.reLogin) {
+                  store.dispatch('FedLogOut').then(() => {
+                    const currentHashRouter = location.hash
+                    if (!currentHashRouter.includes('#/login') && !currentHashRouter.includes('#/register')) {
+                      const delayTime = Math.floor(Math.random() * 2000 + 3000)
+                      setTimeout(() => {
+                        const hashRouter = location.hash
+                        console.log(hashRouter)
+                        if (!hashRouter.includes('#/login') && !hashRouter.includes('#/register')) {
+                          location.reload() // 为了重新实例化vue-router对象 避免bug
+                        }
+                      }, delayTime)
+                    }
+                  })
+                  setToken('')
+                }
               }
-              setToken('')
             }
           } else {
             Message({
@@ -139,38 +141,36 @@ service.interceptors.response.use(
       const response = error.response
       const data = response.data
       const code = response.data.code
-      const msg = msgOfErrorCode(code)
-      if (msg !== '') {
-        if (getToken() !== '') {
-          const msgComponent = Message({
-            message: msg,
-            type: 'error',
-            duration: 5 * 1000
-          })
-          msgComponent.close = () => {
-            store.dispatch('FedLogOut').then(() => {
-              const currentHashRouter = location.hash
-              if (currentHashRouter.startsWith('#/login') && currentHashRouter.startsWith('#/register')) {
-                const delayTime = Math.floor(Math.random() * 2000 + 3000)
-                setTimeout(() => {
-                  const hashRouter = location.hash
-                  console.log(hashRouter)
-                  if (hashRouter.startsWith('#/login') && hashRouter.startsWith('#/register')) {
-                    location.reload() // 为了重新实例化vue-router对象 避免bug
-                  }
-                }, delayTime)
-              }
-            })
-          }
-          setToken('')
-        }
-      } else if (typeof (data.message) !== 'undefined') {
-        Message({
-          message: data.message,
+      const handler = handleErrorCode(code)
+      console.log(handler)
+      if (handler.msg !== '') {
+        const msgComponent = Message({
+          message: handler.msg,
           type: 'error',
           duration: 5 * 1000
         })
+        if (getToken() !== '') {
+          msgComponent.onClose = () => {
+            if (handler.reLogin) {
+              store.dispatch('FedLogOut').then(() => {
+                const currentHashRouter = location.hash
+                if (!currentHashRouter.includes('#/login') && !currentHashRouter.includes('#/register')) {
+                  const delayTime = Math.floor(Math.random() * 2000 + 3000)
+                  setTimeout(() => {
+                    const hashRouter = location.hash
+                    console.log(hashRouter)
+                    if (!hashRouter.includes('#/login') && !hashRouter.includes('#/register')) {
+                      location.reload() // 为了重新实例化vue-router对象 避免bug
+                    }
+                  }, delayTime)
+                }
+              })
+              setToken('')
+            }
+          }
+        }
       } else {
+        console.log(data.msg)
         Message({
           message: data.msg,
           type: 'error',

@@ -116,7 +116,7 @@ export default {
         const root = [{ id: 'root', label: '根节点', children: undefined }]
         root[0].children = generateTreeData(null, data)
         this.permissionOptions = root
-        const firstNodeId = root[0].children.length > 0 ? root[0].children[0].id : null
+        const firstNodeId = root[0].id
         if (this.currentNodeKey === '') {
           this.currentNodeKey = firstNodeId
           this.initNodeChildList(firstNodeId)

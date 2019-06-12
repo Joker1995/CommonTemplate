@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Email;
 
 import com.tisson.demo.common.base.BaseEntity;
 
@@ -26,7 +27,6 @@ import cn.hutool.core.date.DateUtil;
 */
 @Table(name = "sys_users")
 public class SysUsers extends BaseEntity implements Serializable{
-
 	/**
 	 * 
 	 */
@@ -68,6 +68,9 @@ public class SysUsers extends BaseEntity implements Serializable{
 
     @Column(name = "max_online_count")
     private Integer maxOnlineCount;
+    
+    @Email
+    private String email;
     
     @Transient 
     private List<SysRoles> roleList;
@@ -246,6 +249,14 @@ public class SysUsers extends BaseEntity implements Serializable{
 		this.organizationId = organizationId;
 	}
 	
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	/**
 	 * 对象的成员变量和值以k-v输出
 	 * @return
@@ -264,13 +275,26 @@ public class SysUsers extends BaseEntity implements Serializable{
 		map.put("effDate", DateUtil.format(this.effDate, "yyyy-MM-dd HH:mm:ss"));
 		map.put("expDate", DateUtil.format(this.expDate, "yyyy-MM-dd HH:mm:ss"));
 		map.put("maxOnlineCount", String.valueOf(maxOnlineCount));
+		map.put("email", email);
 		return map;
 	}
 
 	@Override
 	public String toString() {
-		return "{id:" + id + ", name:" + name + ", password:" + password + ", label:" + label + ", status:"
-				+ status + ", mobilePhone:" + mobilePhone + ", sex:" + sex + ", photo:" + photo + ", memo:" + memo
-				+ ", effDate:" + effDate + ", expDate:" + expDate + ",maxOnlineCount:"+maxOnlineCount+"}";
+		return "{id:" + id + ", name:" + name + ", password:" + password + ", label:" + label + 
+				", status:"+ status + ", mobilePhone:" + mobilePhone + ", sex:" + sex 
+				+ ", photo:" + photo + ", memo:" + memo + ", effDate:" + effDate + ", expDate:" + expDate 
+				+ ",maxOnlineCount:"+maxOnlineCount+",email"+ email + "}";
+	}
+
+	public enum Status{
+		EFFECTIVE("S0A"),INVALID("S0X");
+		private String status;
+		private Status(String name) {
+			status=name;
+		}
+		public String getStatus() {
+			return status;
+		}
 	}
 }

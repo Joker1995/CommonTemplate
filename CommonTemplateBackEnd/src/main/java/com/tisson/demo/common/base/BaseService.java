@@ -63,10 +63,9 @@ public abstract class BaseService<T> implements Service<T> {
 	}
 	
 	public PageInfo<T> queryPage(ListQuery<T> query){
-//		if((query.limit!=null && query.limit>-1)&&(query.page!=null && query.page>-1)) {
-//			PageHelper.startPage(query.page, query.limit);
-//		}
-		PageHelper.startPage(query.page, query.limit);
+		if((query.limit!=null && query.limit>-1)&&(query.page!=null && query.page>-1)) {
+			PageHelper.startPage(query.page, query.limit);
+		}
 		List<T> result=mapper.select(query.data);
 		return new PageInfo<T>(result);
 	}

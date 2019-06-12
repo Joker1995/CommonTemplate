@@ -48,7 +48,7 @@ public class SysRolesController {
 	@PostMapping("/roleList")
 	@ApiOperation(value="获取角色列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysRoles>> roleList(@RequestBody @Validated ListQuery<SysRoles> query){
+	public ResponseBean<PageInfo<SysRoles>> roleList(@RequestBody ListQuery<SysRoles> query){
 		return new ResponseBean<PageInfo<SysRoles>>("queryRoleList",sysRolesService.queryRoleList(query));
 	}
 	

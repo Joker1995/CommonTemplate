@@ -75,6 +75,12 @@ public class ProjectTask extends GenerateTask{
 		String logbackConfigTemplateFilePath=this.getTemplateDirPath()+File.separator+"resourceFile"+File.separator+"logback-spring.xml";
 		String logbackConfigFilePath=resourceDirPath+File.separator+"logback-spring.xml";
 		FileUtil.copy(logbackConfigTemplateFilePath, logbackConfigFilePath, true);
+		
+		String globalPropTemplateFilePath=this.getTemplateDirPath()+File.separator+"resourceFile"+File.separator+"props"
+				+File.separator+"global.yml";
+		String globalPropFilePath=resourceDirPath+File.separator+"props"+File.separator+"global.yml";
+		
+		FileUtil.copy(globalPropTemplateFilePath, globalPropFilePath, true);
 	}
 	
 	private void generateProjectCode(String srcCodeDir) throws Exception {

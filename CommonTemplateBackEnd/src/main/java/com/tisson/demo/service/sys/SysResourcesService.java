@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.mapper.sys.SysResourcesMapper;
@@ -43,5 +44,10 @@ public class SysResourcesService extends BaseService<SysResources> {
 		params.put("query", sysResources);
 		params.put("subListIds", subListIds);
 		sysResourcesMapper.deleteResources(params);
+	}
+	public PageInfo<SysResources> queryRootResources() {
+		PageInfo<SysResources> result=new PageInfo<SysResources>();
+		result.setList(sysResourcesMapper.queryRootResources());
+		return result;
 	}
 }

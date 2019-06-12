@@ -18,4 +18,6 @@ public interface SysResourcesMapper extends Mapper<SysResources>{
 	List<SysResources> queryResourcesChildList(String id);
 
 	void deleteResources(Map<String,Object> params);
+	
+	List<SysResources> queryRootResources();
 }

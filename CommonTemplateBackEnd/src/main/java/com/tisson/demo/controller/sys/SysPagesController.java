@@ -43,7 +43,7 @@ public class SysPagesController {
 	@PostMapping(value = "/accessPages")
 	@ApiOperation(value="获取前端授权界面列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysPages>> queryAccessPages(@RequestBody @Validated ListQuery<SysPages> query){
+	public ResponseBean<PageInfo<SysPages>> queryAccessPages(@RequestBody ListQuery<SysPages> query){
 		return new ResponseBean<PageInfo<SysPages>>("queryAccessPages success",sysPagesService.queryPage(query));
 	}
 	
@@ -53,12 +53,16 @@ public class SysPagesController {
 		@ApiImplicitParam(name = "id", value = "前端授权界面ID", required = true, dataType = "String"),
 		@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public ResponseBean<PageInfo<SysPages>> queryAccessPagesChildList(@PathVariable("id")@NotEmpty String id,
-			@RequestBody @Validated ListQuery<SysPages> query){
+			@RequestBody ListQuery<SysPages> query){
 		if(query.data==null) {
 			query.data=new SysPages();
 		}
-		query.data.setParentId(id);
-		return new ResponseBean<PageInfo<SysPages>>("queryAccessPagesChildList success",sysPagesService.queryPage(query));
+		if(id.equals("root")) {
+			return new ResponseBean<PageInfo<SysPages>>("queryAccessPagesChildList success",sysPagesService.queryRootPages());
+		}else {
+			query.data.setParentId(id);
+			return new ResponseBean<PageInfo<SysPages>>("queryAccessPagesChildList success",sysPagesService.queryPage(query));
+		}
 	}
 	
 	@PostMapping

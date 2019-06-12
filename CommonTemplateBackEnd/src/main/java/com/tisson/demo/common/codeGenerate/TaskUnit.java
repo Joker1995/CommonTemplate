@@ -1,7 +1,5 @@
 package com.tisson.demo.common.codeGenerate;
 
-import javax.validation.constraints.NotEmpty;
-
 /**  
 * @Title: CodeProperties.java  
 * @Package com.tisson.demo.common.codeGenerate  
@@ -11,13 +9,12 @@ import javax.validation.constraints.NotEmpty;
 * @version V1.0  
 */
 public class TaskUnit {
-	@NotEmpty
 	private String packageName;
 	
 	private String prefix;
 	
 	private String suffix;
-	@NotEmpty
+	
 	private String projectPackageName;
 	
 	private DataSourceConfig config;

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="userRegister" name="userRegister" isExecutable="true">
+    <startEvent id="startEvent" name="Start"></startEvent>
+    <endEvent id="endEvent" name="End"></endEvent>
+    <userTask id="registerApply" name="RegisterApply"></userTask>
+    <userTask id="managerApproval" name="ManagerApproval" activiti:candidateGroups="admin"></userTask>
+    <userTask id="emailNotify" name="EmailNotify">
+      <extensionElements>
+        <activiti:taskListener event="create" expression="${sysUsersService.registerEmailNotify(execution)}"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="start" sourceRef="startEvent" targetRef="registerApply"></sequenceFlow>
+    <sequenceFlow id="postRegister" sourceRef="registerApply" targetRef="managerApproval"></sequenceFlow>
+    <sequenceFlow id="approval" sourceRef="managerApproval" targetRef="emailNotify"></sequenceFlow>
+    <sequenceFlow id="end" sourceRef="emailNotify" targetRef="endEvent"></sequenceFlow>
+    <boundaryEvent id="registeOvertime" name="RegisteOvertime" attachedToRef="registerApply" cancelActivity="true">
+      <extensionElements>
+        <activiti:executionListener event="end" expression="${sysUsersService.registerOvertime(execution)}"></activiti:executionListener>
+      </extensionElements>
+      <timerEventDefinition>
+        <timeDate>${executeTime}</timeDate>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="overtimeNotify" sourceRef="registeOvertime" targetRef="emailNotify"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_userRegister">
+    <bpmndi:BPMNPlane bpmnElement="userRegister" id="BPMNPlane_userRegister">
+      <bpmndi:BPMNShape bpmnElement="startEvent" id="BPMNShape_startEvent">
+        <omgdc:Bounds height="35.0" width="35.0" x="130.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endEvent" id="BPMNShape_endEvent">
+        <omgdc:Bounds height="35.0" width="35.0" x="670.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="registerApply" id="BPMNShape_registerApply">
+        <omgdc:Bounds height="55.0" width="105.0" x="200.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="registeOvertime" id="BPMNShape_registeOvertime">
+        <omgdc:Bounds height="30.0" width="30.0" x="240.0" y="310.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerApproval" id="BPMNShape_managerApproval">
+        <omgdc:Bounds height="55.0" width="105.0" x="360.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="emailNotify" id="BPMNShape_emailNotify">
+        <omgdc:Bounds height="55.0" width="105.0" x="510.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="start" id="BPMNEdge_start">
+        <omgdi:waypoint x="165.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="postRegister" id="BPMNEdge_postRegister">
+        <omgdi:waypoint x="305.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="360.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="approval" id="BPMNEdge_approval">
+        <omgdi:waypoint x="465.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="510.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="end" id="BPMNEdge_end">
+        <omgdi:waypoint x="615.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="670.0" y="287.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="overtimeNotify" id="BPMNEdge_overtimeNotify">
+        <omgdi:waypoint x="255.0" y="340.0"></omgdi:waypoint>
+        <omgdi:waypoint x="254.0" y="442.0"></omgdi:waypoint>
+        <omgdi:waypoint x="562.0" y="442.0"></omgdi:waypoint>
+        <omgdi:waypoint x="562.0" y="315.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

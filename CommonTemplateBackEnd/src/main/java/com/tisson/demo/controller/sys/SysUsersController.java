@@ -8,10 +8,12 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
+import org.activiti.engine.TaskService;
+import org.activiti.engine.task.Task;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -40,12 +44,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.druid.util.StringUtils;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.Gson;
 import com.tisson.demo.common.base.GlobalConstant;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.cahce.RedisCache;
 import com.tisson.demo.common.expt.CaptchaValidateException;
-import com.tisson.demo.common.expt.UnauthorizedException;
+import com.tisson.demo.common.expt.RegisterUserException;
 import com.tisson.demo.common.expt.UserNameOrPwdException;
 import com.tisson.demo.common.shiro.JWTToken;
 import com.tisson.demo.common.util.JWTUtil;
@@ -60,6 +65,8 @@ import com.wf.captcha.Captcha;
 import com.wf.captcha.GifCaptcha;
 
 import cn.hutool.core.codec.Base64;
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.UUID;
@@ -89,10 +96,10 @@ public class SysUsersController {
 	private SysUsersService sysUsersService;
 	@Autowired
 	private GlobalProperties globalProperties;
-//	@Autowired
-//	private IRedisService<Boolean> userName2TokenService;
 	@Autowired
 	private RedisCache cache;
+	@Autowired
+	private TaskService taskService;
 
 	@PostMapping(value = "/usersList")
 	@RequiresPermissions("/user/usersList")
@@ -303,19 +310,27 @@ public class SysUsersController {
 	@PostMapping(value = "/register")
 	@ApiOperation(value = "注册", httpMethod = "POST", response = ResponseBean.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "userName", value = "用户名", required = true, dataType = "String"),
-			@ApiImplicitParam(name = "password", value = "用户密码", required = true, dataType = "String"), })
+			@ApiImplicitParam(name = "password", value = "用户密码", required = true, dataType = "String"),
+			@ApiImplicitParam(name = "email", value = "用户邮箱", required = true, dataType = "String"),})
 	public ResponseBean<String> register(@RequestParam("userName") @NotEmpty String userName,
-			@RequestParam("password") @NotEmpty String password) throws UnauthorizedException {
+			@RequestParam("password") @NotEmpty String password,
+			@RequestParam("email") @NotEmpty String email) throws Exception {
 		SysUsers sysUsers = sysUsersService.loadByName(userName);
-		// TODO 改造token
 		if (sysUsers != null) {
-			return new ResponseBean<String>("register Fail", "the userName " + userName + " is exist");
+			throw new RegisterUserException();
 		} else {
 			sysUsers = new SysUsers();
 			sysUsers.setName(userName);
 			sysUsers.setPassword(password);
+			sysUsers.setEmail(email);
+			sysUsers.setStatus(SysUsers.Status.INVALID.getStatus());
+			sysUsers.setCreateTime(new Date());
+			sysUsers.setCreateUser("admin");
+			sysUsers.setUpdateTime(new Date());
+			sysUsers.setUpdateUser("admin");
 			sysUsersService.save(sysUsers);
-			// 添加额外逻辑,如权限等
+			sysUsersService.startRegisterProcess(sysUsers);//不喜工作流可取消相关
+			// 开始启动注册流程
 			return new ResponseBean<String>("register Success", null);
 		}
 	}
@@ -323,7 +338,7 @@ public class SysUsersController {
 	@PostMapping(value = "/logout")
 	@ApiOperation(value = "退出", httpMethod = "POST", response = ResponseBean.class)
 	public ResponseBean<String> logout(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token)
-			throws UnauthorizedException {
+			throws Exception {
 		Subject subject = SecurityUtils.getSubject();
 		subject.logout();
 //        userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(token), token);
@@ -519,8 +534,7 @@ public class SysUsersController {
 	@GetMapping(value = "/captcha")
 	@ApiOperation(value = "获取验证码", httpMethod = "GET", response = ResponseBean.class)
 	public ResponseBean<Map<String, String>> captcha() throws Exception {
-		String tempDirPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
-				+ File.separator + "tempCaptcha";
+		String tempDirPath = globalProperties.getCaptchaDirPath() + File.separator + "tempCaptcha";
 		LOGGER.info("验证码存储文件夹路径:[{}]",tempDirPath);
 		Map<String, String> result = new HashMap<String, String>();
 		String token = UUID.randomUUID().toString().replace("-", "");
@@ -546,6 +560,56 @@ public class SysUsersController {
 		}
 		FileUtil.del(tempFile);
 		return new ResponseBean<Map<String, String>>("生成验证码成功", result);
+	}
+	
+	@GetMapping(value = "/registerTask")
+	@RequiresPermissions("/user/registerTask")
+	@ApiOperation(value = "获取登录用户注册任务信息", httpMethod = "GET", response = ResponseBean.class)
+	public ResponseBean<List<Map<String,String>>> queryUserRegisterTask(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token) {
+		List<Map<String,String>> result = new ArrayList<Map<String,String>>();
+		SysUsers loginUser = null;
+		Subject subject = SecurityUtils.getSubject();
+		Object principal = subject.getPrincipal();
+		Set<Task> taskSet=new HashSet<Task>();
+		if (principal instanceof SysUsers) {
+			loginUser = (SysUsers) principal;
+			List<SysRoles> roleList = loginUser.getRoleList();
+			roleList.stream().forEach(role->{
+				taskSet.addAll(sysUsersService.userTask(role.getName(), "userRegister"));
+			});
+			taskSet.stream().forEach(task->{
+				Map<String,String> taskItem = new HashMap<String,String>();
+				Object entityJsonStr = taskService.getVariable(task.getId(),"registerEntity");
+				if(entityJsonStr!=null) {
+					Gson gson = new Gson();
+					SysUsers registerUser = gson.fromJson(Optional.of(entityJsonStr).map(Object::toString).get(),
+							SysUsers.class);
+					Date registerTime = registerUser.getCreateTime();
+					Date expireTime = DateUtil.offset(registerTime, DateField.DAY_OF_YEAR, 1);
+					taskItem.put("userName",registerUser.getName());
+					taskItem.put("applyTime",DateUtil.format(registerTime, "yyyy-MM-dd HH:mm:ss"));
+					taskItem.put("expireTime",DateUtil.format(expireTime, "yyyy-MM-dd HH:mm:ss"));
+					taskItem.put("taskId", task.getId());
+					result.add(taskItem);
+				}
+			});
+		}
+		return new ResponseBean<List<Map<String,String>>>("获取登录用户注册任务信息成功", result);
+	}
+	
+	@PostMapping(value = "/approvalRegisterTask")
+	@RequiresPermissions("/user/approvalRegisterTask")
+	@ApiOperation(value = "审批登录用户注册任务", httpMethod = "POST", response = ResponseBean.class)
+	public ResponseBean<String> approvalRegisterTask(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
+			@RequestParam("taskId")@NotEmpty String taskId,@RequestParam("approvalResult")@NotEmpty String approvalResult) {
+		SysUsers loginUser = null;
+		Subject subject = SecurityUtils.getSubject();
+		Object principal = subject.getPrincipal();
+		if (principal instanceof SysUsers) {
+			loginUser = (SysUsers) principal;
+			sysUsersService.approvalRegisterTask(loginUser, taskId, approvalResult);
+		}
+		return new ResponseBean<String>("审批登录用户注册任务成功", "");
 	}
 
 	private Set<SysPages> filterAccessPageList(List<SysPages> list) {

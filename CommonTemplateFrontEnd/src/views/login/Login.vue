@@ -84,7 +84,7 @@ export default {
       loading: false,
       pwdType: 'password',
       redirect: undefined,
-      projectName: '爬虫后台'
+      projectName: '通用模板'
     }
   },
   watch: {

@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import com.github.pagehelper.PageHelper;
 
@@ -67,6 +68,11 @@ public class MasterMybatisConfig {
         return template;
     }
     
+    
+    @Bean
+	public DataSourceTransactionManager masterTransactionManager(@Qualifier("masterDatasource") DataSource dataSource) {
+		return new DataSourceTransactionManager(dataSource);
+	}
 
     @Bean
     public PageHelper pageHelper() {

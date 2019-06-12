@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.base.ResultCode;
 import com.tisson.demo.common.expt.CaptchaValidateException;
+import com.tisson.demo.common.expt.RegisterUserException;
 import com.tisson.demo.common.expt.SessionKickoutException;
 import com.tisson.demo.common.expt.TokenInvalidateException;
 import com.tisson.demo.common.expt.UnauthorizedException;
@@ -137,7 +138,7 @@ public class ExceptionControllerHandler {
     }
     
     /**
-     * 捕捉验证码校验异常
+      * 捕捉验证码校验异常
      * @return
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -147,6 +148,17 @@ public class ExceptionControllerHandler {
         		ResultCode.CAPTCHA_INVALIDATE_ERROR.getDesc(), null);
     }
     
+    
+    /**
+       * 捕捉用户注册异常
+     * @return
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(RegisterUserException.class)
+	public ResponseBean<String>  handlerRegisteUser(){
+    	return new ResponseBean<String>(ResultCode.REGISTER_USER_ERROR.getCode(),
+        		ResultCode.REGISTER_USER_ERROR.getDesc(), null);
+    }
     
 	/**
 	 * 捕捉所有其他异常

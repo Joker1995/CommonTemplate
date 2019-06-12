@@ -28,6 +28,10 @@ public class GlobalProperties {
 	private String codeGenerateDirPath;
 	
 	private String codeTemplateDirPath;
+	
+	private String captchaDirPath;
+	
+	private String processPreviewDirPath;
 
 	public String getEncyptSalt() {
 		return encyptSalt;
@@ -83,5 +87,21 @@ public class GlobalProperties {
 
 	public void setCodeTemplateDirPath(String codeTemplateDirPath) {
 		this.codeTemplateDirPath = codeTemplateDirPath;
+	}
+
+	public String getCaptchaDirPath() {
+		return captchaDirPath;
+	}
+
+	public void setCaptchaDirPath(String captchaDirPath) {
+		this.captchaDirPath = captchaDirPath;
+	}
+
+	public String getProcessPreviewDirPath() {
+		return processPreviewDirPath;
+	}
+
+	public void setProcessPreviewDirPath(String processPreviewDirPath) {
+		this.processPreviewDirPath = processPreviewDirPath;
 	}
 }

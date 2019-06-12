@@ -13,6 +13,8 @@ server:
 spring:
   aop:
     proxy-target-class: true
+  config:
+    locaction: props/
   datasource:
     name: masterDataSource
     driver-class-name: com.mysql.jdbc.Driver
@@ -30,6 +32,20 @@ spring:
      connection-test-query: select 1
      connection-timeout: 1000
      validation-timeout: 6000
+  mail:
+    # 接收邮件的人
+    reciverMail: chenjiebo@tisson.cn,chenweiqiao@tisson.cn
+    host: 42.120.219.29
+    username: yh_maintence@tisson.cn
+    password: 1q2w3e!Q@W#E
+    status: ON
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 # devtools:
 #   remote:
 #     restart:
@@ -40,9 +56,6 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  profiles:
-    include:
-      - props/global-dev.yml
   redis:
      cluster:
       nodes: "172.16.28.148:6379"

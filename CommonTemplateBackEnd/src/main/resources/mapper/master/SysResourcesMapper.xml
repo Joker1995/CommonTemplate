@@ -18,6 +18,10 @@
   	select * from sys_resources where parent_id=#{id,jdbcType=CHAR}
   </select>
   
+  <select id="queryRootResources" resultMap="BaseResultMap">
+  	select * from sys_resources where parent_id is null
+  </select>
+  
   <delete id="deleteResources">
   	<if test="query!=null">
         <if test="query.id!=null">

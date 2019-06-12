@@ -59,7 +59,7 @@ public class MySQLGenerateTask extends GenerateTask {
 		for (Map<String, String> item : columnsInfo) {
 			Column column = new Column().setComment(item.get("COLUMN_COMMENT")).setJdbcName(item.get("COLUMN_NAME"))
 					.setJavaName(NameConverter.convertNormal2CamelCaseName(item.get("COLUMN_NAME"), true))
-					.setJdbcType(item.get("DATA_TYPE"))
+					.setJdbcType(item.get("DATA_TYPE").toUpperCase())
 					.setNotNull(!NameConverter.checkColumnIsNullable(item.get("IS_NULLABLE")))
 					.setJavaType(NameConverter.converJdbcType2JavaType(item.get("DATA_TYPE").toUpperCase()));
 			if (column.getJavaType().toLowerCase().equals("boolean")) {

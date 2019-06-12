@@ -19,35 +19,35 @@ public abstract class BaseEntity {
 	
 	protected Date updateTime;
 
-	protected String getCreateUser() {
+	public String getCreateUser() {
 		return createUser;
 	}
 
-	protected void setCreateUser(String createUser) {
+	public void setCreateUser(String createUser) {
 		this.createUser = createUser;
 	}
 
-	protected String getUpdateUser() {
+	public String getUpdateUser() {
 		return updateUser;
 	}
 
-	protected void setUpdateUser(String updateUser) {
+	public void setUpdateUser(String updateUser) {
 		this.updateUser = updateUser;
 	}
 
-	protected Date getCreateTime() {
+	public Date getCreateTime() {
 		return createTime;
 	}
 
-	protected void setCreateTime(Date createTime) {
+	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
 	}
 
-	protected Date getUpdateTime() {
+	public Date getUpdateTime() {
 		return updateTime;
 	}
 
-	protected void setUpdateTime(Date updateTime) {
+	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
 	}
 }

@@ -43,7 +43,7 @@ public class SysResoucesController {
 	@PostMapping(value = "/resources")
 	@ApiOperation(value="获取授权接口列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
-	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody @Validated ListQuery<SysResources> query){
+	public ResponseBean<PageInfo<SysResources>> queryResourcesList(@RequestBody ListQuery<SysResources> query){
 		return new ResponseBean<PageInfo<SysResources>>("queryResourceList success",sysResourcesService.queryPage(query));
 	}
 	
@@ -51,12 +51,16 @@ public class SysResoucesController {
 	@ApiOperation(value="获取id为{id}的授权接口列表的子列表",httpMethod="POST",  response=ResponseBean.class)
 	@ApiImplicitParams({@ApiImplicitParam(name = "query", value = "列表查询项", required = true, dataType = "ListQuery"),})
 	public ResponseBean<PageInfo<SysResources>> queryResourcesChildList(@PathVariable("id")@NotEmpty String id,
-			@RequestBody @Validated ListQuery<SysResources> query){
+			@RequestBody ListQuery<SysResources> query){
 		if(query.data==null) {
 			query.data=new SysResources();
 		}
-		query.data.setParentId(id);
-		return new ResponseBean<PageInfo<SysResources>>("queryResourcesChildList success",sysResourcesService.queryPage(query));
+		if(id.equals("root")) {
+			return new ResponseBean<PageInfo<SysResources>>("queryResourcesChildList success",sysResourcesService.queryRootResources());
+		}else {
+			query.data.setParentId(id);
+			return new ResponseBean<PageInfo<SysResources>>("queryResourcesChildList success",sysResourcesService.queryPage(query));
+		}	
 	}
 	
 	@PostMapping
