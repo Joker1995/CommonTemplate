@@ -11,7 +11,7 @@
  Target Server Version : 50724
  File Encoding         : 65001
 
- Date: 12/06/2019 16:54:22
+ Date: 13/06/2019 14:35:56
 */
 
 SET NAMES utf8mb4;
@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS `sys_common_resources`;
 CREATE TABLE `sys_common_resources`  (
   `id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '文件名',
+  `used` tinyint(1) NULL DEFAULT NULL COMMENT '是否使用到,0为未使用,1为使用中',
   `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '文件路径',
   `type` tinyint(2) NULL DEFAULT NULL COMMENT '文件类型',
   `desc` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL COMMENT '备注',
@@ -80,10 +81,6 @@ CREATE TABLE `sys_logger_login`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '登陆日志表' ROW_FORMAT = Compact;
 
 -- ----------------------------
--- Records of sys_logger_login
--- ----------------------------
-
--- ----------------------------
 -- Table structure for sys_logger_operation
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_logger_operation`;
@@ -98,10 +95,6 @@ CREATE TABLE `sys_logger_operation`  (
   `result` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '结果信息',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '操作记录表' ROW_FORMAT = Compact;
-
--- ----------------------------
--- Records of sys_logger_operation
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for sys_organizations
@@ -204,7 +197,7 @@ INSERT INTO `sys_resources` VALUES ('228a2b3f77cc48d7a1076bcff9ee8130', '用户�
 INSERT INTO `sys_resources` VALUES ('26f4118721c040f3a06a8b4e62d7a4c1', '修改用户角色', '修改用户角色', '/user/updateUserRoles', 'b5d0550521234bf68cb607e9df21beeb', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
 INSERT INTO `sys_resources` VALUES ('415edaa4e4fe439fa3474b5db6855207', '获取登录用户注册任务信息', NULL, '/user/registerTask', 'b5d0550521234bf68cb607e9df21beeb', NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `sys_resources` VALUES ('4296d361cf1c4ff399c5ebca7d6e30cc', '新增用户', '新增用户', '/user/addSysUsers', 'b5d0550521234bf68cb607e9df21beeb', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
-INSERT INTO `sys_resources` VALUES ('47f5cc2c8ab740748ab2e7edf09fc5df', '代码生成', '代码生成', NULL, NULL, NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
+INSERT INTO `sys_resources` VALUES ('47f5cc2c8ab740748ab2e7edf09fc5df', '代码生成', '代码生成', '/code', NULL, NULL, 'admin', '2018-12-29 00:00:00', 'admin', '2018-12-29 00:00:00');
 INSERT INTO `sys_resources` VALUES ('6280fc300441453a8b85a349b562f63d', '部署流程压缩包', NULL, '/process/deploy', '9036585724ca419c8bbc0e581a7a2bde', NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `sys_resources` VALUES ('6a82f337cad6422495ad37e873178a32', '登陆用户可访问前端路由列表', '登陆用户可访问前端路由列表', '/user/queryAccessPages', 'b5d0550521234bf68cb607e9df21beeb', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
 INSERT INTO `sys_resources` VALUES ('718783518e1e41e5a71d89980cbbbdef', '部门维护', '部门维护', '/organization', NULL, NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
@@ -215,7 +208,7 @@ INSERT INTO `sys_resources` VALUES ('842f7b68238246b8a9cb617589fc0817', '前端�
 INSERT INTO `sys_resources` VALUES ('9036585724ca419c8bbc0e581a7a2bde', '流程维护', NULL, '/process', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `sys_resources` VALUES ('91c3840e2dc24853be5190798e3cc54b', '修改用户可访问前端路由', '修改用户可访问前端路由', '/user/updateUserAccessPages', 'b5d0550521234bf68cb607e9df21beeb', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
 INSERT INTO `sys_resources` VALUES ('abd806c092c54fd2bbb35d0045bb5f06', '数据源', '数据源', '/code/dataSource', '47f5cc2c8ab740748ab2e7edf09fc5df', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
-INSERT INTO `sys_resources` VALUES ('b5d0550521234bf68cb607e9df21beeb', '用户信息维护', '用户信息维护', NULL, NULL, NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
+INSERT INTO `sys_resources` VALUES ('b5d0550521234bf68cb607e9df21beeb', '用户信息维护', '用户信息维护', '/user', NULL, NULL, 'admin', '2018-12-29 00:00:00', 'admin', '2018-12-29 00:00:00');
 INSERT INTO `sys_resources` VALUES ('d1298fd5ebc24f02820c7216a4c51215', '上传部署流程压缩包', NULL, '/process/resources', '9036585724ca419c8bbc0e581a7a2bde', NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `sys_resources` VALUES ('d87abd8dcef6419b980e1d414f1342c4', '角色下用户列表', '角色下用户列表', '/user/loadUserRolesById', 'b5d0550521234bf68cb607e9df21beeb', NULL, 'admin', '2018-12-29 09:55:27', 'admin', '2018-12-29 09:55:27');
 INSERT INTO `sys_resources` VALUES ('e7a8d0aeaaba458b92109f601fc4a5a1', '取消部署流程', NULL, '/process/undeploy', '9036585724ca419c8bbc0e581a7a2bde', NULL, NULL, NULL, NULL, NULL);
@@ -461,7 +454,7 @@ CREATE TABLE `sys_users`  (
 -- ----------------------------
 -- Records of sys_users
 -- ----------------------------
-INSERT INTO `sys_users` VALUES ('266908ea02765d49094d72a76a0e5fc2', 'test', 'b41a2c314c3871b89293a901e7b531b7', 'chenweiqiao@tisson.cn', '18912345678', '测试', 'S0A', NULL, 0, NULL, '2018-12-29 00:00:00', -1, '2058-12-29 00:00:00', 'admin', '2018-12-29 00:00:00', 'admin', '2018-12-29 00:00:00');
+INSERT INTO `sys_users` VALUES ('266908ea02765d49094d72a76a0e5fc2', 'test', '9b22bcdea4a09a59382323a479982c10', 'chenweiqiao@tisson.cn', '18912345678', '测试', 'S0A', NULL, 0, NULL, '2018-12-29 00:00:00', -1, '2058-12-29 00:00:00', 'admin', '2018-12-29 00:00:00', 'admin', '2018-12-29 00:00:00');
 INSERT INTO `sys_users` VALUES ('d1181ed8cea8485287bbdd5bea266908', 'admin', '9b22bcdea4a09a59382323a479982c10', 'chenweiqiao@tisson.cn', '18912345678', '管理员', 'S0A', NULL, 0, NULL, '2018-12-29 09:02:44', -1, '2058-12-29 09:03:00', 'admin', '2018-12-29 09:03:28', 'admin', '2018-12-29 09:03:37');
 
 SET FOREIGN_KEY_CHECKS = 1;
