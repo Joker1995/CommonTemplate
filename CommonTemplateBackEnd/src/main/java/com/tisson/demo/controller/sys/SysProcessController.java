@@ -32,10 +32,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tisson.demo.common.base.FileType;
 import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.ResponseBean;
 import com.tisson.demo.common.base.ResultCode;
+import com.tisson.demo.common.util.IdWorker;
 import com.tisson.demo.configuration.GlobalProperties;
+import com.tisson.demo.entity.sys.SysCommonResources;
+import com.tisson.demo.service.sys.SysCommonResourcesService;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
@@ -59,7 +63,8 @@ public class SysProcessController {
 	private RuntimeService runtimeService;
 	@Autowired
 	private GlobalProperties globalProperties;
-	
+	@Autowired
+	private SysCommonResourcesService commonResourceService;
 	@PostMapping(value = "/processList")
 	@ApiOperation(value = "获取部署流程列表信息", httpMethod = "GET", response = ResponseBean.class)
 	@ApiImplicitParams({ @ApiImplicitParam(name = "query", value = "查询项", required = true, dataType = "ListQuery")})
@@ -109,15 +114,25 @@ public class SysProcessController {
 			savePath+="-1.zip";
 		}
 		file.transferTo(FileUtil.touch(savePath));
-		return new ResponseBean<String>("上传文件成功", Base64.encode(savePath));
+		//保存db
+		SysCommonResources item = new SysCommonResources();
+		IdWorker worker = IdWorker.getFlowIdWorkerInstance();
+		String id=String.valueOf(worker.nextId());
+		item.setId(id);
+		item.setName(fileName);
+		item.setPath(savePath);
+		item.setType(FileType.ZIP.getCode());
+		item.setUsed(0);
+		commonResourceService.save(item);
+		return new ResponseBean<String>("上传文件成功", id);
 	}
 	
 	@PostMapping(value = "/deploy")
 	@RequiresPermissions("/process/deploy")
 	@ApiOperation(value = "部署流程压缩包(zip)", httpMethod = "POST", response = ResponseBean.class)
-	@ApiImplicitParams({ @ApiImplicitParam(name = "processResourcePath", value = "加密文件资源路径(base64加密)", required = true, dataType = "String")})
-	public ResponseBean<String> deployProcess(@RequestParam("processResourcePath") @NotEmpty String processResourcePath) throws Exception{
-		String resourcePath=Base64.decodeStr(processResourcePath);
+	@ApiImplicitParams({ @ApiImplicitParam(name = "commonResourceId", value = "共用资源ID", required = true, dataType = "String")})
+	public ResponseBean<String> deployProcess(@RequestParam("resourceId") @NotEmpty String commonResourceId) throws Exception{
+		String resourcePath=commonResourceService.loadById(commonResourceId).getPath();
 		File zipFile = FileUtil.file(resourcePath);
 		String fileName = zipFile.getName();
 		Pattern pattern=Pattern.compile("\\S+-\\d");
@@ -189,6 +204,7 @@ public class SysProcessController {
 						ResultCode.PROCESS_RESOURCE_FILE_ERROR.getDesc(),null);
 			}
 			zipFile.delete();
+			commonResourceService.deleteById(commonResourceId);
 			return new ResponseBean<String>("部署成功","部署资源名称为"+fileName);
 		}
 		return new ResponseBean<String>(ResultCode.PROCESS_RESOURCE_FILE_ERROR.getCode(),

@@ -3,11 +3,13 @@ package com.tisson.demo.entity.sys;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.tisson.demo.common.base.BaseEntity;
+import com.tisson.demo.common.base.GenerateId;
+
+import tk.mybatis.mapper.annotation.KeySql;
 
 /**  
 * @Title: SysResources.java  
@@ -26,7 +28,8 @@ public class SysResources extends BaseEntity implements Serializable{
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(generator="UUID")
+//	@GeneratedValue(generator="UUID")
+	@KeySql(genId=GenerateId.class)
     private String id;
 
     @Column(name = "name")

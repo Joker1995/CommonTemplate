@@ -38,8 +38,9 @@ public class LoginLogAspect {
 	private ThreadPoolTaskExecutor executor;
 	
 	@Pointcut(" execution(public * com.tisson.demo.controller..*.login*(..)) && "
-			+ " @annotation(org.springframework.web.bind.annotation.RestController) ")
+			+ " @within(org.springframework.web.bind.annotation.RestController) ")
 	public void loginAspectPoint() {
+		LOGGER.info("exuece login aspect");
 	}
 	
 	@Around("loginAspectPoint()")
@@ -59,7 +60,11 @@ public class LoginLogAspect {
 				loginLog.setResult(result.getMsg());
 				
 				executor.execute(()->{
-					sysLoggerLoginService.save(loginLog);
+					try {
+						sysLoggerLoginService.save(loginLog);
+					} catch (Exception e) {
+						LOGGER.error("ERROR IN process loginAspectPoint:",e);
+					}
 				});
 			}
 		} catch (Exception e) {

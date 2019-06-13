@@ -3,9 +3,12 @@ package com.tisson.demo.entity.sys;
 import java.util.Date;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.tisson.demo.common.base.GenerateId;
+
+import tk.mybatis.mapper.annotation.KeySql;
 
 /**  
 * @Title: SysLoggerOpration.java  
@@ -18,7 +21,8 @@ import javax.persistence.Table;
 @Table(name = "sys_logger_operation")
 public class SysLoggerOpration {
 	@Id
-	@GeneratedValue(generator="UUID")
+//	@GeneratedValue(generator="UUID")
+	@KeySql(genId=GenerateId.class)
 	private String id;
 	
 	@Column(name="method")

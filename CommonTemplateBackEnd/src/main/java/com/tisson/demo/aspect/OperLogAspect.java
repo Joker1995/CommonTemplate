@@ -51,8 +51,8 @@ public class OperLogAspect {
 	private ThreadPoolTaskExecutor executor;
 	
 	@Pointcut("execution(public * com.tisson.demo.controller..*.*(..)) && "
-			+ " !execution(public * com.tisson.demo.controller..*.login*(..))"
-			+ " execution(@annotation(org.springframework.web.bind.annotation.RestController) ")
+			+ " !execution(public * com.tisson.demo.controller..*.login*(..)) && "
+			+ " @within(org.springframework.web.bind.annotation.RestController) ")
 	public void operAspectPoint() {
 	}
 	
@@ -67,7 +67,7 @@ public class OperLogAspect {
         Object returnValue = joinPoint.proceed(args);
         
 		try {
-			if(!StringUtils.isEmpty(token)) {
+			if(!StringUtils.isEmpty(token)) { //针对登录后的方法拦截
 				String name=JWTUtil.getUserName(token);
 				operLog.setUserName(name);
 				//入参名称
@@ -107,7 +107,57 @@ public class OperLogAspect {
 				    operLog.setUrl(requestUrl);
 				    operLog.setTime(new Date());
 				    executor.execute(()->{
-				    	sysLoggerOprationService.save(operLog);
+				    	try {
+							sysLoggerOprationService.save(operLog);
+						} catch (Exception e) {
+							LOGGER.error("ERROR IN process operAspectPoint:",e);
+						}
+				    });
+			    }
+			}else {//针对未登录的方法拦截
+				operLog.setUserName("anno");
+				//入参名称
+			    String[] paramNames = ((CodeSignature) joinPoint.getSignature()).getParameterNames();
+			    Map<String, Object> params = new HashMap<>();
+			    //获取所有参数对象
+			    for (int i = 0; i < args.length; i++) {
+			        if (null != args[i]) {
+			            if (args[i] instanceof BindingResult) {
+			                params.put(paramNames[i], "bindingResult");
+			            } else {
+			                params.put(paramNames[i], args[i]);
+			            }
+			        } else {
+			            params.put(paramNames[i], "无");
+			        }
+			    }
+			    Signature sig = joinPoint.getSignature();
+			    MethodSignature msig = null;
+			    if (!(sig instanceof MethodSignature)) {
+			        throw new IllegalArgumentException("该注解只能用于方法");
+			    }
+			    msig = (MethodSignature) sig;
+			    Object target = joinPoint.getTarget();
+			    Method currentMethod = target.getClass().getMethod(msig.getName(), msig.getParameterTypes());
+			    
+			    String requestUrl=request.getRequestURI().length()>110?request.getRequestURI().substring(0, 110):
+			    	request.getRequestURI();
+			    String paramsStr=JSONUtil.toJsonStr(params);
+			    paramsStr=paramsStr.length()>250?paramsStr.substring(0, 250):paramsStr;
+			    ResponseBean result=(ResponseBean)returnValue;
+			    if(result!=null) {
+			    	operLog.setCode(StringUtils.isEmpty(result.getCode())?"ErrCode":String.valueOf(result.getCode()));
+					operLog.setResult(result.getMsg());
+				    operLog.setParams(paramsStr);
+				    operLog.setMethod(target.getClass().getName()+"."+currentMethod.getName());
+				    operLog.setUrl(requestUrl);
+				    operLog.setTime(new Date());
+				    executor.execute(()->{
+				    	try {
+							sysLoggerOprationService.save(operLog);
+						} catch (Exception e) {
+							LOGGER.error("ERROR IN process operAspectPoint:",e);
+						}
 				    });
 			    }
 			}

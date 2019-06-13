@@ -3,9 +3,12 @@ package com.tisson.demo.entity.sys;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import com.tisson.demo.common.base.GenerateId;
+
+import tk.mybatis.mapper.annotation.KeySql;
 
 /**  
 * @Title: SysCommonResources.java  
@@ -16,12 +19,12 @@ import javax.persistence.Table;
 * @version V1.0  
 */
 @Table(name = "sys_common_resources")
-public class  SysCommonResources implements Serializable{
+public class SysCommonResources implements Serializable{
 	private static final long serialVersionUID = 1L;
 
-    //  
     @Id
-    @GeneratedValue(generator="UUID")
+//    @GeneratedValue(generator="UUID")
+    @KeySql(genId=GenerateId.class)
     private String id;
     
     // 文件名 
@@ -40,9 +43,12 @@ public class  SysCommonResources implements Serializable{
     
     
     // 备注 
-    @Column(name="desc")
+    @Column(name="`desc`")
     private String desc;
     
+    // 是否使用到,0为未使用,1为使用中
+    @Column(name="used")
+    private Integer used;
     
     public String getId(){
         return id;
@@ -83,6 +89,12 @@ public class  SysCommonResources implements Serializable{
     public void setDesc ( String desc ){
         this.desc=desc;
     }
-    	
-    
+
+	public Integer getUsed() {
+		return used;
+	}
+
+	public void setUsed(Integer used) {
+		this.used = used;
+	}
 }
