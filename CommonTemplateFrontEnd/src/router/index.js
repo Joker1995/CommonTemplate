@@ -42,8 +42,8 @@ export const asyncRouterMap = [
     path: '/system',
     component: Layout,
     redirect: '/system/user',
-    name: '组织维护',
-    meta: { title: '组织维护', icon: 'form', permission: '/system' },
+    name: '系统设置',
+    meta: { title: '系统设置', icon: 'system', permission: '/system' },
     children: [
       {
         path: 'user',
@@ -55,37 +55,37 @@ export const asyncRouterMap = [
         path: 'role',
         name: 'Role',
         component: Role,
-        meta: { title: '角色维护', icon: 'user', permission: '/system/role' }
+        meta: { title: '角色维护', icon: 'role', permission: '/system/role' }
       },
       {
         path: 'organization',
         name: 'Organization',
         component: Organization,
-        meta: { title: '部门维护', icon: 'user', permission: '/system/organization' }
+        meta: { title: '部门维护', icon: 'organization', permission: '/system/organization' }
       },
       {
         path: 'accessPages',
         name: 'AccessPage',
         component: AccessPage,
-        meta: { title: '页面权限维护', icon: 'user', permission: '/system/accessPages' }
+        meta: { title: '页面权限维护', icon: 'accessPage', permission: '/system/accessPages' }
       },
       {
         path: 'resource',
         name: 'Resource',
         component: Resource,
-        meta: { title: '接口权限维护', icon: 'user', permission: '/system/resource' }
+        meta: { title: '接口权限维护', icon: 'resource', permission: '/system/resource' }
       },
       {
         path: 'registerTask',
         name: 'RegisterTask',
         component: RegisterTask,
-        meta: { title: '注册任务审批', icon: 'user', permission: '/system/registerTask' }
+        meta: { title: '注册任务审批', icon: 'registerTask', permission: '/system/registerTask' }
       },
       {
         path: 'process',
         name: 'Process',
         component: Process,
-        meta: { title: '流程维护', icon: 'user', permission: '/system/process' }
+        meta: { title: '流程维护', icon: 'process', permission: '/system/process' }
       }
     ]
   },
@@ -94,17 +94,17 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: '/logger/operation',
     name: '日志查看',
-    meta: { title: '日志查看', icon: 'form', permission: '/logger' },
+    meta: { title: '日志查看', icon: 'logger', permission: '/logger' },
     children: [{
       path: 'operation',
       name: 'Operation',
       component: Operation,
-      meta: { title: '操作日志', icon: 'user', permission: '/logger/operation' }
+      meta: { title: '操作日志', icon: 'operation', permission: '/logger/operation' }
     }, {
       path: 'login',
       name: 'Login',
       component: Login,
-      meta: { title: '登陆日志', icon: 'user', permission: '/logger/login' }
+      meta: { title: '登陆日志', icon: 'login', permission: '/logger/login' }
     }]
   },
   {
@@ -112,22 +112,22 @@ export const asyncRouterMap = [
     component: Layout,
     redirect: '/code/dataSource',
     name: '代码生成',
-    meta: { title: '代码生成', icon: 'form', permission: '/code' },
+    meta: { title: '代码生成', icon: 'code', permission: '/code' },
     children: [{
       path: 'project',
       name: 'Prject',
       component: Project,
-      meta: { title: '初始化项目', icon: 'user', permission: '/code/project' }
+      meta: { title: '初始化项目', icon: 'project', permission: '/code/project' }
     }, {
       path: 'dataSource',
       name: 'DataSource',
       component: DataSource,
-      meta: { title: '数据源', icon: 'user', permission: '/code/dataSource' }
+      meta: { title: '数据源', icon: 'dataSource', permission: '/code/dataSource' }
     }, {
       path: 'tables',
       name: 'Tables',
       component: Tables,
-      meta: { title: '数据表', icon: 'user', permission: '/code/tables' },
+      meta: { title: '数据表', icon: 'dataSource', permission: '/code/tables' },
       hidden: true
     }]
   }

@@ -3,7 +3,7 @@
     <div class="filter-container">
       <el-input :placeholder="$t('table.name')" v-model="listQuery.name" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter"/>
       <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">{{ $t('table.search') }}</el-button>
-      <el-button class="filter-item" type="primary" icon="el-icon-search" @click="handleUpload">上传流程资源</el-button>
+      <el-button class="filter-item" type="primary" @click="handleUpload"><svg-icon icon-class="upload" />上传流程资源</el-button>
     </div>
 
     <el-table
