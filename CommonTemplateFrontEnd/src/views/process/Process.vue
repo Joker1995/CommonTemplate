@@ -81,7 +81,7 @@ export default {
       temp: {
         imageSrc: undefined,
         processName: undefined,
-        processResourcePath: undefined
+        resourceId: undefined
       },
       dialogFormVisible: false,
       dialogPreviewVisible: false
@@ -131,7 +131,7 @@ export default {
         config: { headers: { 'Content-Type': 'multipart/form-data' }}
       }).then((res) => {
         if (res.data.length > 0) {
-          this.temp.processResourcePath = res.data
+          this.temp.resourceId = res.data
           this.$notify({
             title: '成功',
             message: '流程文件上传成功',
@@ -172,7 +172,7 @@ export default {
       })
     },
     handleDeploy() {
-      const requestData = { 'processResourcePath': this.temp.processResourcePath }
+      const requestData = { 'resourceId': this.temp.resourceId }
       doDeployProcess(requestData).then(resp => {
         this.$notify({
           title: '成功',
