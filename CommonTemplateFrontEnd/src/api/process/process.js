@@ -1,5 +1,7 @@
 import request from '@/utils/request'
 
+export const processUploadUrl = '/process/resources'
+
 export function doGetProcessList(query) {
   return request({
     url: '/process/processList',

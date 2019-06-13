@@ -9,38 +9,38 @@ project
 │ └─config(启动或打包配置文件)
 │ │
 └─└─node_modules(npm 依赖)
-    │
-    └─src
-      |
-      └─api(页面请求接口url配置)
-      |
-      └─assets(静态资源)
-      |
-      └─components(组件)
-      │
-      └─icons(图标和字体文件)
-      │
-      └─mock(本地mock接口文件数据)
-      |
-      └─router(路由配置)
-      |
-      └─store(会话信息)
-      |
-      └─styles(css文件)
-      |
-      └─utils(工具类)
-      |  |
-      |  └───index.js(简单工具)
-      |  |
-      |  └───cookie.js(cookie操作)
-      |  |
-      |  └───permisson.js(路由权限处理)
-      |  |
-      |  └───request.js(api请求处理)
-      |  |
-      |  └───...
-      |
-      └───views(业务处理界面)
+│
+└─src
+  |
+  └─api(页面请求接口url配置)
+  |
+  └─assets(静态资源)
+  |
+  └─components(组件)
+  │
+  └─icons(图标和字体文件)
+  │
+  └─mock(本地mock接口文件数据)
+  |
+  └─router(路由配置)
+  |
+  └─store(会话信息)
+  |
+  └─styles(css文件)
+  |
+  └─utils(工具类)
+  |  |
+  |  └───index.js(简单工具)
+  |  |
+  |  └───cookie.js(cookie操作)
+  |  |
+  |  └───permisson.js(路由权限处理)
+  |  |
+  |  └───request.js(api请求处理)
+  |  |
+  |  └───...
+  |
+  └───views(业务处理界面)
 ```
 开发指南:
   1. dev环境下:通过修改dev.env.js配置USEING_MOCK为true,使用mockjs进行数据接口调试,mock数据为src/mock,通过npm run dev,且在config/index.js中dev设置proxyTable进行url重写,可跨域请求(**注:打包html后proxyTable无效,因为请求是通过nodejs进行转发,通过nginx或者iis进行html访问是无效的**)

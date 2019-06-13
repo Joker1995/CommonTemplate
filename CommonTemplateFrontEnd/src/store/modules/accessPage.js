@@ -10,7 +10,7 @@ function hasPermission(accessPages, route) {
   if (route.meta && route.meta.permission) {
     return accessPages.some(page => route.meta.permission.includes(page))
   } else {
-    return true
+    return false
   }
 }
 

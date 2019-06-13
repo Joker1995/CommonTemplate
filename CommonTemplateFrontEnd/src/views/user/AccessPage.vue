@@ -44,7 +44,7 @@
           </el-table-column>
         </el-table>
 
-        <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+        <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="initNodeChildList(currentNodeKey)" />
 
         <el-dialog :title="dialogStatus" :visible.sync="dialogFormVisible">
           <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
@@ -195,10 +195,6 @@ export default {
         )
       }
     },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
     resetTemp() {
       this.temp = {
         id: undefined,
@@ -209,6 +205,13 @@ export default {
     },
     queryChildList(data, node, component) {
       this.currentNodeKey = data.id
+      if (this.currentNodeKey !== 'root' && this.listQuery.limit === -1) {
+        this.listQuery.limit = 10
+        this.listQuery.page = 1
+      } else if (this.currentNodeKey === 'root') {
+        this.listQuery.limit = -1
+        this.listQuery.page = -1
+      }
       this.initNodeChildList(data.id)
     },
     createData() {

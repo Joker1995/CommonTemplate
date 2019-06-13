@@ -34,22 +34,24 @@
           <span>{{ scope.row.version }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" width="320" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button type="primary" size="mini" @click="handlePreview(scope.row.processName)">流程图预览</el-button>
+          <el-button type="primary" size="mini">流程实例</el-button>
           <el-button type="danger" size="mini" @click="handleUndeploy(scope.row.deployId)" >撤销部署</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <el-dialog :visible.sync="dialogFormVisible" title="流程资源部署">
-      <el-upload :http-request="handleUploadProcessResource" :limit="1" drag action="/process/resources" accept=".zip">
+      <el-upload ref="upload" :http-request="handleUploadProcessResource" :limit="1" :auto-upload="false" :action="uploadUrl" drag accept=".zip">
         <i class="el-icon-upload"/>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         <div slot="tip" class="el-upload__tip">只能上传zip文件，且不超过2MB</div>
       </el-upload>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button @click="handleSumbitProcessFile">上传</el-button>
         <el-button @click="handleDeploy">部署</el-button>
       </div>
     </el-dialog>
@@ -62,7 +64,7 @@
 </template>
 <script>
 import request from '@/utils/request'
-import { doGetProcessList, doDeployProcess, doUnDeployProcess, doPreviewProcessImg } from '@/api/process/process'
+import { processUploadUrl, doGetProcessList, doDeployProcess, doUnDeployProcess, doPreviewProcessImg } from '@/api/process/process'
 
 export default {
   data() {
@@ -75,6 +77,7 @@ export default {
         page: 0,
         limit: 20
       },
+      uploadUrl: processUploadUrl,
       temp: {
         imageSrc: undefined,
         processName: undefined,
@@ -181,6 +184,9 @@ export default {
         this.resetTemp()
         this.getList()
       })
+    },
+    handleSumbitProcessFile() {
+      this.$refs.upload.submit()
     }
   }
 }
