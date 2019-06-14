@@ -425,6 +425,7 @@ export default {
     handleAccessPageUpdate(row) {
       this.accessPageFormVisible = true
       const userId = row.id
+      this.temp = deepcopy(row)
       doGetUserAccessPagesList(userId).then(response => {
         const data = response.data
         const userAccessPageIds = []
@@ -467,7 +468,7 @@ export default {
     },
     updateAccessPage() {
       const userId = this.temp.id
-      const checkedNodes = this.$refs['resourceTree'].getCheckedNodes()
+      const checkedNodes = this.$refs['accessPageTree'].getCheckedNodes()
       const accessPageIdList = []
       for (const node of checkedNodes) {
         accessPageIdList.push(node.id)
