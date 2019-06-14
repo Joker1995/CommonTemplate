@@ -9,9 +9,9 @@
 	<result column="desc" jdbcType="VARCHAR" property="desc" />
   </resultMap>
   
-  <sql id="item_columns">id,name,path,type,desc</sql>
+  <sql id="item_columns">ID,NAME,PATH,TYPE,`DESC`</sql>
 	<insert id="saveWordList">
-		INSERT INTO sys_common_resources (<include refid="item_columns" />)
+		INSERT INTO SYS_COMMON_RESOURCES (<include refid="item_columns" />)
 			VALUES
 			<foreach collection="dataList" item="sysCommonResources" separator=",">
 				(sysCommonResources.id,sysCommonResources.name,sysCommonResources.path,sysCommonResources.type,sysCommonResources.desc)

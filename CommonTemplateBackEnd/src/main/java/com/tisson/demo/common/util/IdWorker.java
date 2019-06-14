@@ -47,11 +47,13 @@ public class IdWorker{
 		this.lastTimestamp = timestamp;
 		return timestamp - this.epoch << this.timestampLeftShift | this.workerId << this.workerIdShift | this.sequence;
 	}
-
-	private static IdWorker flowIdWorker = new IdWorker(1);
+	
+	private static class IdWorkderHolder{
+		private static IdWorker WORKER = new IdWorker(1);
+	}
 
 	public static IdWorker getFlowIdWorkerInstance() {
-		return flowIdWorker;
+		return IdWorkderHolder.WORKER;
 	}
 
 	/**

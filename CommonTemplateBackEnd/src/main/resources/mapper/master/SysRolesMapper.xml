@@ -12,62 +12,67 @@
     <result column="update_time" jdbcType="DATE" property="updateTime" />
   </resultMap>
   
+  <sql id="item_columns">ID,NAME,LABEL,MEMO,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME</sql>
+  <sql id="page_columns">ID,NAME,MEMO,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME</sql>
+  <sql id="resource_columns">ID,NAME,LABEL,URL,PARENT_ID,MEMO,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME</sql>
   <select id="queryAccessPageList" resultType="com.tisson.demo.entity.sys.SysPages">
-  	select * from sys_pages where id in (select page_id from sys_role_pages where role_id=#{query.id,jdbcType=CHAR} )
+  	SELECT <include refid="page_columns" /> FROM SYS_PAGES WHERE ID IN (SELECT PAGE_ID FROM SYS_ROLE_PAGES WHERE ROLE_ID=#{query.id,jdbcType=CHAR} )
   </select>
   
   <select id="queryResourceList" resultType="com.tisson.demo.entity.sys.SysResources">
-  	select * from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{query.id,jdbcType=CHAR} )
+  	SELECT <include refid="resource_columns" /> FROM SYS_RESOURCES WHERE ID IN (SELECT RESOURCE_ID FROM SYS_ROLE_RESOURCES WHERE ROLE_ID=#{query.id,jdbcType=CHAR} )
   </select>
   
   <select id="queryResourcesByRoleId" resultType="com.tisson.demo.entity.sys.SysResources">
-  	select * from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{id,jdbcType=CHAR} )
+  	SELECT <include refid="resource_columns" /> FROM SYS_RESOURCES WHERE ID IN (SELECT RESOURCE_ID FROM SYS_ROLE_RESOURCES WHERE ROLE_ID=#{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryAccessPageByRoleId" resultType="com.tisson.demo.entity.sys.SysPages">
-  	select * from sys_pages where id in (select page_id from sys_role_pages where role_id=#{id,jdbcType=CHAR} )
+  	SELECT <include refid="page_columns" /> FROM SYS_PAGES WHERE ID IN (SELECT PAGE_ID FROM SYS_ROLE_PAGES WHERE ROLE_ID=#{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryAccessPageIdsList" resultType="java.lang.String">
-  	select id from sys_pages where id in (select page_id from sys_role_pages where role_id=#{query.id,jdbcType=CHAR} )
+  	SELECT ID FROM SYS_PAGES WHERE ID IN (SELECT PAGE_ID FROM SYS_ROLE_PAGES WHERE ROLE_ID=#{query.id,jdbcType=CHAR} )
   </select>
   
   <select id="queryResourceIdsList" resultType="java.lang.String">
-  	select id from sys_resources where id in (select resource_id from sys_role_resources where role_id=#{query.id,jdbcType=CHAR} )
+  	SELECT ID FROM SYS_RESOURCES WHERE ID IN (SELECT RESOURCE_ID FROM SYS_ROLE_RESOURCES WHERE ROLE_ID=#{query.id,jdbcType=CHAR} )
   </select>
   
   <delete id="deleteRole">
   	<if test="query!=null and query.id!=null">
-       delete from sys_role_pages where role_id=#{query.id,jdbcType=CHAR};
-       delete from sys_role_resources where role_id=#{query.id,jdbcType=CHAR};
-       delete from sys_roles where id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_ROLE_PAGES WHERE ROLE_ID=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_ROLE_RESOURCES WHERE ROLE_ID=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_ROLES WHERE ID=#{query.id,jdbcType=CHAR};
   	</if>
   </delete>
   
   <delete id="deleteRoleAccessPages">
   	<if test="query!=null and query.id!=null">
-       delete from sys_role_pages where role_id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_ROLE_PAGES WHERE ROLE_ID=#{query.id,jdbcType=CHAR};
   	</if>
   </delete>
   
   <insert id="addRoleAccessPages">
-  	<if test="query!=null and query.accessPageIds!=null">
-       <foreach collection ="query.accessPageIds" item="item" index= "index" separator =";">
-       	insert into sys_role_pages(id,role_id,page_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+  	<if test="query!=null and roleId !=null and query.size()>0 ">
+  		INSERT INTO SYS_ROLE_PAGES(ID,ROLE_ID,PAGE_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	 (#{item.id},#{roleId},#{item.pageId})
        </foreach >
   	</if>
   </insert>
   
   <delete id="deleteRoleResources">
   	<if test="query!=null and query.id!=null">
-       delete from sys_role_resources where role_id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_ROLE_RESOURCES WHERE ROLE_ID=#{query.id,jdbcType=CHAR};
   	</if>
   </delete>
   
   <insert id="addRoleResources">
-  	<if test="query!=null and query.resourceIds!=null">
-       <foreach collection ="query.resourceIds" item="item" index= "index" separator =";">
-       	insert into sys_role_resources(id,role_id,resource_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+  	<if test="query!=null and roleId !=null and query.size()>0">
+  		INSERT INTO SYS_ROLE_RESOURCES(ID,ROLE_ID,RESOURCE_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	(#{item.id},#{roleId},#{item.resourceId})
        </foreach >
   	</if>
   </insert>

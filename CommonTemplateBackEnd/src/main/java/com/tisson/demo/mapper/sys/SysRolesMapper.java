@@ -1,6 +1,7 @@
 package com.tisson.demo.mapper.sys;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -30,11 +31,11 @@ public interface SysRolesMapper extends Mapper<SysRoles>{
 
 	void deleteRoleAccessPages(@Param("query")SysRoles query);
 
-	void addRoleAccessPages(@Param("query")SysRoles query);
+	void addRoleAccessPages(@Param("query")List<Map<String,String>> query,@Param("roleId")String roleId);
 	
 	void deleteRoleResources(@Param("query")SysRoles query);
 
-	void addRoleResources(@Param("query")SysRoles query);
+	void addRoleResources(@Param("query")List<Map<String,String>> query,@Param("roleId")String roleId);
 
 	List<SysResources> queryResourcesByRoleId(String id);
 

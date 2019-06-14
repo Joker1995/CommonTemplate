@@ -42,6 +42,7 @@ import com.tisson.demo.common.base.ListQuery;
 import com.tisson.demo.common.base.MailService;
 import com.tisson.demo.common.cahce.RedisCache;
 import com.tisson.demo.common.cahce.RedisCallBack;
+import com.tisson.demo.common.util.IdWorker;
 import com.tisson.demo.common.util.JWTUtil;
 import com.tisson.demo.entity.sys.SysOrganizations;
 import com.tisson.demo.entity.sys.SysPages;
@@ -171,23 +172,82 @@ public class SysUsersService extends BaseService<SysUsers> {
 	}
 	@Transactional(rollbackFor=Exception.class)
 	public void updateUserRoles(SysUsers sysUsers) throws Exception{
-		sysUsersMapper.deleteUserRoles(sysUsers);
-		sysUsersMapper.addUserRoles(sysUsers);
+		if(null!=sysUsers.getRoleIds() && sysUsers.getRoleIds().size()>0) {
+			IdWorker idWorker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>
+				(sysUsers.getRoleIds().size());
+			sysUsers.getRoleIds().stream().forEach(roleId->{
+				try {
+					Map<String,String> item=new HashMap<String,String>();
+					item.put("id", String.valueOf(idWorker.nextId()));
+					item.put("roleId", roleId);
+					insertList.add(item);
+				} catch (Exception e) {
+					LOGGER.error("ERROR IN generate queryList:",e);
+				}
+			});
+			sysUsersMapper.deleteUserRoles(sysUsers);
+			sysUsersMapper.addUserRoles(insertList,sysUsers.getId());
+		}
 	}
 	@Transactional(rollbackFor=Exception.class)
 	public void updateUserResources(SysUsers sysUsers) {
-		sysUsersMapper.deleteUserResources(sysUsers);
-		sysUsersMapper.addUserResources(sysUsers);
+		if(null!=sysUsers.getResourceIds() && sysUsers.getResourceIds().size()>0) {
+			IdWorker idWorker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>
+				(sysUsers.getResourceIds().size());
+			sysUsers.getResourceIds().stream().forEach(resourceId->{
+				try {
+					Map<String,String> item=new HashMap<String,String>();
+					item.put("id", String.valueOf(idWorker.nextId()));
+					item.put("resourceId", resourceId);
+					insertList.add(item);
+				} catch (Exception e) {
+					LOGGER.error("ERROR IN generate queryList:",e);
+				}
+			});
+			sysUsersMapper.deleteUserResources(sysUsers);
+			sysUsersMapper.addUserResources(insertList,sysUsers.getId());
+		}
+		
 	}
 	@Transactional(rollbackFor=Exception.class)
 	public void updateUserAccessPages(SysUsers sysUsers) {
-		sysUsersMapper.deleteUserAccessPages(sysUsers);
-		sysUsersMapper.addUserAccessPages(sysUsers);
+		if(sysUsers.getAccessPageIds()!=null && sysUsers.getAccessPageIds().size()>0) {
+			IdWorker idWorker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>
+				(sysUsers.getAccessPageIds().size());
+			sysUsers.getAccessPageIds().stream().forEach(pageId->{
+				try {
+					Map<String,String> item=new HashMap<String,String>();
+					item.put("id", String.valueOf(idWorker.nextId()));
+					item.put("pageId", pageId);
+					insertList.add(item);
+				} catch (Exception e) {
+					LOGGER.error("ERROR IN generate queryList:",e);
+				}
+			});
+			sysUsersMapper.deleteUserAccessPages(sysUsers);
+			sysUsersMapper.addUserAccessPages(insertList,sysUsers.getId());
+		}
+		
 	}
 	@Transactional(rollbackFor=Exception.class)
 	public void saveUserOrganizationRelation(SysUsers sysUsers) {
-		sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
-		sysUsersMapper.insertUserOrganizationRelation(sysUsers);
+		if(sysUsers.getOrganizationId()!=null) {
+			IdWorker idWorker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>(1);
+			try {
+				Map<String,String> item=new HashMap<String,String>();
+				item.put("id", String.valueOf(idWorker.nextId()));
+				item.put("organizationId", sysUsers.getOrganizationId());
+				insertList.add(item);
+			} catch (Exception e) {
+				LOGGER.error("ERROR IN generate queryList:",e);
+			}
+			sysUsersMapper.deleteUserOrganizationRelation(sysUsers);
+			sysUsersMapper.insertUserOrganizationRelation(insertList,sysUsers.getId());
+		}
 	}
 
 	public List<SysOrganizations> queryOrganizationByUserId(String id) {

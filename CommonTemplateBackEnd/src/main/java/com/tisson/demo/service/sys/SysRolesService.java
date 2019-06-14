@@ -1,7 +1,12 @@
 package com.tisson.demo.service.sys;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.pagehelper.PageInfo;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.ListQuery;
+import com.tisson.demo.common.util.IdWorker;
 import com.tisson.demo.entity.sys.SysPages;
 import com.tisson.demo.entity.sys.SysResources;
 import com.tisson.demo.entity.sys.SysRoles;
@@ -25,6 +31,7 @@ import com.tisson.demo.mapper.sys.SysRolesMapper;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysRolesService extends BaseService<SysRoles>{
+	private final static Logger LOGGER = LoggerFactory.getLogger(SysRolesService.class);
 	@Autowired
 	private SysRolesMapper sysRolesMapper;
 	
@@ -78,8 +85,23 @@ public class SysRolesService extends BaseService<SysRoles>{
 		* @return    返回类型  
 		* @throws  
 		*/  
-		sysRolesMapper.deleteRoleAccessPages(query);
-		sysRolesMapper.addRoleAccessPages(query);
+		if(query.getAccessPageIds()!=null && query.getAccessPageIds().size()>0) {
+			IdWorker worker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>
+				(query.getAccessPageIds().size());
+			query.getAccessPageIds().stream().forEach(pageId->{
+				try {
+					Map<String,String> item=new HashMap<String,String>();
+					item.put("id", String.valueOf(worker.nextId()));
+					item.put("pageId", pageId);
+					insertList.add(item);
+				}catch (Exception e) {
+					LOGGER.error("ERROR IN generate insertList:",e);;
+				}
+			});
+			sysRolesMapper.deleteRoleAccessPages(query);
+			sysRolesMapper.addRoleAccessPages(insertList,query.getId());
+		}
 	}
 	@Transactional(rollbackFor=Exception.class)
 	public void updateRoleResources(SysRoles query) {
@@ -89,8 +111,24 @@ public class SysRolesService extends BaseService<SysRoles>{
 		* @return    返回类型  
 		* @throws  
 		*/  
-		sysRolesMapper.deleteRoleResources(query);
-		sysRolesMapper.addRoleResources(query);
+		if(query.getResourceIds()!=null && query.getResourceIds().size()>0) {
+			IdWorker worker=IdWorker.getFlowIdWorkerInstance();
+			List<Map<String,String>> insertList=new ArrayList<Map<String,String>>
+				(query.getResourceIds().size());
+			query.getResourceIds().stream().forEach(resourceId->{
+				try {
+					Map<String,String> item=new HashMap<String,String>();
+					item.put("id", String.valueOf(worker.nextId()));
+					item.put("resourceId", resourceId);
+					insertList.add(item);
+				}catch (Exception e) {
+					LOGGER.error("ERROR IN generate insertList:",e);;
+				}
+			});
+			sysRolesMapper.deleteRoleResources(query);
+			sysRolesMapper.addRoleResources(insertList,query.getId());
+		}
+		
 	}
 
 	public List<SysResources> queryResourcesByRoleId(String id) {

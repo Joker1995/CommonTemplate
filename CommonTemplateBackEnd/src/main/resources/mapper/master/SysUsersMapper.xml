@@ -20,52 +20,52 @@
   </resultMap>
 
   <select id="loadByName" parameterType="java.lang.String" resultMap="BaseResultMap" >
-    SELECT * FROM sys_users WHERE name = #{name,jdbcType=VARCHAR}
+    SELECT * FROM SYS_USERS WHERE NAME = #{name,jdbcType=VARCHAR}
   </select>
 
   <select id="queryRoles" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysRoles" >
-    SELECT * FROM sys_roles  WHERE id IN ( SELECT role_id FROM sys_user_roles WHERE user_id = #{id,jdbcType=CHAR} )
+    SELECT * FROM SYS_ROLES  WHERE ID IN ( SELECT ROLE_ID FROM SYS_USER_ROLES WHERE USER_ID = #{id,jdbcType=CHAR} )
   </select>
 
   <select id="queryResourcesByUserId" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysResources" >
-    SELECT * FROM sys_resources WHERE id IN ( SELECT resource_id FROM sys_user_resources  WHERE user_id = #{id,jdbcType=CHAR} )
+    SELECT * FROM SYS_RESOURCES WHERE ID IN ( SELECT RESOURCE_ID FROM SYS_USER_RESOURCES  WHERE USER_ID = #{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryResourcesByRoleId" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysResources" >
-    SELECT * FROM sys_resources WHERE id IN ( SELECT resource_id FROM sys_role_resources  WHERE role_id =#{id,jdbcType=CHAR} )
+    SELECT * FROM SYS_RESOURCES WHERE ID IN ( SELECT RESOURCE_ID FROM SYS_ROLE_RESOURCES  WHERE ROLE_ID =#{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryOrganizationByUserId" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysOrganizations" >
-    SELECT * FROM sys_organizations WHERE id IN ( SELECT organization_id FROM sys_user_organizations  WHERE user_id =#{id,jdbcType=CHAR} )
+    SELECT * FROM SYS_ORGANIZATIONS WHERE ID IN ( SELECT ORGANIZATION_ID FROM SYS_USER_ORGANIZATIONS  WHERE USER_ID =#{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryPagesByUserId" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysPages" >
-    SELECT * FROM sys_pages WHERE id IN ( SELECT page_id FROM sys_user_pages  WHERE user_id = #{id,jdbcType=CHAR} )
+    SELECT * FROM SYS_PAGES WHERE ID IN ( SELECT PAGE_ID FROM SYS_USER_PAGES  WHERE USER_ID = #{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryPagesByRoleId" parameterType="java.lang.String" resultType="com.tisson.demo.entity.sys.SysPages" >
-  	SELECT * FROM sys_pages WHERE id IN ( SELECT page_id FROM sys_role_pages  WHERE role_id =#{id,jdbcType=CHAR} )
+  	SELECT * FROM SYS_PAGES WHERE ID IN ( SELECT PAGE_ID FROM SYS_ROLE_PAGES  WHERE ROLE_ID =#{id,jdbcType=CHAR} )
   </select>
   
   <select id="queryList" parameterType="java.util.Map" resultMap="BaseResultMap" >
-    SELECT * FROM sys_users
+    SELECT * FROM SYS_USERS
     <where>
     	<if test="query !=null">
     		<if test="query.name !=null and query.name !='' ">
-		    	and name=#{query.name}
+		    	AND NAME=#{query.name}
 		    </if>
 		    <if test="query.label !=null and query.label !='' ">
-		    	and label=#{query.label}
+		    	AND LABEL=#{query.label}
 		    </if>
 		    <if test="query.mobilePhone !=null and query.mobilePhone !='' ">
-		    	and mobile_phone=#{query.mobilePhone}
+		    	AND MOBILE_PHONE=#{query.mobilePhone}
 		    </if>
 		    <if test="query.status !=null and query.status !='' ">
-		    	and status=#{query.status}
+		    	AND STATUS=#{query.status}
 		    </if>
     	</if>
 	    <if test="specialUserName!=null">
-	    	and name not in
+	    	AND NAME NOT IN
 	    	<foreach item="item" index="index" collection="specialUserName" 
                          open="(" separator="," close=")">
             	#{item}
@@ -76,64 +76,70 @@
   
   <delete id="deleteSysUsers">
   	<if test="sysUsers!=null and sysUsers.id!=null ">
-  		delete from sys_user_pages where user_id=#{sysUsers.id,jdbcType=CHAR};
-  		delete from sys_user_resources where user_id=#{sysUsers.id,jdbcType=CHAR};
-  		delete from sys_user_roles where user_id=#{sysUsers.id,jdbcType=CHAR};
-  		delete from sys_users where id=#{sysUsers.id,jdbcType=CHAR};
+  		DELETE FROM SYS_USER_PAGES WHERE USER_ID=#{sysUsers.id,jdbcType=CHAR};
+  		DELETE FROM SYS_USER_RESOURCES WHERE USER_ID=#{sysUsers.id,jdbcType=CHAR};
+  		DELETE FROM SYS_USER_ROLES WHERE USER_ID=#{sysUsers.id,jdbcType=CHAR};
+  		DELETE FROM SYS_USERS WHERE ID=#{sysUsers.id,jdbcType=CHAR};
   	</if>
   </delete>
   
   <delete id="deleteUserAccessPages">
   	<if test="query!=null and query.id!=null">
-       delete from sys_user_pages where user_id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_USER_PAGES WHERE USER_ID=#{query.id,jdbcType=CHAR};
   	</if>
   </delete>
   
   <insert id="addUserAccessPages">
-  	<if test="query!=null and query.accessPageIds!=null">
-       <foreach collection ="query.accessPageIds" item="item" index= "index" separator =";">
-       	insert into sys_user_pages(id,user_id,page_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+  	<if test="query!=null and userId !=null and query.size()>0 ">
+  		INSERT INTO SYS_USER_PAGES(ID,USER_ID,PAGE_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	(#{item.id},#{userId},#{item.pageId})
        </foreach >
   	</if>
   </insert>
   
   <delete id="deleteUserResources">
   	<if test="query!=null and query.id!=null">
-       delete from sys_user_resources where user_id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_USER_RESOURCES WHERE USER_ID=#{query.id,jdbcType=CHAR}
   	</if>
   </delete>
   
   <insert id="addUserResources">
-  	<if test="query!=null and query.resourceIds!=null">
-       <foreach collection ="query.resourceIds" item="item" index= "index" separator =";">
-       	insert into sys_user_resources(id,user_id,resource_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+  	<if test="query!=null and userId !=null and query.size()>0">
+  		INSERT INTO SYS_USER_RESOURCES(ID,USER_ID,RESOURCE_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	 (#{item.id},#{userId},#{item.resourceId})
        </foreach >
   	</if>
   </insert>
   
   <delete id="deleteUserRoles">
   	<if test="query!=null and query.id!=null">
-       delete from sys_user_roles where user_id=#{query.id,jdbcType=CHAR};
+       DELETE FROM SYS_USER_ROLES WHERE USER_ID=#{query.id,jdbcType=CHAR}
   	</if>
   </delete>
   
   <insert id="addUserRoles">
-  	<if test="query!=null and query.roleIds!=null">
-       <foreach collection ="query.roleIds" item="item" index= "index" separator =";">
-       	insert into sys_user_roles(id,user_id,role_id) select REPLACE(UUID(),'-',''),#{query.id},#{item} from dual
+  	<if test="query!=null and userId !=null and query.size()>0">
+  		INSERT INTO SYS_USER_ROLES(ID,USER_ID,ROLE_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	(#{item.id},#{userId},#{item.roleId})
        </foreach >
   	</if>
   </insert>
   
   <delete id="deleteUserOrganizationRelation">
   	<if test="query!=null and query.id!=null">
-  		delete from sys_user_organizations where user_id=#{query.id,jdbcType=CHAR}
+  		DELETE FROM SYS_USER_ORGANIZATIONS WHERE USER_ID=#{query.id,jdbcType=CHAR}
   	</if>
   </delete>
   
   <insert id="insertUserOrganizationRelation">
-  	<if test="query!=null and query.organizationId!=null">
-       insert into sys_user_organizations(id,user_id,organization_id) select REPLACE(UUID(),'-',''),#{query.id},#{query.organizationId} from dual
+  	<if test="query!=null and userId !=null and query.size()>0 ">
+       INSERT INTO SYS_USER_ORGANIZATIONS(ID,USER_ID,ORGANIZATION_ID) VALUES
+       <foreach collection ="query" item="item" index= "index" separator =",">
+       	 (#{item.id},#{userId},#{item.organizationId})
+       </foreach >
   	</if>
   </insert>
 </mapper>

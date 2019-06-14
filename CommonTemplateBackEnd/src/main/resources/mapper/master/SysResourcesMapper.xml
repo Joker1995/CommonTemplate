@@ -14,36 +14,37 @@
     <result column="update_time" jdbcType="DATE" property="updateTime" />
   </resultMap>
   
+  <sql id="item_columns">ID,NAME,LABEL,URL,PARENT_ID,MEMO,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME</sql>
   <select id="queryResourcesChildList" parameterType="java.lang.String" resultMap="BaseResultMap">
-  	select * from sys_resources where parent_id=#{id,jdbcType=CHAR}
+  	SELECT <include refid="item_columns" /> FROM SYS_RESOURCES WHERE PARENT_ID=#{id,jdbcType=CHAR}
   </select>
   
   <select id="queryRootResources" resultMap="BaseResultMap">
-  	select * from sys_resources where parent_id is null
+  	SELECT <include refid="item_columns" /> FROM SYS_RESOURCES WHERE PARENT_ID IS NULL
   </select>
   
   <delete id="deleteResources">
   	<if test="query!=null">
         <if test="query.id!=null">
-  			delete from sys_role_resources where resource_id=#{query.id,jdbcType=CHAR};
-  			delete from sys_user_resources where resource_id=#{query.id,jdbcType=CHAR};
+  			DELETE FROM SYS_ROLE_RESOURCES WHERE RESOURCE_ID=#{query.id,jdbcType=CHAR};
+  			DELETE FROM SYS_USER_RESOURCES WHERE RESOURCE_ID=#{query.id,jdbcType=CHAR};
   		</if>
   		<if test="query.id!=null">
-  			delete from sys_resources where id=#{query.id,jdbcType=CHAR};
+  			DELETE FROM SYS_RESOURCES WHERE ID=#{query.id,jdbcType=CHAR};
   		</if>
   	</if>
   	<if test="subListIds!=null and subListIds.size()>0 ">
-		delete from sys_role_resources where resource_id in
+		DELETE FROM SYS_ROLE_RESOURCES WHERE RESOURCE_ID IN
 		<foreach item="item" index="index" collection="subListIds" 
 	                     open="(" separator="," close=")">
 	        	#{item}
 	    </foreach>;
-	     delete from sys_user_resources where resource_id in
+	    DELETE FROM SYS_USER_RESOURCES WHERE RESOURCE_ID IN
 		<foreach item="item" index="index" collection="subListIds" 
 	                     open="(" separator="," close=")">
 	        	#{item}
 	    </foreach>;
-	    delete from sys_resources where id in
+	    DELETE FROM SYS_RESOURCES WHERE ID IN
 		<foreach item="item" index="index" collection="subListIds" 
 	                     open="(" separator="," close=")">
 	        	#{item}

@@ -69,19 +69,19 @@ public interface SysUsersMapper extends Mapper<SysUsers>{
 	
 	void deleteUserAccessPages(@Param("query")SysUsers query);
 
-	void addUserAccessPages(@Param("query")SysUsers query);
+	void addUserAccessPages(@Param("query")List<Map<String,String>> query,@Param("userId")String userId);
 	
 	void deleteUserResources(@Param("query")SysUsers query);
 
-	void addUserResources(@Param("query")SysUsers query);
+	void addUserResources(@Param("query")List<Map<String,String>> query,@Param("userId")String userId);
 	
 	void deleteUserRoles(@Param("query")SysUsers query);
 
-	void addUserRoles(@Param("query")SysUsers query);
+	void addUserRoles(@Param("query")List<Map<String,String>> query,@Param("userId")String userId);
 
 	List<SysOrganizations> queryOrganizationByUserId(String id);
 
-	void insertUserOrganizationRelation(@Param("query")SysUsers sysUsers);
+	void insertUserOrganizationRelation(@Param("query")List<Map<String,String>> query,@Param("userId")String userId);
 
 	void deleteUserOrganizationRelation(@Param("query")SysUsers sysUsers);
 }

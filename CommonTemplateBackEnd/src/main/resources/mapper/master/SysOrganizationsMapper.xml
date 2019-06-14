@@ -10,4 +10,5 @@
     <result column="create_time" jdbcType="DATE" property="createTime" />
     <result column="update_time" jdbcType="DATE" property="updateTime" />
   </resultMap>
+  <sql id="item_columns">ID,NAME,MEMO,CREATE_USER,CREATE_TIME,UPDATE_USER,UPDATE_TIME</sql>
 </mapper>
