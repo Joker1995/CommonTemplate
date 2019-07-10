@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
-import org.activiti.engine.TaskService;
-import org.activiti.engine.task.Task;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -99,7 +97,9 @@ public class SysUsersController {
 	@Autowired
 	private RedisCache cache;
 	@Autowired
-	private TaskService taskService;
+	private RedisCacheManager redisCacheManager;
+	@Autowired
+	private AuthRealm realm;
 
 	@PostMapping(value = "/usersList")
 	@RequiresPermissions("/user/usersList")
@@ -329,7 +329,6 @@ public class SysUsersController {
 			sysUsers.setUpdateTime(new Date());
 			sysUsers.setUpdateUser("admin");
 			sysUsersService.save(sysUsers);
-			sysUsersService.startRegisterProcess(sysUsers);//不喜工作流可取消相关
 			// 开始启动注册流程
 			return new ResponseBean<String>("register Success", null);
 		}
@@ -341,8 +340,9 @@ public class SysUsersController {
 			throws Exception {
 		Subject subject = SecurityUtils.getSubject();
 		subject.logout();
-//        userName2TokenService.remove("ssoToken:" + JWTUtil.getUserName(token), token);
 		cache.delHash("ssoToken:" + JWTUtil.getUserName(token), token);
+		//这边是为了程序认证cache bug清除
+		cache.del((redisCacheManager.getKeyPrefix()+realm.getAuthenticationCacheName()+":"+token).getBytes());
 		return new ResponseBean<String>("logout Success", null);
 	}
 
@@ -560,56 +560,6 @@ public class SysUsersController {
 		}
 		FileUtil.del(tempFile);
 		return new ResponseBean<Map<String, String>>("生成验证码成功", result);
-	}
-	
-	@GetMapping(value = "/registerTask")
-	@RequiresPermissions("/user/registerTask")
-	@ApiOperation(value = "获取登录用户注册任务信息", httpMethod = "GET", response = ResponseBean.class)
-	public ResponseBean<List<Map<String,String>>> queryUserRegisterTask(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token) {
-		List<Map<String,String>> result = new ArrayList<Map<String,String>>();
-		SysUsers loginUser = null;
-		Subject subject = SecurityUtils.getSubject();
-		Object principal = subject.getPrincipal();
-		Set<Task> taskSet=new HashSet<Task>();
-		if (principal instanceof SysUsers) {
-			loginUser = (SysUsers) principal;
-			List<SysRoles> roleList = loginUser.getRoleList();
-			roleList.stream().forEach(role->{
-				taskSet.addAll(sysUsersService.userTask(role.getName(), "userRegister"));
-			});
-			taskSet.stream().forEach(task->{
-				Map<String,String> taskItem = new HashMap<String,String>();
-				Object entityJsonStr = taskService.getVariable(task.getId(),"registerEntity");
-				if(entityJsonStr!=null) {
-					Gson gson = new Gson();
-					SysUsers registerUser = gson.fromJson(Optional.of(entityJsonStr).map(Object::toString).get(),
-							SysUsers.class);
-					Date registerTime = registerUser.getCreateTime();
-					Date expireTime = DateUtil.offset(registerTime, DateField.DAY_OF_YEAR, 1);
-					taskItem.put("userName",registerUser.getName());
-					taskItem.put("applyTime",DateUtil.format(registerTime, "yyyy-MM-dd HH:mm:ss"));
-					taskItem.put("expireTime",DateUtil.format(expireTime, "yyyy-MM-dd HH:mm:ss"));
-					taskItem.put("taskId", task.getId());
-					result.add(taskItem);
-				}
-			});
-		}
-		return new ResponseBean<List<Map<String,String>>>("获取登录用户注册任务信息成功", result);
-	}
-	
-	@PostMapping(value = "/approvalRegisterTask")
-	@RequiresPermissions("/user/approvalRegisterTask")
-	@ApiOperation(value = "审批登录用户注册任务", httpMethod = "POST", response = ResponseBean.class)
-	public ResponseBean<String> approvalRegisterTask(@RequestHeader(GlobalConstant.TOKEN_HEADER_NAME) String token,
-			@RequestParam("taskId")@NotEmpty String taskId,@RequestParam("approvalResult")@NotEmpty String approvalResult) {
-		SysUsers loginUser = null;
-		Subject subject = SecurityUtils.getSubject();
-		Object principal = subject.getPrincipal();
-		if (principal instanceof SysUsers) {
-			loginUser = (SysUsers) principal;
-			sysUsersService.approvalRegisterTask(loginUser, taskId, approvalResult);
-		}
-		return new ResponseBean<String>("审批登录用户注册任务成功", "");
 	}
 
 	private Set<SysPages> filterAccessPageList(List<SysPages> list) {

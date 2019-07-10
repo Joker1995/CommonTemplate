@@ -17,13 +17,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
-import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.runtime.ProcessInstance;
-import org.activiti.engine.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.AopContext;
@@ -39,7 +32,6 @@ import com.google.gson.reflect.TypeToken;
 import com.tisson.demo.common.base.BaseService;
 import com.tisson.demo.common.base.JsonSerializer;
 import com.tisson.demo.common.base.ListQuery;
-import com.tisson.demo.common.base.MailService;
 import com.tisson.demo.common.cahce.RedisCache;
 import com.tisson.demo.common.cahce.RedisCallBack;
 import com.tisson.demo.common.util.IdWorker;
@@ -84,14 +76,6 @@ public class SysUsersService extends BaseService<SysUsers> {
     private SysUsersMapper sysUsersMapper;
 	@Autowired
 	private RedisCache cache;
-	@Autowired
-	private RepositoryService repositoryService;
-	@Autowired
-	private RuntimeService runtimeService;
-	@Autowired
-	private TaskService taskService;
-	@Autowired
-	private MailService mailService;
 	
 	public SysUsers loadByName(String name) {
 		return sysUsersMapper.loadByName(name);
@@ -318,119 +302,6 @@ public class SysUsersService extends BaseService<SysUsers> {
 			resultMap.put("kickOut", "false");
 			cache.setHash("ssoToken:"+userName, token, resultMap);
 		}
-	}
-	
-	public void startRegisterProcess(SysUsers sysUsers) {
-		List<ProcessDefinition> processDefinitionList = repositoryService.createProcessDefinitionQuery()
-                .processDefinitionName("userRegister").orderByDeploymentId().desc().list();
-		if(processDefinitionList.size()>0) {
-			ProcessDefinition processDefinition=processDefinitionList.get(0);
-			Map<String,Object> variables=new HashMap<String,Object>();
-			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-		    dateFormat.setLenient(false);
-		    Date executeTime=DateUtil.offset(sysUsers.getCreateTime(), DateField.DAY_OF_YEAR, 1).toJdkDate();
-			Gson gson = new Gson();
-			variables.put("registerEntity", gson.toJson(sysUsers));
-			variables.put("executeTime",dateFormat.format(executeTime));
-			ProcessInstance processInstance = runtimeService.startProcessInstanceById(processDefinition.getId(), variables);
-			Task task=taskService.createTaskQuery().processInstanceId(processInstance.getId())
-					.singleResult();
-			taskService.complete(task.getId(),variables);
-			LOGGER.info("register user:[{}],executeTime:[{}],processDefinitionId:[{}],processInstanceId:[{}],taskId:[{}]",
-					 gson.toJson(sysUsers),dateFormat.format(executeTime),
-					 processDefinition.getId(),processInstance.getId(),task.getId());
-		}
-	}
-	
-	public List<Task> userTask(String userRoleName,String processDefinitionName) {
-		return taskService.createTaskQuery().taskCandidateGroup(userRoleName)
-				.processDefinitionName(processDefinitionName).list();
-	}
-	
-	public void registerEmailNotify(DelegateExecution execution) {
-		try {
-			LOCK.lock();//避免activiti乐观锁发生
-			String currentProcessInstanceId=execution.getProcessInstanceId();
-			Task task = taskService.createTaskQuery()
-					.processInstanceId(currentProcessInstanceId).singleResult();
-			Object approvalResult = taskService.getVariable(task.getId(), "approvalResult");
-			Object registerUserEntity = taskService.getVariable(task.getId(), "registerEntity");
-			if(approvalResult!=null && approvalResult instanceof Boolean) {
-				Gson gson=new Gson();
-				SysUsers user = gson.fromJson(registerUserEntity.toString(), new TypeToken<SysUsers>() {}.getType());
-				String email=user.getEmail();
-				Boolean result = (Boolean)approvalResult;
-				if(result) {
-					String content=String.format("亲爱的用户%s:<br/>您注册的用户已经通过审批!", user.getName());
-					mailService.sendHtmlMail(email, "用户注册通过", content);
-				}else {
-					String content=String.format("亲爱的用户%s:<br/>您注册的用户未能通过审批,请和管理员联系!", user.getName());
-					mailService.sendHtmlMail(email, "用户注册未通过", content);
-				}
-				Date startTime = DateUtil.date().offset(DateField.SECOND, 10);//延迟10s执行
-				EXECUTOR.schedule(()->{//当前事件是最后一个节点,通过异步执行完成,不能直接complete
-					try {
-						Task currentTask = taskService.createTaskQuery()
-								.processInstanceId(currentProcessInstanceId).singleResult();
-						taskService.complete(currentTask.getId());
-					} catch (Exception e) {
-						LOGGER.error("ERROR IN registerEmailNotify:",e);;
-					}
-				},startTime);
-			}
-		} catch (Exception e) {
-			LOGGER.error("ERROR IN registerEmailNotify:",e);;
-		}finally {
-			LOCK.unlock();
-		}
-	}
-	
-	public void registerOverTime(DelegateExecution execution) {
-		try {
-			String currentProcessInstanceId=execution.getProcessInstanceId();
-			Task task = taskService.createTaskQuery()
-					.processInstanceId(currentProcessInstanceId).singleResult();
-			taskService.setVariable(task.getId(), "approvalResult", Boolean.FALSE);
-			LOGGER.info("task id:[{}],currentProcessInstanceId:[{}]",task.getId(),currentProcessInstanceId);
-		} catch (Exception e) {
-			LOGGER.error("ERROR IN registerOverTime:",e);;
-		}
-	}
-	
-	@Transactional(rollbackFor=Exception.class)
-	public void approvalRegisterTask(SysUsers loginUser,String taskId,String approvalResult) {
-		SysUsersService sysUsersService = ((SysUsersService)AopContext.currentProxy());
-		Set<Task> taskSet=new HashSet<Task>();
-		List<SysRoles> roleList = loginUser.getRoleList();
-		roleList.stream().forEach(role->{
-			taskSet.addAll(userTask(role.getName(), "userRegister"));
-		});
-		taskSet.stream().forEach(task->{
-			if(task.getId().equals(taskId)) {
-				Object entityJsonStr = taskService.getVariable(taskId,"registerEntity");
-				SysUsers registerUser = null;
-				Map<String,Object> variables=new HashMap<String,Object>();
-				if(entityJsonStr!=null) {
-					Gson gson = new Gson();
-					registerUser = gson.fromJson(Optional.of(entityJsonStr).map(Object::toString).get(),
-							SysUsers.class);
-				}else {
-					return;
-				}
-				if(approvalResult.equals("0")) {
-					registerUser.setStatus(SysUsers.Status.EFFECTIVE.getStatus());
-					sysUsersService.update(registerUser);
-					LOGGER.info("registerUser:[{}]",new Gson().toJson(registerUser));
-					variables.put("approvalResult", Boolean.TRUE);
-					taskService.complete(taskId,variables);
-				}else {
-					sysUsersService.deleteById(registerUser.getId());
-					variables.put("approvalResult", Boolean.FALSE);
-					taskService.complete(taskId,variables);
-				}
-				return;
-			}
-		});
 	}
 	
 	private void initUserRelations(List<SysUsers> userList) {

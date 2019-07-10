@@ -53,16 +53,10 @@ public class RedisCache implements IRedisManager{
 	 */
 	public static final long DEFAULT_CACHE_MILLIS = TimeUnitUtil.getMillis(TimeUnit.MINUTES, FIVE);
 
-//	@Autowired
-//	private JedisPool jedisPool;
-//	@Autowired
-//	private RedisClient redisClient;
-//	
-//	private Jedis getResource() {
-//		return jedisPool.getResource();
-//	}
 	@Autowired
-	private JedisCluster jedisCluster;
+	private JedisPool jedisPool;
+	@Autowired
+	private RedisClient redisClient;
 	/**------------------key 普通 相关操作--------------------------------*/
     /**
      * 是否存在校验
@@ -72,16 +66,9 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean exists(String key) {
         validateKeyParam(key);
-        try {
-//			return redisClient.invoke(jedisPool, (jedis) -> {
-//				return jedis.exists(key.getBytes());
-//			});
-        	return jedisCluster.exists(key.getBytes());
-		} catch (Exception e) {
-			log.error("exists error",e);
-			e.printStackTrace();
-		}
-        return null;
+        return redisClient.invoke(jedisPool, (jedis) -> {
+			return jedis.exists(key.getBytes());
+		});
     }
 
     /**
@@ -118,12 +105,12 @@ public class RedisCache implements IRedisManager{
         validateKeyParam(key);
         //时间转换成毫秒
         long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-//        Long lResult = redisClient.invoke(jedisPool, (jedis) -> jedis.pexpire(key.getBytes(), millis));
-        Long lResult = jedisCluster.pexpire(key.getBytes(), millis);
-        if (LONG_ZERO.equals(lResult)) {
-            return false;
-        }
-        return true;
+		Long lResult = redisClient.invoke(jedisPool, (jedis) -> 
+		jedis.pexpire(key.getBytes(), millis));
+		if (LONG_ZERO.equals(lResult)) {
+		    return false;
+		}
+		return true;
     }
 
     /**
@@ -138,8 +125,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long getExpiresTtl(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.ttl(key.getBytes()));
-        return jedisCluster.ttl(key.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.ttl(key.getBytes()));
     }
 
     /**
@@ -154,8 +140,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long getExpiresPttl(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.pttl(key.getBytes()));
-        return jedisCluster.pttl(key);
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.pttl(key.getBytes()));
     }
 
     /**
@@ -167,8 +152,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long persist(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.persist(key.getBytes()));
-        return jedisCluster.persist(key.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.persist(key.getBytes()));
     }
 
     /**
@@ -185,8 +169,7 @@ public class RedisCache implements IRedisManager{
      */
     public String getType(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.type(key.getBytes()));
-        return jedisCluster.type(key);
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.type(key.getBytes()));
     }
 
     /**
@@ -197,8 +180,7 @@ public class RedisCache implements IRedisManager{
     public void remove(String key) {
         validateKeyParam(key);
         if (exists(key)) {
-//            redisClient.invoke(jedisPool, (jedis) -> jedis.del(key.getBytes()));
-        	jedisCluster.del(key);
+            redisClient.invoke(jedisPool, (jedis) -> jedis.del(key.getBytes()));
         }
     }
     /**------------------字符串相关操作--------------------------------*/
@@ -225,28 +207,28 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean put(String key, Object value, int duration, TimeUnit timeUnit) {
         validateParam(key, value);
-//        String result = redisClient.invoke(jedisPool, (jedis) -> {
-//                    String srtResult = jedis.set(key.getBytes(), JsonSerializer.serialize(value));
-//                    if (duration <= ZERO) {
-//                        //默认5 分钟
-//                        jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
-//                    } else {
-//                        //时间转换成毫秒
-//                        long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-//                        jedis.pexpire(key.getBytes(), millis);
-//                    }
-//                    return srtResult;
-//                }
-//
-//        );
-        String result = jedisCluster.set(key.getBytes(), JsonSerializer.serialize(value));
+        String result = redisClient.invoke(jedisPool, (jedis) -> {
+			String srtResult = jedis.set(key.getBytes(), JsonSerializer.serialize(value));
+			if (duration <= ZERO) {
+				// 默认5 分钟
+				jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
+			} else {
+				// 时间转换成毫秒
+				long millis = TimeUnitUtil.getMillis(timeUnit, duration);
+				jedis.pexpire(key.getBytes(), millis);
+			}
+			return srtResult;
+		});
         if (duration <= ZERO) {
-        	//默认5 分钟
-        	jedisCluster.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
+        	redisClient.invoke(jedisPool, (jedis) -> {
+        		return jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
+        	});
         }else {
         	//时间转换成毫秒
         	long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-        	jedisCluster.pexpire(key.getBytes(), millis);
+        	redisClient.invoke(jedisPool, (jedis) -> {
+        		return jedis.pexpire(key.getBytes(), millis);
+        	});
         }
         if (OK.equals(result)) {
             return true;
@@ -265,16 +247,15 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean putNeverExpires(String key, Object value) {
         validateParam(key, value);
-//        String result = redisClient.invoke(jedisPool, (jedis) -> {
-//                    String srtResult = jedis.set(key.getBytes(), JsonSerializer.serialize(value));
-//                    return srtResult;
-//                }
-//        );
-        String result = jedisCluster.set(key.getBytes(), JsonSerializer.serialize(value));
+        String result = redisClient.invoke(jedisPool, (jedis) -> {
+                    String srtResult = jedis.set(key.getBytes(), JsonSerializer.serialize(value));
+                    return srtResult;
+                }
+        );
         if (OK.equals(result)) {
-            return true;
-        }
-        return false;
+		    return true;
+		}
+		return false;
     }
 
 
@@ -287,13 +268,11 @@ public class RedisCache implements IRedisManager{
      */
     public <T> T get(String key, Type type,RedisCallBack<T> callBack) {
         validateKeyParam(key);
-//        byte[] result = redisClient.invoke(jedisPool, (jedis) -> jedis.get(key.getBytes()));
-        byte[] result = jedisCluster.get(key.getBytes());
+        byte[] result = redisClient.invoke(jedisPool, (jedis) -> jedis.get(key.getBytes()));
         if (result == null) {
-            return null;
-        }
-        return callBack.callbackForSingleObject(result,type);
-//        return JsonSerializer.deserialize(result, clazz);
+		    return null;
+		}
+		return callBack.callbackForSingleObject(result,type);
         
     }
 
@@ -331,14 +310,12 @@ public class RedisCache implements IRedisManager{
      */
     public <T> List<T> getList(String key, Type type,RedisCallBack<T> callBack) {
         validateKeyParam(key);
-//        byte[] result = redisClient.invoke(jedisPool, (jedis) -> jedis.get(key.getBytes()));
-        byte[] result = jedisCluster.get(key.getBytes());
+        byte[] result = redisClient.invoke(jedisPool, (jedis) -> jedis.get(key.getBytes()));
         if (result == null) {
-            return null;
-        }
-        return callBack.callbackForList(result,type);
+		    return null;
+		}
+		return callBack.callbackForList(result,type);
     }
-
     /**
      * 将key 的值设为 value ,当且仅当 key 不存在
      * more值是时间戳 默认有效期是 5 分钟
@@ -399,39 +376,24 @@ public class RedisCache implements IRedisManager{
      */
     public boolean setNx(String key, Object value, int duration, TimeUnit timeUnit) {
         validateParam(key, value);
-//        return redisClient.invoke(jedisPool, (jedis) -> {
-//                    long result = jedis.setnx(key.getBytes(), JsonSerializer.serialize(value));
-//                    if (result >= 1) {
-//                        if (duration <= ZERO) {
-//                            //默认5 分钟
-//                            jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
-//                            return true;
-//                        } else {
-//                            //时间转换成毫秒
-//                            long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-//                            jedis.pexpire(key.getBytes(), millis);
-//                            return true;
-//                        }
-//                    } else {
-//                        return false;
-//                    }
-//                }
-//        );
-        long result = jedisCluster.setnx(key.getBytes(), JsonSerializer.serialize(value));
-        if (result >= 1) {
-        	if (duration <= ZERO) {
-        		//默认5 分钟
-        		jedisCluster.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
-        		return true;
-        	}else {
-        		//时间转换成毫秒
-        		long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-        		jedisCluster.pexpire(key.getBytes(), millis);
-        		return true;
-        	}
-        }else {
-        	return false;
-        }
+        return redisClient.invoke(jedisPool, (jedis) -> {
+		          long result = jedis.setnx(key.getBytes(), JsonSerializer.serialize(value));
+		          if (result >= 1) {
+		              if (duration <= ZERO) {
+		                  //默认5 分钟
+		                  jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
+		                  return true;
+		              } else {
+		                  //时间转换成毫秒
+		                  long millis = TimeUnitUtil.getMillis(timeUnit, duration);
+		                  jedis.pexpire(key.getBytes(), millis);
+		                  return true;
+		              }
+		          } else {
+		              return false;
+		          }
+		      }
+		);
     }
 
     /**
@@ -455,31 +417,20 @@ public class RedisCache implements IRedisManager{
      */
     public String getSet(String key, String value, int duration, TimeUnit timeUnit) {
         validateParam(key, value);
-//        return redisClient.invoke(jedisPool, (jedis) -> {
-//                    String result = jedis.getSet(key, value);
-//                    if (duration <= ZERO) {
-//                        //设置默认过期时间 5 分钟
-//                        jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
-//                        return result;
-//                    } else {
-//                        //时间转换成毫秒
-//                        long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-//                        jedis.pexpire(key.getBytes(), millis);
-//                        return result;
-//                    }
-//                }
-//        );
-        String result = jedisCluster.getSet(key, value);
-        if (duration <= ZERO) {
-        	//设置默认过期时间 5 分钟
-        	jedisCluster.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
-        	return result;
-        }else {
-        	//时间转换成毫秒
-        	long millis = TimeUnitUtil.getMillis(timeUnit, duration);
-        	jedisCluster.pexpire(key.getBytes(), millis);
-        	return result;
-        }
+        return redisClient.invoke(jedisPool, (jedis) -> {
+                    String result = jedis.getSet(key, value);
+                    if (duration <= ZERO) {
+                        //设置默认过期时间 5 分钟
+                        jedis.pexpire(key.getBytes(), DEFAULT_CACHE_MILLIS);
+                        return result;
+                    } else {
+                        //时间转换成毫秒
+                        long millis = TimeUnitUtil.getMillis(timeUnit, duration);
+                        jedis.pexpire(key.getBytes(), millis);
+                        return result;
+                    }
+                }
+        );
     }
 
     /**
@@ -491,8 +442,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long getStrLen(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.strlen(key.getBytes()));
-        return jedisCluster.strlen(key.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.strlen(key.getBytes()));
     }
 
     /**
@@ -507,8 +457,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long incr(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.incr(key.getBytes()));
-        return jedisCluster.incr(key.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.incr(key.getBytes()));
     }
 
     /**
@@ -524,8 +473,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long incr(String key, long value) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.incrBy(key.getBytes(), value));
-        return jedisCluster.incrBy(key.getBytes(), value);
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.incrBy(key.getBytes(), value));
     }
 
     /**
@@ -538,8 +486,7 @@ public class RedisCache implements IRedisManager{
      */
     public Double incr(String key, Double value) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.incrByFloat(key.getBytes(), value));
-        return jedisCluster.incrByFloat(key.getBytes(), value);
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.incrByFloat(key.getBytes(), value));
     }
 
     /**
@@ -554,8 +501,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long decr(String key) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.decr(key.getBytes()));
-        return jedisCluster.decr(key.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.decr(key.getBytes()));
     }
 
     /**
@@ -571,8 +517,7 @@ public class RedisCache implements IRedisManager{
      */
     public Long decr(String key, long value) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.decrBy(key.getBytes(), value));
-        return jedisCluster.decrBy(key.getBytes(), value);
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.decrBy(key.getBytes(), value));
     }
 
     /**
@@ -589,8 +534,9 @@ public class RedisCache implements IRedisManager{
      */
     public Long append(String key, Object value) {
         validateKeyParam(key);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.append(key.getBytes(), JsonSerializer.serialize(value)));
-        return jedisCluster.append(key.getBytes(), JsonSerializer.serialize(value));
+        return redisClient.invoke(jedisPool, (jedis) -> 
+        	jedis.append(key.getBytes(), JsonSerializer.serialize(value))
+        );
     }
 
     /**------------------zSet相关操作--------------------------------*/
@@ -606,11 +552,10 @@ public class RedisCache implements IRedisManager{
      */
     public void zAddByScore(String key, Object obj, double score) {
         validateParam(key, obj);
-//        redisClient.invoke(jedisPool, jedis -> {
-//            jedis.zadd(key.getBytes(), score, JsonSerializer.serialize(obj));
-//            return null;
-//        });
-        jedisCluster.zadd(key.getBytes(), score, JsonSerializer.serialize(obj));
+        redisClient.invoke(jedisPool, jedis -> {
+            jedis.zadd(key.getBytes(), score, JsonSerializer.serialize(obj));
+            return null;
+        });
     }
 
     /**
@@ -619,13 +564,12 @@ public class RedisCache implements IRedisManager{
      * @param key
      * @return 当 key 存在且是有序集类型时，返回有序集的基数。 当 key 不存在时，返回 0
      */
-    public long zCard(String key) {
+    public Long zCard(String key) {
         validateKeyParam(key);
-//        long count = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zcard(key.getBytes());
-//            return result;
-//        });
-        long count = jedisCluster.zcard(key.getBytes());
+        long count = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zcard(key.getBytes());
+            return result;
+        });
         return count;
     }
 
@@ -637,13 +581,12 @@ public class RedisCache implements IRedisManager{
      * @param maxScore 最大排序分值
      * @return 分数值在 min 和 max 之间的成员的数量。
      */
-    public long zCount(String key, double minScore, double maxScore) {
+    public Long zCount(String key, double minScore, double maxScore) {
         validateKeyParam(key);
-//        long count = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zcount(key.getBytes(), minScore, maxScore);
-//            return result;
-//        });
-        long count = jedisCluster.zcount(key.getBytes(), minScore, maxScore);
+        long count = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zcount(key.getBytes(), minScore, maxScore);
+            return result;
+        });
         return count;
     }
 
@@ -663,29 +606,19 @@ public class RedisCache implements IRedisManager{
      */
     public <T> List<T> zRange(String key,Type type, int start, int end,RedisCallBack<T> callBack) {
     	validateKeyParam(key);
-//        List<T> result = redisClient.invoke(jedisPool, jedis -> {
-//        	Set<byte[]> set = jedis.zrange(key.getBytes(), start, end);
-//            List<T> list = new ArrayList<>(set.size());
-//            if (CollectionUtils.isEmpty(set)) {
-//                return new ArrayList<T>(ZERO);
-//            }
-//            for (byte[] bytes : set) {
-//                T t = callBack.callbackForSingleObject(bytes, type);
-//                list.add(t);
-//            }
-//            return list;
-//        });
-    	List<T> result = new ArrayList<T>(ZERO);
-    	Set<byte[]> set = jedisCluster.zrange(key.getBytes(), start, end);
-    	List<T> list = new ArrayList<>(set.size());
-    	if (CollectionUtils.isEmpty(set)) {
-    		return result;
-    	}
-    	for (byte[] bytes : set) {
-    		 T t = callBack.callbackForSingleObject(bytes, type);
-    		 list.add(t);
-    	}
-    	return list;
+        List<T> result = redisClient.invoke(jedisPool, jedis -> {
+        	Set<byte[]> set = jedis.zrange(key.getBytes(), start, end);
+            List<T> list = new ArrayList<>(set.size());
+            if (CollectionUtils.isEmpty(set)) {
+                return new ArrayList<T>(ZERO);
+            }
+            for (byte[] bytes : set) {
+                T t = callBack.callbackForSingleObject(bytes, type);
+                list.add(t);
+            }
+            return list;
+        });
+		return result;
     }
 
     /**
@@ -700,30 +633,20 @@ public class RedisCache implements IRedisManager{
      */
     public <T> List<T> zRevRange(String key, Type type, int start, int end,RedisCallBack<T> callBack) {
     	validateKeyParam(key);
-//    	List<T> result = redisClient.invoke(jedisPool, jedis -> {
-//    		Set<byte[]> set = jedis.zrevrange(key.getBytes(), start, end);
-//            List<T> list = new ArrayList<>(set.size());
-//            if (CollectionUtils.isEmpty(set)) {
-//                return new ArrayList<T>(ZERO);
-//            }
-//            for (byte[] bytes : set) {
-////                T t = JsonSerializer.deserialize(bytes, clazz);
-//            	T t = callBack.callbackForSingleObject(bytes, type);
-//                list.add(t);
-//            }
-//            return list;
-//    	});
-    	List<T> result = new ArrayList<T>(ZERO);
-    	Set<byte[]> set = jedisCluster.zrevrange(key.getBytes(), start, end);
-    	List<T> list = new ArrayList<>(set.size());
-    	if (CollectionUtils.isEmpty(set)) {
-    		return result;
-    	}
-    	for (byte[] bytes : set) {
-    		T t = callBack.callbackForSingleObject(bytes, type);
-    		list.add(t);
-    	}
-    	return list;
+    	List<T> result = redisClient.invoke(jedisPool, jedis -> {
+    		Set<byte[]> set = jedis.zrevrange(key.getBytes(), start, end);
+            List<T> list = new ArrayList<>(set.size());
+            if (CollectionUtils.isEmpty(set)) {
+                return new ArrayList<T>(ZERO);
+            }
+            for (byte[] bytes : set) {
+//                T t = JsonSerializer.deserialize(bytes, clazz);
+            	T t = callBack.callbackForSingleObject(bytes, type);
+                list.add(t);
+            }
+            return list;
+    	});
+    	return result;
     }
 
     /**
@@ -739,30 +662,19 @@ public class RedisCache implements IRedisManager{
     public <T> List<T> zRangeByScore(String key, Type type, double minScore, double maxScore,
     		RedisCallBack<T> callBack) {
     	validateKeyParam(key);
-//        List<T> result = redisClient.invoke(jedisPool, jedis -> {
-//            Set<byte[]> set = jedis.zrangeByScore(key.getBytes(), minScore, maxScore);
-//            List<T> list = new ArrayList<>(set.size());
-//            if (CollectionUtils.isEmpty(set)) {
-//                return new ArrayList<T>(ZERO);
-//            }
-//            for (byte[] bytes : set) {
-////                T t = JsonSerializer.deserialize(bytes, clazz);
-//            	T t = callBack.callbackForSingleObject(bytes, type);
-//                list.add(t);
-//            }
-//            return list;
-//        });
-        List<T> result = new ArrayList<T>(ZERO);
-        Set<byte[]> set = jedisCluster.zrangeByScore(key.getBytes(), minScore, maxScore);
-        List<T> list = new ArrayList<>(set.size());
-        if (CollectionUtils.isEmpty(set)) {
-        	return result;
-        }
-        for (byte[] bytes : set) {
-        	T t = callBack.callbackForSingleObject(bytes, type);
-        	list.add(t);
-        }
-        return list;
+        List<T> result = redisClient.invoke(jedisPool, jedis -> {
+            Set<byte[]> set = jedis.zrangeByScore(key.getBytes(), minScore, maxScore);
+            List<T> list = new ArrayList<>(set.size());
+            if (CollectionUtils.isEmpty(set)) {
+                return new ArrayList<T>(ZERO);
+            }
+            for (byte[] bytes : set) {
+            	T t = callBack.callbackForSingleObject(bytes, type);
+                list.add(t);
+            }
+            return list;
+        });
+    	return result;
     }
 
     /**
@@ -778,30 +690,20 @@ public class RedisCache implements IRedisManager{
     public <T> List<T> zRevRangeByScore(String key, Type type, double minScore, double maxScore,
     		RedisCallBack<T> callBack) {
     	validateKeyParam(key);
-//        List<T> result = redisClient.invoke(jedisPool, jedis -> {
-//            Set<byte[]> set = jedis.zrevrangeByScore(key.getBytes(), maxScore, minScore);
-//            List<T> list = new ArrayList<>(set.size());
-//            if (CollectionUtils.isEmpty(set)) {
-//                return new ArrayList<T>(ZERO);
-//            }
-//            for (byte[] bytes : set) {
-////                T t = JsonSerializer.deserialize(bytes, clazz);
-//            	T t = callBack.callbackForSingleObject(bytes, type);
-//                list.add(t);
-//            }
-//            return list;
-//        });
-    	List<T> result = new ArrayList<T>(ZERO);
-    	Set<byte[]> set = jedisCluster.zrevrangeByScore(key.getBytes(), maxScore, minScore);
-    	List<T> list = new ArrayList<>(set.size());
-    	if (CollectionUtils.isEmpty(set)) {
-    		return result;
-    	}
-    	for (byte[] bytes : set) {
-    		T t = callBack.callbackForSingleObject(bytes, type);
-    		list.add(t);
-    	}
-    	return list;
+        List<T> result = redisClient.invoke(jedisPool, jedis -> {
+            Set<byte[]> set = jedis.zrevrangeByScore(key.getBytes(), maxScore, minScore);
+            List<T> list = new ArrayList<>(set.size());
+            if (CollectionUtils.isEmpty(set)) {
+                return new ArrayList<T>(ZERO);
+            }
+            for (byte[] bytes : set) {
+//                T t = JsonSerializer.deserialize(bytes, clazz);
+            	T t = callBack.callbackForSingleObject(bytes, type);
+                list.add(t);
+            }
+            return list;
+        });
+    	return result;
     }
 
 
@@ -815,13 +717,12 @@ public class RedisCache implements IRedisManager{
      * @return 如果成员是有序集 key 的成员，返回 member 的排名。
      * 如果成员不是有序集 key 的成员，返回空
      */
-    public long zRank(String key, Object obj) {
+    public Long zRank(String key, Object obj) {
         validateParam(key, obj);
-//        long sortIndex = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zrank(key.getBytes(), JsonSerializer.serialize(obj));
-//            return result;
-//        });
-        long sortIndex = jedisCluster.zrank(key.getBytes(), JsonSerializer.serialize(obj));
+        long sortIndex = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zrank(key.getBytes(), JsonSerializer.serialize(obj));
+            return result;
+        });
         return sortIndex;
     }
 
@@ -835,13 +736,12 @@ public class RedisCache implements IRedisManager{
      * @return 如果成员是有序集 key 的成员，返回 member 的排名。
      * 如果成员不是有序集 key 的成员，返回空
      */
-    public long zRevRank(String key, Object obj) {
+    public Long zRevRank(String key, Object obj) {
         validateParam(key, obj);
-//        long sortIndex = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zrevrank(key.getBytes(), JsonSerializer.serialize(obj));
-//            return result;
-//        });
-        long sortIndex = jedisCluster.zrevrank(key.getBytes(), JsonSerializer.serialize(obj));
+        long sortIndex = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zrevrank(key.getBytes(), JsonSerializer.serialize(obj));
+            return result;
+        });
         return sortIndex;
     }
 
@@ -853,13 +753,12 @@ public class RedisCache implements IRedisManager{
      * @param obj 元素
      * @return 被成功移除的成员的数量，不包括被忽略的成员。
      */
-    public long zRem(String key, Object obj) {
+    public Long zRem(String key, Object obj) {
         validateParam(key, obj);
-//        long lRow = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zrem(key.getBytes(), JsonSerializer.serialize(obj));
-//            return result;
-//        });
-        long lRow = jedisCluster.zrem(key.getBytes(), JsonSerializer.serialize(obj));
+        long lRow = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zrem(key.getBytes(), JsonSerializer.serialize(obj));
+            return result;
+        });
         return lRow;
     }
 
@@ -871,13 +770,12 @@ public class RedisCache implements IRedisManager{
      * @param end   结束位置
      * @return 被移除成员的数量。
      */
-    public long zRemRangeByRank(String key, int start, int end) {
+    public Long zRemRangeByRank(String key, int start, int end) {
         validateKeyParam(key);
-//        long lRow = redisClient.invoke(jedisPool, jedis -> {
-//            long result = jedis.zremrangeByRank(key.getBytes(), start, end);
-//            return result;
-//        });
-        long lRow = jedisCluster.zremrangeByRank(key.getBytes(), start, end);
+        long lRow = redisClient.invoke(jedisPool, jedis -> {
+            long result = jedis.zremrangeByRank(key.getBytes(), start, end);
+            return result;
+        });
         return lRow;
     }
 
@@ -892,11 +790,10 @@ public class RedisCache implements IRedisManager{
      */
     public Double zScore(String key, Object obj) {
         validateParam(key, obj);
-//        Double score = redisClient.invoke(jedisPool, jedis -> {
-//            Double sResult = jedis.zscore(key.getBytes(), JsonSerializer.serialize(obj));
-//            return sResult;
-//        });
-        Double score = jedisCluster.zscore(key.getBytes(), JsonSerializer.serialize(obj));
+        Double score = redisClient.invoke(jedisPool, jedis -> {
+            Double sResult = jedis.zscore(key.getBytes(), JsonSerializer.serialize(obj));
+            return sResult;
+        });
         return score;
     }
 
@@ -915,10 +812,9 @@ public class RedisCache implements IRedisManager{
      */
     public Long lpush(String key, Object... value) {
         validateParam(key, value);
-//        Long len = redisClient.invoke(jedisPool, jedis -> {
-//            return jedis.lpush(key.getBytes(), JsonSerializer.serialize(value));
-//        });
-        Long len = jedisCluster.lpush(key.getBytes(), JsonSerializer.serialize(value));
+        Long len = redisClient.invoke(jedisPool, jedis -> {
+            return jedis.lpush(key.getBytes(), JsonSerializer.serialize(value));
+        });
         return len;
     }
 
@@ -930,13 +826,12 @@ public class RedisCache implements IRedisManager{
      * @param key
      * @return list 集大小
      */
-    public long lLen(String key) {
+    public Long lLen(String key) {
         validateKeyParam(key);
-//        long count = redisClient.invoke(jedisPool, jedis -> {
-//            long countAll = jedis.llen(key.getBytes());
-//            return countAll;
-//        });
-        long count = jedisCluster.llen(key.getBytes());
+        long count = redisClient.invoke(jedisPool, jedis -> {
+            long countAll = jedis.llen(key.getBytes());
+            return countAll;
+        });
         return count;
     }
 
@@ -952,19 +847,13 @@ public class RedisCache implements IRedisManager{
      */
     public <T> T lindex(String key, int index, Type type,RedisCallBack<T> callBack) {
         validateParam(key, type);
-//        T obj = redisClient.invoke(jedisPool, jedis -> {
-//            byte[] result = jedis.lindex(key.getBytes(), index);
-//            if (result == null) {
-//                return null;
-//            }
-//            return callBack.callbackForSingleObject(result, type);
-////            return JsonSerializer.deserialize(result, clazz);
-//        });
-        byte[] result = jedisCluster.lindex(key.getBytes(), index);
-        if (result == null) {
-            return null;
-        }
-        T obj = callBack.callbackForSingleObject(result, type);
+        T obj = redisClient.invoke(jedisPool, jedis -> {
+            byte[] result = jedis.lindex(key.getBytes(), index);
+            if (result == null) {
+                return null;
+            }
+            return callBack.callbackForSingleObject(result, type);
+        });
         return obj;
     }
 
@@ -976,19 +865,14 @@ public class RedisCache implements IRedisManager{
      */
     public <T> T lpop(String key, Type type,RedisCallBack<T> callBack) {
         validateParam(key, type);
-//        T obj = redisClient.invoke(jedisPool, jedis -> {
-//            byte[] result = jedis.lpop(key.getBytes());
-//            if (result == null) {
-//                return null;
-//            }
-//            return callBack.callbackForSingleObject(result, type);
-////            return JsonSerializer.deserialize(result, clazz);
-//        });
-        byte[] result = jedisCluster.lpop(key.getBytes());
-        if (result == null) {
-            return null;
-        }
-        T obj = callBack.callbackForSingleObject(result, type);
+        T obj = redisClient.invoke(jedisPool, jedis -> {
+            byte[] result = jedis.lpop(key.getBytes());
+            if (result == null) {
+                return null;
+            }
+            return callBack.callbackForSingleObject(result, type);
+//            return JsonSerializer.deserialize(result, clazz);
+        });
         return obj;
     }
 
@@ -1000,19 +884,14 @@ public class RedisCache implements IRedisManager{
      */
     public <T> T rpop(String key, Type type,RedisCallBack<T> callBack) {
         validateParam(key, type);
-//        T obj = redisClient.invoke(jedisPool, jedis -> {
-//            byte[] result = jedis.rpop(key.getBytes());
-//            if (result == null) {
-//                return null;
-//            }
-//            return callBack.callbackForSingleObject(result, type);
-////            return JsonSerializer.deserialize(result, clazz);
-//        });
-        byte[] result = jedisCluster.rpop(key.getBytes());
-        if (result == null) {
-            return null;
-        }
-        T obj = callBack.callbackForSingleObject(result, type);
+        T obj = redisClient.invoke(jedisPool, jedis -> {
+            byte[] result = jedis.rpop(key.getBytes());
+            if (result == null) {
+                return null;
+            }
+            return callBack.callbackForSingleObject(result, type);
+//            return JsonSerializer.deserialize(result, clazz);
+        });
         return obj;
     }
 
@@ -1021,10 +900,9 @@ public class RedisCache implements IRedisManager{
      */
     public Long publish(String key, Object value) {
         validateParam(key, value);
-//        Long len = redisClient.invoke(jedisPool, jedis -> {
-//            return jedis.publish(key.getBytes(), JsonSerializer.serialize(value));
-//        });
-        Long len = jedisCluster.publish(key.getBytes(), JsonSerializer.serialize(value));
+        Long len = redisClient.invoke(jedisPool, jedis -> {
+            return jedis.publish(key.getBytes(), JsonSerializer.serialize(value));
+        });
         return len;
     }
 
@@ -1043,15 +921,13 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean setHash(String key, String field, Object value) {
         validateKeyParam(key);
-//        long result =
-//                redisClient.invoke(jedisPool, (jedis) -> jedis.hset(key.getBytes(), field.getBytes(),
-//                        JsonSerializer.serialize(value)));
-        long result = jedisCluster.hset(key.getBytes(), field.getBytes(),
-              JsonSerializer.serialize(value));
+        long result =
+                redisClient.invoke(jedisPool, (jedis) -> jedis.hset(key.getBytes(), field.getBytes(),
+                        JsonSerializer.serialize(value)));
         if (LONG_ZERO.equals(result)) {
-            return false;
-        }
-        return true;
+		    return false;
+		}
+		return true;
     }
 
     /**
@@ -1069,15 +945,13 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean setNxHash(String key, String field, Object value) {
         validateKeyParam(key);
-//        long result =
-//                redisClient.invoke(jedisPool, (jedis) -> jedis.hsetnx(key.getBytes(), field.getBytes(),
-//                        JsonSerializer.serialize(value)));
-        long result = jedisCluster.hsetnx(key.getBytes(), field.getBytes(),
-              JsonSerializer.serialize(value));
+        long result =
+                redisClient.invoke(jedisPool, (jedis) -> jedis.hsetnx(key.getBytes(), field.getBytes(),
+                        JsonSerializer.serialize(value)));
         if (LONG_ZERO.equals(result)) {
-            return false;
-        }
-        return true;
+		    return false;
+		}
+		return true;
     }
 
     /**
@@ -1089,11 +963,9 @@ public class RedisCache implements IRedisManager{
      */
     public <T> T getHash(String key, String field, Type type,RedisCallBack<T> callBack) {
         validateKeyParam(key);
-//        byte[] value = redisClient.invoke(jedisPool, (jedis) -> jedis.hget(key.getBytes(), field.getBytes()));
-        byte[] value =  jedisCluster.hget(key.getBytes(), field.getBytes());
+        byte[] value = redisClient.invoke(jedisPool, (jedis) -> jedis.hget(key.getBytes(), field.getBytes()));
         if (value != null) {
-        	return callBack.callbackForSingleObject(value, type);
-//            return JsonSerializer.deserialize(value, clazz);
+			return callBack.callbackForSingleObject(value, type);
         }
         return null;
     }
@@ -1105,7 +977,7 @@ public class RedisCache implements IRedisManager{
      */
     public List<String> getAllHashKey(String key){
     	validateKeyParam(key);
-    	return new ArrayList<String>(jedisCluster.hkeys(key));
+    	return new ArrayList<String>(redisClient.invoke(jedisPool, (jedis) -> jedis.hkeys(key)));
     }
 
     /**
@@ -1116,8 +988,7 @@ public class RedisCache implements IRedisManager{
      */
     public void delHash(String key, String field) {
         validateParam(key, field);
-//        redisClient.invoke(jedisPool, (jedis) -> jedis.hdel(key.getBytes(), field.getBytes()));
-        jedisCluster.hdel(key.getBytes(), field.getBytes());
+        redisClient.invoke(jedisPool, (jedis) -> jedis.hdel(key.getBytes(), field.getBytes()));
     }
 
     /**
@@ -1128,8 +999,7 @@ public class RedisCache implements IRedisManager{
      */
     public Boolean hashKeyExists(String key, String field) {
         validateParam(key, field);
-//        return redisClient.invoke(jedisPool, (jedis) -> jedis.hexists(key.getBytes(), field.getBytes()));
-        return jedisCluster.hexists(key.getBytes(), field.getBytes());
+        return redisClient.invoke(jedisPool, (jedis) -> jedis.hexists(key.getBytes(), field.getBytes()));
     }
 
     /**
@@ -1142,32 +1012,20 @@ public class RedisCache implements IRedisManager{
      */
     public <T> Map<String, T> getAllHash(String key, Type type,RedisCallBack<T> callBack) {
     	validateKeyParam(key);
-//    	return redisClient.invoke(jedisPool, (jedis) -> {
-//    		Map<byte[], byte[]> map = jedis.hgetAll(key.getBytes());
-//    		Map<String, T> resultMap = new HashMap<>();
-//    		if (map != null) {
-//    			for (Map.Entry<byte[], byte[]> item : map.entrySet()) {
-//    				byte[] newKey = item.getKey();
-//    				T newValue = callBack.callbackForSingleObject(newKey, type);
-////    				T newValue = JsonSerializer.deserialize(item.getValue(), clazz);
-//    				resultMap.put(Arrays.toString(newKey), newValue);
-//    			}
-//        		return resultMap;
-//    		}
-//    		return null;
-//    	});
-    	
-    	Map<byte[], byte[]> map = jedisCluster.hgetAll(key.getBytes());
-		Map<String, T> resultMap = new HashMap<>();
-		if (map != null) {
-			for (Map.Entry<byte[], byte[]> item : map.entrySet()) {
-				byte[] newKey = item.getKey();
-				T newValue = callBack.callbackForSingleObject(newKey, type);
-				resultMap.put(Arrays.toString(newKey), newValue);
-			}
-			return resultMap;
-		}
-		return null;
+    	return redisClient.invoke(jedisPool, (jedis) -> {
+    		Map<byte[], byte[]> map = jedis.hgetAll(key.getBytes());
+    		Map<String, T> resultMap = new HashMap<>();
+    		if (map != null) {
+    			for (Map.Entry<byte[], byte[]> item : map.entrySet()) {
+    				byte[] newKey = item.getKey();
+    				T newValue = callBack.callbackForSingleObject(newKey, type);
+//    				T newValue = JsonSerializer.deserialize(item.getValue(), clazz);
+    				resultMap.put(Arrays.toString(newKey), newValue);
+    			}
+        		return resultMap;
+    		}
+    		return null;
+    	});
     }
 
 
@@ -1180,9 +1038,8 @@ public class RedisCache implements IRedisManager{
      * 谨慎使用
      */
     public void clearAll() {
-        log.error("缓存的clear方法被调用，所有缓存数据都被清除！");
-//        redisClient.invoke(jedisPool, BinaryJedis::flushAll);
-//        jedisCluster.flushAll();
+        LOGGER.error("缓存的clear方法被调用，所有缓存数据都被清除！");
+        redisClient.invoke(jedisPool, BinaryJedis::flushAll);
     }
 
     /**
@@ -1196,16 +1053,15 @@ public class RedisCache implements IRedisManager{
      */
     public List<String> findKeys(String pattern) {
         Assert.hasText(pattern, "查找规则不能为空");
-//        return redisClient.invoke(jedisPool, jedis -> {
-//            Set<String> sets = jedis.keys(("*" + pattern + "*"));
-//            if (sets != null) {
-//                List<String> list = new ArrayList<>(sets.size());
-//                list.addAll(sets);
-//                return list;
-//            }
-//            return null;
-//        });
-        return null;
+        return redisClient.invoke(jedisPool, jedis -> {
+            Set<String> sets = jedis.keys(("*" + pattern + "*"));
+            if (sets != null) {
+                List<String> list = new ArrayList<>(sets.size());
+                list.addAll(sets);
+                return list;
+            }
+            return null;
+        });
     }
 
     /**
@@ -1231,46 +1087,45 @@ public class RedisCache implements IRedisManager{
      */
     private void validateKeyParam(String key) {
         Assert.hasText(key, "key不能为空");
-        Assert.notNull(jedisCluster, "jedisCluster连接初始化失败");
+        Assert.notNull(redisClient.invoke(jedisPool, jedis -> jedis), "getResource()");
     }
-    // 实现crazycake IRedisManager的方法
+
 	@Override
 	public byte[] get(byte[] key) {
 		validateKeyParam(new String(key));
-		return jedisCluster.get(key);
+		return redisClient.invoke(jedisPool, jedis -> jedis.get(key));
 	}
 
+	
+	/**
+     * set value
+     * @param key  key
+     * @param value value
+     * @param expire expire(s)
+     * @return value
+     */
 	@Override
 	public byte[] set(byte[] key, byte[] value, int expire) {
 		validateKeyParam(new String(key));
-		jedisCluster.set(key, value);
-//      Long lResult = redisClient.invoke(jedisPool, (jedis) -> jedis.pexpire(key.getBytes(), millis));
-		if (expire >= 0) {
-			jedisCluster.pexpire(key, expire);
-		}else {
-			jedisCluster.pexpire(key, DEFAULT_CACHE_MILLIS);
-		}
-		return value;
+        return redisClient.invoke(jedisPool, (jedis) -> {
+        	jedis.set(key, value);
+			if (expire >= 0) {
+				jedis.pexpire(key, Long.valueOf(expire*1000));
+			}else {
+				jedis.pexpire(key, DEFAULT_CACHE_MILLIS);
+			}
+			return value;
+        });
 	}
 
 	/* 
-	 * jedisCluster 删除key
+	 * getResource() 删除key
 	 * @see org.crazycake.shiro.IRedisManager#del(byte[])
 	 */
 	@Override
 	public void del(byte[] key) {
 		validateKeyParam(new String(key));
-		jedisCluster.del(key);
-	}
-
-	/* 
-	 * jedisCluster db size 不建议使用
-	 * @see org.crazycake.shiro.IRedisManager#dbSize()
-	 */
-	@SuppressWarnings("deprecation")
-	@Override
-	public Long dbSize() {
-		return jedisCluster.dbSize();
+		redisClient.invoke(jedisPool, (jedis) -> jedis.del(key));
 	}
 
 	/* 
@@ -1279,26 +1134,27 @@ public class RedisCache implements IRedisManager{
 	 */
 	@Override
 	public Set<byte[]> keys(byte[] pattern) {
-		Set<byte[]> keys = null;
-		keys = new HashSet<byte[]>();
-        ScanParams params = new ScanParams();
-        params.count(count);
-        params.match(pattern);
-        byte[] cursor = ScanParams.SCAN_POINTER_START_BINARY;
-        ScanResult<byte[]> scanResult;
-        do {
-            scanResult = jedisCluster.scan(cursor, params);
-            keys.addAll(scanResult.getResult());
-            cursor = scanResult.getCursorAsBytes();
-        } while (scanResult.getStringCursor().compareTo(ScanParams.SCAN_POINTER_START) > 0);
-        return keys;
+        return redisClient.invoke(jedisPool, (jedis)->{
+        	Set<byte[]> keys = null;
+    		keys = new HashSet<byte[]>();
+            ScanParams params = new ScanParams();
+            params.count(count);
+            params.match(pattern);
+            byte[] cursor = ScanParams.SCAN_POINTER_START_BINARY;
+            ScanResult<byte[]> scanResult;
+        	do {
+        		scanResult = jedis.scan(cursor, params);
+			    keys.addAll(scanResult.getResult());
+			    cursor = scanResult.getCursorAsBytes();
+			} while (scanResult.getStringCursor().compareTo(ScanParams.SCAN_POINTER_START) > 0);
+			return keys;
+        });
 	}
 
-//    public synchronized Jedis getRedis() {
-//        return jedisPool.getResource();
-//    }
-//
-//    public void setJedisPool(JedisPool jedisPool) {
-//        this.jedisPool = jedisPool;
-//    }
+	@Override
+	public Long dbSize(byte[] pattern) {
+		return redisClient.invoke(jedisPool, (jedis)->{
+			return jedis.dbSize();
+		});
+	}
 }
