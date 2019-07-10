@@ -74,18 +74,6 @@ export const asyncRouterMap = [
         name: 'Resource',
         component: Resource,
         meta: { title: '接口权限维护', icon: 'resource', permission: '/system/resource' }
-      },
-      {
-        path: 'registerTask',
-        name: 'RegisterTask',
-        component: RegisterTask,
-        meta: { title: '注册任务审批', icon: 'registerTask', permission: '/system/registerTask' }
-      },
-      {
-        path: 'process',
-        name: 'Process',
-        component: Process,
-        meta: { title: '流程维护', icon: 'process', permission: '/system/process' }
       }
     ]
   },
@@ -105,30 +93,6 @@ export const asyncRouterMap = [
       name: 'Login',
       component: Login,
       meta: { title: '登陆日志', icon: 'login', permission: '/logger/login' }
-    }]
-  },
-  {
-    path: '/code',
-    component: Layout,
-    redirect: '/code/dataSource',
-    name: '代码生成',
-    meta: { title: '代码生成', icon: 'code', permission: '/code' },
-    children: [{
-      path: 'project',
-      name: 'Prject',
-      component: Project,
-      meta: { title: '初始化项目', icon: 'project', permission: '/code/project' }
-    }, {
-      path: 'dataSource',
-      name: 'DataSource',
-      component: DataSource,
-      meta: { title: '数据源', icon: 'dataSource', permission: '/code/dataSource' }
-    }, {
-      path: 'tables',
-      name: 'Tables',
-      component: Tables,
-      meta: { title: '数据表', icon: 'dataSource', permission: '/code/tables' },
-      hidden: true
     }]
   }
 ]

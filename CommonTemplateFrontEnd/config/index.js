@@ -11,10 +11,10 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/template':{
-        target:'http://172.16.28.149:8090/template',
+        target:'http://127.0.0.1:8088/template',
         changeOrigin:true,
         pathRewrite:{
-          '^/template':''
+      	'^/template':''
         }
       }
     },
