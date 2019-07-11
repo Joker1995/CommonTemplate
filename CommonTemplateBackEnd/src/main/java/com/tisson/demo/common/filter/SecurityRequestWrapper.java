@@ -113,28 +113,7 @@ public class SecurityRequestWrapper extends HttpServletRequestWrapper {
         		} 
             }
         } 
-        // 对于json格式的数据
-        try(InputStream in = this.getInputStream();){
-        	byte[] bytes=new byte[1024];
-        	int len = 0;
-        	StringBuilder requestContent = new StringBuilder();
-        	while((len=in.read(bytes))!=-1) {
-        		String tmp = new String(bytes,0,len,CharsetUtil.CHARSET_UTF_8);
-        		requestContent.append(tmp);
-        	}
-        	String parseResult = requestContent.toString();
-        	for (Pattern pattern : patternList) {
-        		Matcher matcher = pattern.matcher(parseResult);
-				while (matcher.find()) {
-					String matcherContent = matcher.group();
-					LOGGER.info("match sensitive content:[{}],pattern:[{}]",
-							matcherContent, pattern.pattern());
-					return true;
-				}
-        	}
-        }catch (Exception e) {
-			LOGGER.error("error:",e);
-		}
+        // TODO 对于json格式的数据待处理
         return false;  
 	}
 
