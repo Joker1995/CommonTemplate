@@ -1,6 +1,5 @@
 package com.tisson.demo.common.filter;
 
-import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.util.StringUtils;
-
-import cn.hutool.core.util.CharsetUtil;
 
 public class SecurityRequestWrapper extends HttpServletRequestWrapper {
 	private final static Logger LOGGER = LoggerFactory.getLogger(SecurityRequestWrapper.class);
@@ -113,28 +110,7 @@ public class SecurityRequestWrapper extends HttpServletRequestWrapper {
         		} 
             }
         } 
-        // 对于json格式的数据
-        try(InputStream in = this.getInputStream();){
-        	byte[] bytes=new byte[1024];
-        	int len = 0;
-        	StringBuilder requestContent = new StringBuilder();
-        	while((len=in.read(bytes))!=-1) {
-        		String tmp = new String(bytes,0,len,CharsetUtil.CHARSET_UTF_8);
-        		requestContent.append(tmp);
-        	}
-        	String parseResult = requestContent.toString();
-        	for (Pattern pattern : patternList) {
-        		Matcher matcher = pattern.matcher(parseResult);
-				while (matcher.find()) {
-					String matcherContent = matcher.group();
-					LOGGER.info("match sensitive content:[{}],pattern:[{}]",
-							matcherContent, pattern.pattern());
-					return true;
-				}
-        	}
-        }catch (Exception e) {
-			LOGGER.error("error:",e);
-		}
+        // TODO 对于json格式的数据待处理
         return false;  
 	}
 
