@@ -1,9 +1,14 @@
 package com.tisson.demo.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import javax.servlet.Filter;
+
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -12,6 +17,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.github.pagehelper.PageHelper;
+import com.tisson.demo.common.filter.LimitingFilter;
+import com.tisson.demo.common.filter.SecurityFilter;
 
 /**
  * @Title: GlobalConfig.java
@@ -73,5 +80,27 @@ public class GlobalConfig {
         //加载
         executor.initialize();
         return executor;
+    }
+	
+	@Bean("securityFilterRegistration")
+    public FilterRegistrationBean<Filter> securityFilterRegistration(SecurityFilter securityFilter) {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<Filter>();
+        registrationBean.setFilter(securityFilter);
+        List<String> urlPatterns = new ArrayList<String>();
+        urlPatterns.add("/*");
+        registrationBean.setUrlPatterns(urlPatterns);
+        registrationBean.setOrder(2);
+        return registrationBean;
+    }
+	
+	@Bean("limitingFilterRegistration")
+    public FilterRegistrationBean<Filter> limitingFilterRegistration(LimitingFilter limitingFilter) {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<Filter>();
+        registrationBean.setFilter(limitingFilter);
+        List<String> urlPatterns = new ArrayList<String>();
+        urlPatterns.add("/*");
+        registrationBean.setUrlPatterns(urlPatterns);
+        registrationBean.setOrder(1);
+        return registrationBean;
     }
 }
