@@ -1,5 +1,8 @@
 package com.tisson.demo.common.expt;
-/**  
+
+import org.apache.shiro.authc.AuthenticationException;
+
+/**
 * @Title: SessionKickoutException.java  
 * @Package com.tisson.demo.common.expt  
 * @Description: TODO(用一句话描述该文件做什么)  
@@ -7,7 +10,7 @@ package com.tisson.demo.common.expt;
 * @date 2019年2月20日  
 * @version V1.0  
 */
-public class SessionKickoutException extends RuntimeException {
+public class SessionKickoutException extends AuthenticationException {
 	private static final long serialVersionUID = 1L;
 
 	public SessionKickoutException(String msg) {

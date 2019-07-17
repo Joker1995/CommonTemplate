@@ -63,7 +63,7 @@ public class ShiroConfig {
 	}
 
 	@Bean("shiroFilter")
-	public ShiroFilterFactoryBean shiroFilterFactoryBean(SecurityManager securityManager, JWTFilter jwtFilter) {
+	public ShiroFilterFactoryBean shiroFilterFactoryBean(SessionsSecurityManager securityManager, JWTFilter jwtFilter) {
 		ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
 		shiroFilterFactoryBean.setSecurityManager(securityManager);
 		Map<String, Filter> filtersMap = new LinkedHashMap<String, Filter>();
@@ -91,7 +91,7 @@ public class ShiroConfig {
 	}
 
 	@Bean
-	public SessionManager sessionManager(RedisSessionDAO redisSessionDAO) {
+	public DefaultWebSessionManager sessionManager(RedisSessionDAO redisSessionDAO) {
 		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
 		sessionManager.setSessionDAO(redisSessionDAO);
 		return sessionManager;
