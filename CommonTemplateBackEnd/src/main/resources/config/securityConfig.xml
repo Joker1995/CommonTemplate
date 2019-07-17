@@ -36,11 +36,11 @@
     <!-- 匹配含有字符： <script> </script> -->  
     <regex><![CDATA[.*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>.*]]></regex>  
     <!-- 匹配含有字符： 含有一个符号： "  -->  
-    <regex><![CDATA[[.&[^\"]]*\"[.&[^\"]]*]]></regex>  
+    <!-- <regex><![CDATA[[.&[^\"]]*\"[.&[^\"]]*]]></regex>   -->
     <!-- 匹配含有字符： 含有一个符号： '  -->  
-    <regex><![CDATA[[.&[^']]*'[.&[^']]*]]></regex>  
+    <!-- <regex><![CDATA[[.&[^']]*'[.&[^']]*]]></regex>   -->
     <!-- 匹配含有字符： 含有一个符号： ;  -->  
-    <regex><![CDATA[[.&[^;]]*;[.&[^;]]*]]></regex>  
+    <!-- <regex><![CDATA[[.&[^;]]*;[.&[^;]]*]]></regex>   -->
     <!-- 匹配含有字符： 含有回车换行 和 <script> </script> -->  
     <regex><![CDATA[[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*]]></regex>  
     <!-- 匹配含有字符： 含有document.location -->  
@@ -105,12 +105,12 @@
     <!--  concat -->  
     <regex><![CDATA[.*[C|c][O|o][N|n][C|c][A|a][T|t]\(.*]]></regex>  
     <!-- 匹配参数包含'  -->  
-    <regex><![CDATA[.*'.*]]></regex>  
+    <!-- <regex><![CDATA[.*'.*]]></regex>   -->
     <!-- 匹配参数包含"  -->  
-    <regex><![CDATA[.*\".*]]></regex>  
+    <!-- <regex><![CDATA[.*\".*]]></regex>   -->
     <!-- 匹配参数包含"  -->  
-    <regex><![CDATA[.*;.*]]></regex>  
+    <!-- <regex><![CDATA[.*;.*]]></regex>   -->
     <!-- 匹配参数包含\  -->  
-    <regex><![CDATA[.*,.*]]></regex> 
+    <!-- <regex><![CDATA[.*,.*]]></regex>  -->
   </regexList> 
 </XSSConfig>

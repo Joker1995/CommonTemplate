@@ -3,6 +3,7 @@ package com.tisson.demo.common.controller;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.catalina.connector.ClientAbortException;
+import org.apache.shiro.ShiroException;
 import org.apache.shiro.authz.UnauthenticatedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ import com.tisson.demo.common.expt.UserNameOrPwdException;
 import cn.hutool.json.JSONUtil;
 
 /**  
-* @Title: ExceptionController.java  
+* @Title: ExceptionController.java
 * @Package com.tisson.demo.common.controller  
 * @Description: TODO(用一句话描述该文件做什么)  
 * @author Joker1995
@@ -48,7 +49,15 @@ public class ExceptionControllerHandler {
 		return new ResponseBean<String>(ResultCode.UNAUTHORIZED_ERROR.getCode(), 
 				ResultCode.UNAUTHORIZED_ERROR.getDesc(), null);
 	}
-    
+
+	// 捕捉shiro的异常
+	@ResponseStatus(HttpStatus.UNAUTHORIZED)
+	@ExceptionHandler(ShiroException.class)
+	public ResponseBean handle401(ShiroException e) {
+		return new ResponseBean(ResultCode.UNAUTHORIZED_ERROR.getCode(),
+				ResultCode.UNAUTHORIZED_ERROR.getDesc(), null);
+	}
+
     /**
      * 捕捉token失效异常
      * @return

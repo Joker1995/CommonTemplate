@@ -11,6 +11,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class CommonTemplateApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(CommonTemplateApplication.class, args);
+		SpringApplication.run(CommonTemplateApplication.class,args);
 	}
 }
