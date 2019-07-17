@@ -17,7 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.apache.shiro.web.util.WebUtils;
@@ -175,28 +174,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
 		if (isLoginAttempt(request, response)) {
 			try {
-				executeLogin(request, response);
+				return executeLogin(request, response);
 			} catch (Exception e) {
 				LOGGER.error("判断token发生错误:", e);
-				if(e instanceof AuthenticationException) {
-					response(request, response,
-							ResultCode.UNAUTHORIZED_ERROR.getCode(),ResultCode.UNAUTHORIZED_ERROR.getDesc());
-				} else if(e instanceof TokenInvalidateException) {
-					response(request, response,
-							ResultCode.TOKEN_INVALIDATE_ERROR.getCode(),ResultCode.TOKEN_INVALIDATE_ERROR.getDesc());
-				}else if(e instanceof SessionKickoutException) {
-					response(request, response,
-							ResultCode.SESSION_KICKOUT_ERROR.getCode(),ResultCode.SESSION_KICKOUT_ERROR.getDesc());
-				}else if(e instanceof SessionOnlineLimitException){
-					response(request, response,
-							ResultCode.SESSION_ONLINE_LIMIT_ERROR.getCode(),ResultCode.SESSION_ONLINE_LIMIT_ERROR.getDesc());
-				}else if (e instanceof UserNameOrPwdException){
-					response(request, response,
-							ResultCode.USERNAME_OR_PWD_ERROR.getCode(),ResultCode.USERNAME_OR_PWD_ERROR.getDesc());
-				}else {
-					response(request, response,ResultCode.INTERNAL_SERVER_ERROR.getCode(),
-							ResultCode.INTERNAL_SERVER_ERROR.getDesc());
-				}
 				return false;
 			}
 		}
@@ -220,6 +200,20 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			return false;
 		}
 		return super.preHandle(request, httpServletResponse);
+	}
+
+	/**
+	 * 表示访问拒绝时是否自己处理，如果返回 true 表示自己不处理且继续拦截器链执行，返回 false 表示自己已经处理了
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@Override
+	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws Exception {
+		response(request, response,
+							ResultCode.UNAUTHORIZED_ERROR.getCode(),ResultCode.UNAUTHORIZED_ERROR.getDesc());
+		return false;
 	}
 
 	/**

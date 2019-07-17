@@ -46,7 +46,7 @@
     <!-- 匹配含有字符： 含有document.location -->  
     <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t]\\.[L|l][O|o][C|c][A|a][T|t][I|i][O|o][N|n].*]]></regex>  
     <!-- 匹配含有字符： 含有password -->  
-    <regex><![CDATA[.*[P|p][A|a][S|s]{2}[W|w][O|o]?[R|r]?[D|d]\\.*]]></regex>  
+    <!--<regex><![CDATA[.*[P|p][A|a][S|s]{2}[W|w][O|o]?[R|r]?[D|d]\\.*]]></regex>  -->
     <!-- 匹配含有字符： 含有onclick -->  
     <regex><![CDATA[.*[O|o][N|n][C|c][L|l][I|i][C|c][K|k].*]]></regex>  
     <!-- 以下为2017-05-17  新增关键字拦截 -->  

@@ -173,31 +173,38 @@ public class SecurityRequestWrapper extends HttpServletRequestWrapper {
 
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
-		final ByteArrayInputStream bais = new ByteArrayInputStream(body);
-		return new ServletInputStream() {
-			@Override
-			public int read() throws IOException {
-				return bais.read();
-			}
-
-			@Override
-			public boolean isFinished() {
-				return bais.available() == 0;
-			}
-
-			@Override
-			public boolean isReady() {
-				return true;
-			}
-
-			@Override
-			public void setReadListener(ReadListener listener) {
-			}
-		};
+		return new SecurityServletInputStream(body);
 	}
 
 	@Override
 	public BufferedReader getReader() throws IOException {
 		return new BufferedReader(new InputStreamReader(getInputStream()));
+	}
+
+	private class SecurityServletInputStream extends ServletInputStream {
+		private ByteArrayInputStream buffer;
+
+		public SecurityServletInputStream(byte[] bytes){
+			this.buffer = new ByteArrayInputStream(bytes);
+		}
+		@Override
+		public boolean isFinished() {
+			return buffer.available() == 0;
+		}
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener listener) {
+
+		}
+
+		@Override
+		public int read() throws IOException {
+			return buffer.read();
+		}
 	}
 }
