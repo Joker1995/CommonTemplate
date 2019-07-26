@@ -25,6 +25,7 @@ import com.tisson.demo.common.expt.UnauthorizedException;
 import com.tisson.demo.common.expt.UserNameOrPwdException;
 
 import cn.hutool.json.JSONUtil;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**  
 * @Title: ExceptionController.java
@@ -168,7 +169,14 @@ public class ExceptionControllerHandler {
     	return new ResponseBean<String>(ResultCode.REGISTER_USER_ERROR.getCode(),
         		ResultCode.REGISTER_USER_ERROR.getDesc(), null);
     }
-    
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(NoHandlerFoundException.class)
+	public ResponseBean<String>  handlerFound(){
+		return new ResponseBean<String>(ResultCode.URL_NOT_FOUND.getCode(),
+				ResultCode.URL_NOT_FOUND.getDesc(), null);
+	}
+
 	/**
 	 * 捕捉所有其他异常
 	 * 

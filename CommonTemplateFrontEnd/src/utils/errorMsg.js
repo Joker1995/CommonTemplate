@@ -10,6 +10,7 @@ export default function handleErrorCode(errorCode) {
     case 1009: handle.msg = '验证码校验失败,请重试'; break
     case 1010: handle.msg = '流程文件异常,请重试'; break
     case 1011: handle.msg = '注册用户名已存在或注册参数格式错误,请重试'; break
+	case 1014: handle.msg = 'URL未映射'; break
   }
   return handle
 }
