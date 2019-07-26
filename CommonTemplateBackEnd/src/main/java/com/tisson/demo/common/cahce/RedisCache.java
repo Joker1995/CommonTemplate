@@ -21,9 +21,7 @@ import com.tisson.demo.common.base.SystemClock;
 import com.tisson.demo.common.util.TimeUnitUtil;
 
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.JedisCluster;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.*;
 
 /**
  * @Title: RedisCache.java
@@ -262,8 +260,9 @@ public class RedisCache implements IRedisManager{
     /**
      * 根据key 获取值
      *
-     * @param key
-     * @param clazz 类class
+     * @param  key
+     * @param  type type类型
+     * @param  callBack 回调
      * @return 类对象
      */
     public <T> T get(String key, Type type,RedisCallBack<T> callBack) {
@@ -305,7 +304,7 @@ public class RedisCache implements IRedisManager{
      * 根据key 获取值
      *
      * @param key
-     * @param clazz 集合泛型对象
+     * @param type 集合泛型对象
      * @return 集合对象
      */
     public <T> List<T> getList(String key, Type type,RedisCallBack<T> callBack) {
@@ -599,7 +598,7 @@ public class RedisCache implements IRedisManager{
      * 负数下标，以 -1 表示最后一个成员， -2 表示倒数第二个成员，以此类推
      *
      * @param key
-     * @param clazz
+     * @param type
      * @param start 开始位置
      * @param end   结束位置
      * @return 相应对象集合
@@ -626,7 +625,7 @@ public class RedisCache implements IRedisManager{
      * 其中成员的位置按分数值递增(从大到小)来排序
      *
      * @param key
-     * @param clazz
+     * @param type
      * @param start 开始位置
      * @param end   结束位置
      * @return 指定区间内，带有分数值的有序集成员的列表。
@@ -654,7 +653,7 @@ public class RedisCache implements IRedisManager{
      * 有序集成员按分数值递增(从小到大)次序排列
      *
      * @param key
-     * @param clazz
+     * @param type
      * @param minScore 最小分数
      * @param maxScore 最大分数
      * @return 指定区间内，带有分数值(可选)的有序集成员的列表。
@@ -682,7 +681,7 @@ public class RedisCache implements IRedisManager{
      * 有序集成员按分数值递增(从大到小)次序排列
      *
      * @param key
-     * @param clazz
+     * @param type
      * @param minScore 最小分数
      * @param maxScore 最大分数
      * @return 指定区间内，带有分数值(可选)的有序集成员的列表。
@@ -1038,7 +1037,7 @@ public class RedisCache implements IRedisManager{
      * 谨慎使用
      */
     public void clearAll() {
-        LOGGER.error("缓存的clear方法被调用，所有缓存数据都被清除！");
+        log.error("缓存的clear方法被调用，所有缓存数据都被清除！");
         redisClient.invoke(jedisPool, BinaryJedis::flushAll);
     }
 
@@ -1128,7 +1127,12 @@ public class RedisCache implements IRedisManager{
 		redisClient.invoke(jedisPool, (jedis) -> jedis.del(key));
 	}
 
-	/* 
+    @Override
+    public Long dbSize() {
+        return null;
+    }
+
+    /*
 	 * jedisCluster 扫描pattern匹配的 keys,不建议使用
 	 * @see org.crazycake.shiro.IRedisManager#keys(byte[])
 	 */
@@ -1149,12 +1153,5 @@ public class RedisCache implements IRedisManager{
 			} while (scanResult.getStringCursor().compareTo(ScanParams.SCAN_POINTER_START) > 0);
 			return keys;
         });
-	}
-
-	@Override
-	public Long dbSize(byte[] pattern) {
-		return redisClient.invoke(jedisPool, (jedis)->{
-			return jedis.dbSize();
-		});
 	}
 }

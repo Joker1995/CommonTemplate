@@ -81,7 +81,8 @@ public class SecurityFilter implements Filter{
 						Node regexNode = regexNodeList.item(index);
 						String regexNodeName = regexNode.getNodeName();
 						if("regex".equals(regexNodeName)) {
-							regexWordList.add(regexNode.getTextContent());
+							String regexContent = regexNode.getTextContent();
+							regexWordList.add(regexContent.replace("\\\\", "\\"));
 						}
 					}
 					for(String regexWord : regexWordList) {
@@ -101,22 +102,28 @@ public class SecurityFilter implements Filter{
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest) request;  
-		SecurityRequestWrapper securityRequest=new SecurityRequestWrapper(httpRequest,securityConfig);
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		SecurityRequestWrapper securityRequest;
+		try {
+			securityRequest = new SecurityRequestWrapper(httpRequest,securityConfig);
+		} catch (Exception e1) {
+			LOGGER.error("error:",e1);
+			throw new ServletException(e1);
+		}
 		try {
 			if(securityConfig==null) {
-				chain.doFilter(securityRequest, response);
+				chain.doFilter(securityRequest, httpResponse);
 				return;
 			}
 			if(securityRequest.validateParameter()) {
 				if(securityConfig.isChain()) {
-					HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-					httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
-					httpServletResponse.setCharacterEncoding("UTF-8");
-					httpServletResponse.setContentType("application/json; charset=utf-8");
-					try (PrintWriter out = httpServletResponse.getWriter()) {
+					httpResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+					httpResponse.setCharacterEncoding("UTF-8");
+					httpResponse.setContentType("application/json; charset=utf-8");
+					try (PrintWriter out = httpResponse.getWriter()) {
 						String data = new Gson().toJson(
-								new ResponseBean<String>(ResultCode.SECURITY_ERROR.getCode(), 
+								new ResponseBean<String>(ResultCode.SECURITY_ERROR.getCode(),
 										ResultCode.SECURITY_ERROR.getDesc(), null));
 						out.append(data);
 						out.flush();
@@ -125,14 +132,14 @@ public class SecurityFilter implements Filter{
 					}
 					return;
 				}else {
-					chain.doFilter(securityRequest, response);
+					chain.doFilter(securityRequest, httpResponse);
 					return;
 				}
 			}
 		} catch (Exception e) {
 			LOGGER.error("doFilter fail:",e);
 		}
-		chain.doFilter(securityRequest, response);
+		chain.doFilter(securityRequest, httpResponse);
 	}
 
 	@Override

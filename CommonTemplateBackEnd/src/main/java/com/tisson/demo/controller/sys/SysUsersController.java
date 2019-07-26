@@ -21,10 +21,12 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
+import com.tisson.demo.common.shiro.AuthRealm;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.subject.Subject;
+import org.crazycake.shiro.RedisCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

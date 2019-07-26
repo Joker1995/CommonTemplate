@@ -1,116 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<XSSConfig> 
-  <!-- 是否进行header校验 -->  
-  <isCheckHeader>false</isCheckHeader>  
-  <!-- 是否进行parameter校验 -->  
-  <isCheckParameter>true</isCheckParameter>  
-  <!-- 是否中断请求 -->  
-  <isChain>true</isChain>  
-  <!-- 是否开启特殊字符替换 -->  
+<XSSConfig>
+  <!-- 是否进行header校验 -->
+  <isCheckHeader>false</isCheckHeader>
+  <!-- 是否进行parameter校验 -->
+  <isCheckParameter>true</isCheckParameter>
+  <!-- 是否中断请求 -->
+  <isChain>true</isChain>
+  <!-- 是否开启特殊字符替换 -->
   <isReplace>true</isReplace>
-  <!-- 替换关键词 -->  
+  <!-- 替换关键词 -->
   <replaceWord>****</replaceWord>
-  <!-- 敏感IP列表，多个IP之间用英文分号分隔 -->  
-  <!-- <sensitiveIP>135.10.17</sensitiveIP> -->  
-  <regexList> 
-    <!-- 匹配含有字符： alert( ) -->  
-    <regex><![CDATA[.*[A|a][L|l][E|e][R|r][T|t]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： window.location = -->  
-    <regex><![CDATA[.*[W|w][I|i][N|n][D|d][O|o][W|w]\\.[L|l][O|o][C|c][A|a][T|t][I|i][O|o][N|n]\\s*=.*]]></regex>  
-    <!-- 匹配含有字符：style = x:ex pression ( ) -->  
-    <regex><![CDATA[.*[S|s][T|t][Y|y][L|l][E|e]\\s*=.*[X|x]:[E|e][X|x].*[P|p][R|r][E|e][S|s]{1,2}[I|i][O|o][N|n]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： document.cookie -->  
-    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t]\\.[C|c][O|o]{2}[K|k][I|i][E|e].*]]></regex>  
-    <!-- 匹配含有字符： eval( ) -->  
-    <regex><![CDATA[.*[E|e][V|v][A|a][L|l]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： unescape() -->  
-    <regex><![CDATA[.*[U|u][N|n][E|e][S|s][C|c][A|a][P|p][E|e]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： execscript( ) -->  
-    <regex><![CDATA[.*[E|e][X|x][E|e][C|c][S|s][C|c][R|r][I|i][P|p][T|t]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： msgbox( ) -->  
-    <regex><![CDATA[.*[M|m][S|s][G|g][B|b][O|o][X|x]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： confirm( ) -->  
-    <regex><![CDATA[.*[C|c][O|o][N|n][F|f][I|i][R|r][M|m]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： prompt( ) -->  
-    <regex><![CDATA[.*[P|p][R|r][O|o][M|m][P|p][T|t]\\s*\\(.*\\).*]]></regex>  
-    <!-- 匹配含有字符： <script> </script> -->  
-    <regex><![CDATA[.*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>.*]]></regex>  
-    <!-- 匹配含有字符： 含有一个符号： "  -->  
-    <regex><![CDATA[[.&[^\"]]*\"[.&[^\"]]*]]></regex>  
-    <!-- 匹配含有字符： 含有一个符号： '  -->  
-    <regex><![CDATA[[.&[^']]*'[.&[^']]*]]></regex>  
-    <!-- 匹配含有字符： 含有一个符号： ;  -->  
-    <regex><![CDATA[[.&[^;]]*;[.&[^;]]*]]></regex>  
-    <!-- 匹配含有字符： 含有回车换行 和 <script> </script> -->  
-    <regex><![CDATA[[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*]]></regex>  
-    <!-- 匹配含有字符： 含有document.location -->  
-    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t]\\.[L|l][O|o][C|c][A|a][T|t][I|i][O|o][N|n].*]]></regex>  
-    <!-- 匹配含有字符： 含有password -->  
-    <regex><![CDATA[.*[P|p][A|a][S|s]{2}[W|w][O|o]?[R|r]?[D|d]\\.*]]></regex>  
-    <!-- 匹配含有字符： 含有onclick -->  
-    <regex><![CDATA[.*[O|o][N|n][C|c][L|l][I|i][C|c][K|k].*]]></regex>  
-    <!-- 以下为2017-05-17  新增关键字拦截 -->  
-    <!-- 匹配含有字符 document  -->  
-    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t].*]]></regex>  
-    <!-- script -->  
-    <regex><![CDATA[.*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*]]></regex>  
-    <!--  delete -->  
-    <regex><![CDATA[.*[D|d][E|e][L|l][E|e][T|t][E|e]\\s.*]]></regex>  
-    <!--  select -->  
-    <regex><![CDATA[.*[S|s][E|e][L|l][E|e][C|c][T|t]\\s.*]]></regex>  
-    <!--  execute -->  
-    <regex><![CDATA[.*[E|e][X|x][e|E][C|c][U|u][T|t][E|e].*]]></regex>  
-    <!--  insert -->  
-    <regex><![CDATA[.*[i|I][N|n][S|s][E|e][R|r][T|t]\\s.*]]></regex>  
-    <!--  update -->  
-    <regex><![CDATA[.*[U|u][p|P][D|d][a|A][T|t][E|e]\\s.*]]></regex>  
-    <!--  update -->  
-    <regex><![CDATA[.*[U|u][p|P][D|d][a|A][T|t][E|e]\\s.*]]></regex>  
-    <!--  drop -->  
-    <regex><![CDATA[.*[D|d][R|r][O|o][P|p]\\s.*]]></regex>  
-    <!--  chr -->  
-    <regex><![CDATA[.*[C|c][H|h][R|r]\(.*]]></regex>  
-    <!--  mid -->  
-    <regex><![CDATA[.*[M|m][I|i][D|d]\(.*]]></regex>  
-    <!--  master -->  
-    <regex><![CDATA[.*[M|m][A|a][S|s][T|t][E|e][R|r]\\s.*]]></regex>  
-    <!--  truncate -->  
-    <regex><![CDATA[.*[T|t][R|r][U|u][N|n][C|c][A|a][T|t][E|e]\\s.*]]></regex>  
-    <!--  char -->  
-    <regex><![CDATA[.*[C|c][H|h][A|a][R|r]\\s.*]]></regex>  
-    <!--  declare -->  
-    <regex><![CDATA[.*[D|d][E|e][C|c][L|l][A|a][R|r][E|e]\\s.*]]></regex>  
-    <!--  sitename -->  
-    <regex><![CDATA[.*[S|s][I|i][T|t][E|e][N|n][A|a][M|m][E|e]\\s.*]]></regex>  
-    <!--  xp_cmdshell -->  
-    <regex><![CDATA[.*[X|x][P|p]_[C|c][M|m][D|d][S|s][H|h][E|e][L|l][L|l]\\s.*]]></regex>  
-    <!--  like -->  
-    <regex><![CDATA[.*[L|l][I|i][K|k][E|e]\\s.*]]></regex>  
-    <!--  and -->  
-    <regex><![CDATA[.*[A|a][N|n][d|D].*]]></regex>  
-    <!--  create -->  
-    <regex><![CDATA[.*[C|c][R|r][E|e][A|a][T|t][E|e]\\s.*]]></regex>  
-    <!--  table -->  
-    <regex><![CDATA[.*[T|t][A|a][B|b][L|l][E|e]\\s.*]]></regex>  
-    <!--  from -->  
-    <regex><![CDATA[.*[F|f][R|r][O|o][M|m]\\s.*]]></regex>  
-    <!--  grant -->  
-    <regex><![CDATA[.*[G|g][R|r][A|a][N|n][T|t]\\s.*]]></regex>  
-    <!--  use -->  
-    <regex><![CDATA[.*[U|u][S|s][E|e]\\s.*]]></regex>  
-    <!--  union -->  
-    <regex><![CDATA[.*[U|u][N|n][I|i][O|o][N|n]\\s.*]]></regex>  
-    <!--  group -->  
-    <regex><![CDATA[.*[G|g][R|r][O|o][U|u][P|p]\\s.*]]></regex>  
-    <!--  concat -->  
-    <regex><![CDATA[.*[C|c][O|o][N|n][C|c][A|a][T|t]\(.*]]></regex>  
-    <!-- 匹配参数包含'  -->  
-    <regex><![CDATA[.*'.*]]></regex>  
-    <!-- 匹配参数包含"  -->  
-    <regex><![CDATA[.*\".*]]></regex>  
-    <!-- 匹配参数包含"  -->  
-    <regex><![CDATA[.*;.*]]></regex>  
-    <!-- 匹配参数包含\  -->  
-    <regex><![CDATA[.*,.*]]></regex> 
-  </regexList> 
+  <!-- 敏感IP列表，多个IP之间用英文分号分隔 -->
+  <!-- <sensitiveIP>135.10.17</sensitiveIP> -->
+  <regexList>
+    <!-- 匹配含有字符： alert( ) -->
+    <regex><![CDATA[.*[A|a][L|l][E|e][R|r][T|t]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： window.location = -->
+    <regex><![CDATA[.*[W|w][I|i][N|n][D|d][O|o][W|w]\\.[L|l][O|o][C|c][A|a][T|t][I|i][O|o][N|n]\\s*=.*]]></regex>
+    <!-- 匹配含有字符：style = x:ex pression ( ) -->
+    <regex><![CDATA[.*[S|s][T|t][Y|y][L|l][E|e]\\s*=.*[X|x]:[E|e][X|x].*[P|p][R|r][E|e][S|s]{1,2}[I|i][O|o][N|n]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： document.cookie -->
+    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t]\\.[C|c][O|o]{2}[K|k][I|i][E|e].*]]></regex>
+    <!-- 匹配含有字符： eval( ) -->
+    <regex><![CDATA[.*[E|e][V|v][A|a][L|l]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： unescape() -->
+    <regex><![CDATA[.*[U|u][N|n][E|e][S|s][C|c][A|a][P|p][E|e]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： execscript( ) -->
+    <regex><![CDATA[.*[E|e][X|x][E|e][C|c][S|s][C|c][R|r][I|i][P|p][T|t]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： msgbox( ) -->
+    <regex><![CDATA[.*[M|m][S|s][G|g][B|b][O|o][X|x]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： confirm( ) -->
+    <regex><![CDATA[.*[C|c][O|o][N|n][F|f][I|i][R|r][M|m]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： prompt( ) -->
+    <regex><![CDATA[.*[P|p][R|r][O|o][M|m][P|p][T|t]\\s*\\(.*\\).*]]></regex>
+    <!-- 匹配含有字符： <script> </script> -->
+    <regex><![CDATA[.*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>.*]]></regex>
+    <!-- 匹配含有字符： 含有一个符号： "  -->
+    <!-- <regex><![CDATA[[.&[^\"]]*\"[.&[^\"]]*]]></regex>   -->
+    <!-- 匹配含有字符： 含有一个符号： '  -->
+    <!-- <regex><![CDATA[[.&[^']]*'[.&[^']]*]]></regex>   -->
+    <!-- 匹配含有字符： 含有一个符号： ;  -->
+    <!-- <regex><![CDATA[[.&[^;]]*;[.&[^;]]*]]></regex>   -->
+    <!-- 匹配含有字符： 含有回车换行 和 <script> </script> -->
+    <regex><![CDATA[[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*</[S|s][C|c][R|r][I|i][P|p][T|t]>[[.&[^a]]|[|a|\n|\r\n|\r|\u0085|\u2028|\u2029]]*]]></regex>
+    <!-- 匹配含有字符： 含有document.location -->
+    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t]\\.[L|l][O|o][C|c][A|a][T|t][I|i][O|o][N|n].*]]></regex>
+    <!-- 匹配含有字符： 含有password -->
+    <!--<regex><![CDATA[.*[P|p][A|a][S|s]{2}[W|w][O|o]?[R|r]?[D|d]\\.*]]></regex>  -->
+    <!-- 匹配含有字符： 含有onclick -->
+    <regex><![CDATA[.*[O|o][N|n][C|c][L|l][I|i][C|c][K|k].*]]></regex>
+    <!-- 以下为2017-05-17  新增关键字拦截 -->
+    <!-- 匹配含有字符 document  -->
+    <regex><![CDATA[.*[D|d][O|o][C|c][U|u][M|m][E|e][N|n][T|t].*]]></regex>
+    <!-- script -->
+    <regex><![CDATA[.*<[S|s][C|c][R|r][I|i][P|p][T|t]>.*]]></regex>
+    <!--  delete -->
+    <regex><![CDATA[.*[D|d][E|e][L|l][E|e][T|t][E|e]\\s.*]]></regex>
+    <!--  select -->
+    <regex><![CDATA[.*[S|s][E|e][L|l][E|e][C|c][T|t]\\s.*]]></regex>
+    <!--  execute -->
+    <regex><![CDATA[.*[E|e][X|x][e|E][C|c][U|u][T|t][E|e].*]]></regex>
+    <!--  insert -->
+    <regex><![CDATA[.*[i|I][N|n][S|s][E|e][R|r][T|t]\\s.*]]></regex>
+    <!--  update -->
+    <regex><![CDATA[.*[U|u][p|P][D|d][a|A][T|t][E|e]\\s.*]]></regex>
+    <!--  update -->
+    <regex><![CDATA[.*[U|u][p|P][D|d][a|A][T|t][E|e]\\s.*]]></regex>
+    <!--  drop -->
+    <regex><![CDATA[.*[D|d][R|r][O|o][P|p]\\s.*]]></regex>
+    <!--  chr -->
+    <regex><![CDATA[.*[C|c][H|h][R|r]\(.*]]></regex>
+    <!--  mid -->
+    <regex><![CDATA[.*[M|m][I|i][D|d]\(.*]]></regex>
+    <!--  master -->
+    <regex><![CDATA[.*[M|m][A|a][S|s][T|t][E|e][R|r]\\s.*]]></regex>
+    <!--  truncate -->
+    <regex><![CDATA[.*[T|t][R|r][U|u][N|n][C|c][A|a][T|t][E|e]\\s.*]]></regex>
+    <!--  char -->
+    <regex><![CDATA[.*[C|c][H|h][A|a][R|r]\\s.*]]></regex>
+    <!--  declare -->
+    <regex><![CDATA[.*[D|d][E|e][C|c][L|l][A|a][R|r][E|e]\\s.*]]></regex>
+    <!--  sitename -->
+    <regex><![CDATA[.*[S|s][I|i][T|t][E|e][N|n][A|a][M|m][E|e]\\s.*]]></regex>
+    <!--  xp_cmdshell -->
+    <regex><![CDATA[.*[X|x][P|p]_[C|c][M|m][D|d][S|s][H|h][E|e][L|l][L|l]\\s.*]]></regex>
+    <!--  like -->
+    <regex><![CDATA[.*[L|l][I|i][K|k][E|e]\\s.*]]></regex>
+    <!--  and -->
+    <regex><![CDATA[.*[A|a][N|n][d|D].*]]></regex>
+    <!--  create -->
+    <regex><![CDATA[.*[C|c][R|r][E|e][A|a][T|t][E|e]\\s.*]]></regex>
+    <!--  table -->
+    <regex><![CDATA[.*[T|t][A|a][B|b][L|l][E|e]\\s.*]]></regex>
+    <!--  from -->
+    <regex><![CDATA[.*[F|f][R|r][O|o][M|m]\\s.*]]></regex>
+    <!--  grant -->
+    <regex><![CDATA[.*[G|g][R|r][A|a][N|n][T|t]\\s.*]]></regex>
+    <!--  use -->
+    <regex><![CDATA[.*[U|u][S|s][E|e]\\s.*]]></regex>
+    <!--  union -->
+    <regex><![CDATA[.*[U|u][N|n][I|i][O|o][N|n]\\s.*]]></regex>
+    <!--  group -->
+    <regex><![CDATA[.*[G|g][R|r][O|o][U|u][P|p]\\s.*]]></regex>
+    <!--  concat -->
+    <regex><![CDATA[.*[C|c][O|o][N|n][C|c][A|a][T|t]\(.*]]></regex>
+    <!-- 匹配参数包含'  -->
+    <!-- <regex><![CDATA[.*'.*]]></regex>   -->
+    <!-- 匹配参数包含"  -->
+    <!-- <regex><![CDATA[.*\".*]]></regex>   -->
+    <!-- 匹配参数包含"  -->
+    <!-- <regex><![CDATA[.*;.*]]></regex>   -->
+    <!-- 匹配参数包含\  -->
+    <!-- <regex><![CDATA[.*,.*]]></regex>  -->
+  </regexList>
 </XSSConfig>

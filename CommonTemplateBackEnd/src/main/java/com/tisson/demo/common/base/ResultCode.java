@@ -20,7 +20,9 @@ public enum ResultCode {
 	PARAMS_VALIDATE_FAILURE(1008,"参数校验失败"),
 	CAPTCHA_INVALIDATE_ERROR(1009,"验证码校验失败"),
 	PROCESS_RESOURCE_FILE_ERROR(1010,"流程文件异常"),
-	REGISTER_USER_ERROR(1011,"注册用户名已存在或注册参数格式错误");
+	REGISTER_USER_ERROR(1011,"注册用户名已存在或注册参数格式错误"),
+	RATE_LIMIT_ERROR(1012,"请求次数超出限制"),
+	SECURITY_ERROR(1013,"请求安全过滤失败");
 	
 	
 	private int code;

@@ -61,12 +61,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 	 * 距离失效前5分钟重发签名
 	 */
 	private static final int tokenRefreshInterval = 300;
-//	private static final int tokenRefreshInterval = 30;
 	private final static Logger LOGGER = LoggerFactory.getLogger(JWTFilter.class);
 	@Autowired
 	private SysUsersMapper sysUsersMapper;
-//	@Autowired
-//	private IRedisService<Boolean> userName2TokenService;
 	@Autowired
 	private RedisCache cache;
 
@@ -123,24 +120,24 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 				}
 			});
 			if(resultMap!=null) {
-	        	String kickOutResult=resultMap.get("kickOut");
-	    	    if(kickOutResult!=null && kickOutResult.toLowerCase().equals("true")) {
-	    	    	throw new SessionKickoutException();
-	    	    }
-	        }
+				String kickOutResult=resultMap.get("kickOut");
+				if(kickOutResult!=null && kickOutResult.toLowerCase().equals("true")) {
+					throw new SessionKickoutException();
+				}
+			}
 			Integer maxOnlineCount = loginUser.getMaxOnlineCount();
 			// hash结构expire会使全部hashkey都执行
 			List<String> hashKeyList=new ArrayList<String>(cache.getAllHashKey(key));
-	        Integer cacheMaxCount=hashKeyList.size();
-	        for(String hashKey:hashKeyList) {
-	        	expireTime = new DateTime(JWTUtil.getExpiresAt(hashKey));
-	        	if(expireTime.isBeforeOrEquals(now)) {
-	        		cache.delHash(key, hashKey);
-	        		cacheMaxCount--;
-	        	}
-	        }
-	        if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount 
-	        		&& !cache.hashKeyExists(key, authorization)) {
+			Integer cacheMaxCount=hashKeyList.size();
+			for(String hashKey:hashKeyList) {
+				expireTime = new DateTime(JWTUtil.getExpiresAt(hashKey));
+				if(expireTime.isBeforeOrEquals(now)) {
+					cache.delHash(key, hashKey);
+					cacheMaxCount--;
+				}
+			}
+			if (maxOnlineCount > 1 && cacheMaxCount >= maxOnlineCount
+					&& !cache.hashKeyExists(key, authorization)) {
 				throw new SessionOnlineLimitException();
 			}
 			boolean shouldRefresh = shouldTokenRefresh(JWTUtil.getIssuedAt(authorization));
@@ -151,7 +148,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 					Map<String,String> dataMap=new HashMap<String,String>();
 					dataMap.put("kickOut", "false");
 					cache.setHash("ssoToken:" + userName, newToken,dataMap);
-					cache.expire("ssoToken:" + userName, 
+					cache.expire("ssoToken:" + userName,
 							Double.valueOf(JWTUtil.EXPIRE_TIME / 1000 + new Random().nextInt(30)).intValue());
 				}
 				cache.delHash("ssoToken:" + userName,authorization);
@@ -163,46 +160,6 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 		}
 		return true;
 	}
-
-	/**
-	 * 这里我们详细说明下为什么最终返回的都是true，即允许访问 例如我们提供一个地址 GET /article 登入用户和游客看到的内容是不同的
-	 * 如果在这里返回了false，请求会被直接拦截，用户看不到任何东西 所以我们在这里返回true，Controller中可以通过
-	 * subject.isAuthenticated() 来判断用户是否登入
-	 * 如果有些资源只有登入用户才能访问，我们只需要在方法上面加上 @RequiresAuthentication 注解即可
-	 * 但是这样做有一个缺点，就是不能够对GET,POST等请求进行分别过滤鉴权(因为我们重写了官方的方法)，但实际上对应用影响不大
-	 */
-	@Override
-	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
-		if (isLoginAttempt(request, response)) {
-			try {
-				executeLogin(request, response);
-			} catch (Exception e) {
-				LOGGER.error("判断token发生错误:", e);
-				if(e instanceof AuthenticationException) {
-					response(request, response,
-							ResultCode.UNAUTHORIZED_ERROR.getCode(),ResultCode.UNAUTHORIZED_ERROR.getDesc());
-				} else if(e instanceof TokenInvalidateException) {
-					response(request, response,
-							ResultCode.TOKEN_INVALIDATE_ERROR.getCode(),ResultCode.TOKEN_INVALIDATE_ERROR.getDesc());
-				}else if(e instanceof SessionKickoutException) {
-					response(request, response,
-							ResultCode.SESSION_KICKOUT_ERROR.getCode(),ResultCode.SESSION_KICKOUT_ERROR.getDesc());
-				}else if(e instanceof SessionOnlineLimitException){
-					response(request, response,
-							ResultCode.SESSION_ONLINE_LIMIT_ERROR.getCode(),ResultCode.SESSION_ONLINE_LIMIT_ERROR.getDesc());
-				}else if (e instanceof UserNameOrPwdException){
-					response(request, response,
-							ResultCode.USERNAME_OR_PWD_ERROR.getCode(),ResultCode.USERNAME_OR_PWD_ERROR.getDesc());
-				}else {
-					response(request, response,ResultCode.INTERNAL_SERVER_ERROR.getCode(),
-							ResultCode.INTERNAL_SERVER_ERROR.getDesc());
-				}
-				return false;
-			}
-		}
-		return true;
-	}
-
 	/**
 	 * 对跨域提供支持
 	 */
@@ -219,7 +176,34 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 			httpServletResponse.setStatus(HttpStatus.OK.value());
 			return false;
 		}
-		return super.preHandle(request, response);
+		if (isLoginAttempt(request, response)) {
+			try {
+				return executeLogin(request, response);
+			} catch (Exception e) {
+				LOGGER.error("判断token发生错误:", e);
+				if(e instanceof TokenInvalidateException) {
+					response(request, response,
+							ResultCode.TOKEN_INVALIDATE_ERROR.getCode(),ResultCode.TOKEN_INVALIDATE_ERROR.getDesc());
+				}else if(e instanceof SessionKickoutException) {
+					response(request, response,
+							ResultCode.SESSION_KICKOUT_ERROR.getCode(),ResultCode.SESSION_KICKOUT_ERROR.getDesc());
+				}else if(e instanceof SessionOnlineLimitException){
+					response(request, response,
+							ResultCode.SESSION_ONLINE_LIMIT_ERROR.getCode(),ResultCode.SESSION_ONLINE_LIMIT_ERROR.getDesc());
+				}else if (e instanceof UserNameOrPwdException){
+					response(request, response,
+							ResultCode.USERNAME_OR_PWD_ERROR.getCode(),ResultCode.USERNAME_OR_PWD_ERROR.getDesc());
+				}else if(e instanceof AuthenticationException) {
+					response(request, response,
+							ResultCode.UNAUTHORIZED_ERROR.getCode(),ResultCode.UNAUTHORIZED_ERROR.getDesc());
+				}else {
+					response(request, response,ResultCode.INTERNAL_SERVER_ERROR.getCode(),
+							ResultCode.INTERNAL_SERVER_ERROR.getDesc());
+				}
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
