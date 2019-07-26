@@ -22,7 +22,8 @@ public enum ResultCode {
 	PROCESS_RESOURCE_FILE_ERROR(1010,"流程文件异常"),
 	REGISTER_USER_ERROR(1011,"注册用户名已存在或注册参数格式错误"),
 	RATE_LIMIT_ERROR(1012,"请求次数超出限制"),
-	SECURITY_ERROR(1013,"请求安全过滤失败");
+	SECURITY_ERROR(1013,"请求安全过滤失败"),
+	URL_NOT_FOUND(1014,"URL未映射");
 	
 	
 	private int code;
